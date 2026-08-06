@@ -36,5 +36,10 @@
   },
   "allowScripts": {
     "mongodb-memory-server@11.2.0": true
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "disablePostinstall": "1"
+    }
   }
 }
