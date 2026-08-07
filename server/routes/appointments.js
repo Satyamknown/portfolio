@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Appointment from '../models/Appointment.js';
-import { sendAppointmentEmail } from '../lib/notify.js';
+import { sendAppointmentEmail, sendAutoReply } from '../lib/notify.js';
 
 const router = Router();
 
@@ -27,15 +27,22 @@ router.post('/', async (req, res, next) => {
       message: message.trim()
     });
 
-    try {
-      const result = await sendAppointmentEmail(appointment);
-      if (result.sent) {
-        appointment.emailed = true;
-        await appointment.save();
-      }
-    } catch (err) {
-      // The submission is saved either way; email is a best-effort notification.
-      console.error('Appointment email failed:', err.message);
+    // The submission is saved either way; both emails are best-effort. The
+    // auto-reply in particular needs a verified Resend domain, so it is
+    // allowed to fail without affecting the notification or the response.
+    const [notify, reply] = await Promise.allSettled([
+      sendAppointmentEmail(appointment),
+      sendAutoReply(appointment)
+    ]);
+
+    if (notify.status === 'fulfilled' && notify.value.sent) {
+      appointment.emailed = true;
+      await appointment.save();
+    } else if (notify.status === 'rejected') {
+      console.error('Appointment notification failed:', notify.reason?.message);
+    }
+    if (reply.status === 'rejected') {
+      console.error('Appointment auto-reply failed:', reply.reason?.message);
     }
 
     res.status(201).json({ ok: true });
