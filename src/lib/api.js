@@ -51,7 +51,9 @@ export const api = {
   getPost: (slug) => request(`/posts/${slug}`),
   createPost: (payload) => request('/posts', { method: 'POST', body: payload }),
   updatePost: (id, payload) => request(`/posts/${id}`, { method: 'PUT', body: payload }),
-  deletePost: (id) => request(`/posts/${id}`, { method: 'DELETE' })
+  deletePost: (id) => request(`/posts/${id}`, { method: 'DELETE' }),
+
+  submitAppointment: (payload) => request('/appointments', { method: 'POST', body: payload })
 };
 
 export function slugify(value) {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import Loading from '../components/Loading.jsx';
 import Inline from '../components/Inline.jsx';
+import AppointmentForm from '../components/AppointmentForm.jsx';
 import {
   profile,
   positioning,
@@ -193,6 +194,8 @@ export default function Home() {
             Resume (PDF)
           </a>
         </div>
+
+        <AppointmentForm />
       </section>
     </>
   );

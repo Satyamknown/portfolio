@@ -6,6 +6,7 @@ import { connectDB } from '../server/db.js';
 import authRoutes from '../server/routes/auth.js';
 import projectRoutes from '../server/routes/projects.js';
 import postRoutes from '../server/routes/posts.js';
+import appointmentRoutes from '../server/routes/appointments.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(async (req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

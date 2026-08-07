@@ -1,4 +1,5 @@
 import { profile, contact } from '../data/site.js';
+import AppointmentForm from '../components/AppointmentForm.jsx';
 
 export default function Contact() {
   return (
@@ -36,6 +37,8 @@ export default function Contact() {
           Resume (PDF)
         </a>
       </div>
+
+      <AppointmentForm />
     </section>
   );
 }
