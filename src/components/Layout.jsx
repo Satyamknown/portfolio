@@ -1,44 +1,59 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { microcopy } from '../data/site.js';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { profile } from '../data/site.js';
 
-const NAV = [
-  { to: '/work', label: 'Work' },
-  { to: '/writing', label: 'Writing' },
-  { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' }
-];
+function useIstClock() {
+  const [time, setTime] = useState('');
+  useEffect(() => {
+    const tick = () =>
+      setTime(
+        new Date().toLocaleTimeString('en-IN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Asia/Kolkata'
+        })
+      );
+    tick();
+    const timer = setInterval(tick, 30000);
+    return () => clearInterval(timer);
+  }, []);
+  return time;
+}
 
 export default function Layout({ children }) {
   const { pathname } = useLocation();
+  const time = useIstClock();
+  const onHome = pathname === '/';
   // The admin editor needs more room than the reading column allows.
   const wide = pathname.startsWith('/admin');
-  const wrap = wide ? 'wrap-wide' : 'wrap';
+  // Homepage sections span the full viewport; inner pages keep a reading column.
+  const wrap = onHome ? '' : wide ? 'wrap-wide' : 'wrap';
 
   return (
     <>
-      <header className="topbar">
-        <div className={`topbar-inner ${wide ? 'wide' : ''}`}>
-          <Link to="/" className="brand">
-            <b>Abhishek</b> <span className="brand-last">Manjhi</span>
-          </Link>
-          <nav className="nav-links">
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => (isActive ? 'active' : '')}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
+      <header className="site-head">
+        <a href={onHome ? '#work' : '/work'}>works</a>
+        <span className="site-name">
+          <Link to="/">abhishek manjhi</Link>
+        </span>
+        <a href={onHome ? '#contact' : '/contact'}>contact</a>
       </header>
+      <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
 
-      <footer className={wrap}>
-        <div>{microcopy.footer}</div>
+      <footer className="site-footer">
+        <div className="site-footer-inner">
+          <span>©{new Date().getFullYear()} — Abhishek Manjhi</span>
+          <div className="site-footer-links">
+            <a href={`mailto:${profile.email}`}>Email</a>
+            <a href={profile.linkedin} target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+            <a href={profile.resume}>Resume</a>
+          </div>
+          <span>Mumbai — {time}</span>
+        </div>
       </footer>
     </>
   );

@@ -16,6 +16,27 @@ export const profile = {
   resume: '/resume.pdf'
 };
 
+// Homepage (flowing design) copy
+export const home = {
+  scribble: 'やあ!',
+  headline: ['Hey,', "I'm Abhishek"],
+  heroMeta: 'Mumbai, IN — 84-day sprint, BETA',
+  handNote: 'design → pm',
+  heroPara: {
+    before: 'Design Lead → Product Manager. Founder-level owner of ',
+    bold: 'funnels, design systems & internal tools',
+    after:
+      ' for four years — shipping the parts of the product most PMs only spec. Now making the product work explicit.'
+  },
+  availability: 'Open to opportunities — 2026',
+  progressIntro: 'Three things built between July and October 2026, in public.',
+  aboutStatement:
+    "For four years I've been the de facto product owner on work that never had a PM assigned to it.",
+  aboutPara:
+    'Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi — the brief arrived as "make this look better," and the job turned out to be figuring out what to build and why. Now I\'m making that explicit: an 84-day sprint, three things built in public.',
+  contactHand: '話しましょう'
+};
+
 export const positioning =
   'Four years of shipping the parts of the product most PMs only spec — landing pages, growth systems, onboarding flows, internal tools — for contracting, hospitality, and SaaS clients across three continents. Now formalizing the discovery and prioritization work I was already doing, with AI tooling built into the workflow from day one.';
 

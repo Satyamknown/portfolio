@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../lib/api.js';
+import { profile } from '../data/site.js';
 
 const EMPTY = { name: '', email: '', message: '', website: '' };
 
@@ -26,48 +27,55 @@ export default function AppointmentForm() {
 
   if (status === 'sent') {
     return (
-      <div className="notice notice-ok" role="status">
+      <div className="af-sent" role="status">
         Sent — thanks. I usually reply within a day.
       </div>
     );
   }
 
   return (
-    <form className="panel appointment-form" onSubmit={submit}>
-      {error && <div className="notice notice-error">{error}</div>}
+    <form className="af" onSubmit={submit}>
+      {error && <div className="af-error">{error}</div>}
 
-      <div className="field-row">
-        <div className="field">
-          <label htmlFor="apt-name">Name</label>
-          <input id="apt-name" value={data.name} onChange={set('name')} required />
-        </div>
-        <div className="field">
-          <label htmlFor="apt-email">Email</label>
-          <input id="apt-email" type="email" value={data.email} onChange={set('email')} required />
-        </div>
+      <div className="af-pair">
+        <label>
+          Name
+          <input required name="name" value={data.name} onChange={set('name')} />
+        </label>
+        <label>
+          Email
+          <input required type="email" name="email" value={data.email} onChange={set('email')} />
+        </label>
       </div>
 
-      <div className="field">
-        <label htmlFor="apt-message">What's this about</label>
+      <label>
+        What&rsquo;s this about
         <textarea
-          id="apt-message"
+          required
+          name="message"
           rows={4}
           value={data.message}
           onChange={set('message')}
           placeholder="Role, company, what you'd like to talk through…"
-          required
         />
-      </div>
+      </label>
 
       {/* Honeypot — hidden from real users, bots tend to fill every field */}
       <div className="hp-field" aria-hidden="true">
-        <label htmlFor="apt-website">Website</label>
-        <input id="apt-website" tabIndex={-1} autoComplete="off" value={data.website} onChange={set('website')} />
+        <label>
+          Website
+          <input tabIndex={-1} autoComplete="off" value={data.website} onChange={set('website')} />
+        </label>
       </div>
 
-      <button className="btn btn-primary" type="submit" disabled={status === 'sending'}>
-        {status === 'sending' ? 'Sending…' : 'Request a time'}
-      </button>
+      <div className="af-actions">
+        <button className="af-submit" type="submit" disabled={status === 'sending'}>
+          {status === 'sending' ? 'Sending…' : 'Request a time →'}
+        </button>
+        <a className="af-alt" href={`mailto:${profile.email}`}>
+          or email directly
+        </a>
+      </div>
     </form>
   );
 }

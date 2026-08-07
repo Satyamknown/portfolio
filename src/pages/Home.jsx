@@ -1,29 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { initHomeEffects } from '../lib/effects.js';
 import Loading from '../components/Loading.jsx';
-import Inline from '../components/Inline.jsx';
 import AppointmentForm from '../components/AppointmentForm.jsx';
-import {
-  profile,
-  positioning,
-  objection,
-  requirements,
-  inProgress,
-  contact,
-  microcopy
-} from '../data/site.js';
+import { home, profile, contact, inProgress, microcopy } from '../data/site.js';
 
-function SectionLabel({ n, children }) {
-  return (
-    <div className="section-label">
-      <span className="section-num">{n}</span>
-      {children}
-    </div>
-  );
-}
+// Offset-grid layout per card position, from the design handoff.
+const CARD_LAYOUT = [
+  { col: '1 / span 7', mt: '0', ratio: '16/10', drift: 0.4 },
+  { col: '9 / span 4', mt: '22vh', ratio: '3/4', drift: 0.9 },
+  { col: '2 / span 4', mt: '14vh', ratio: '1/1', drift: 0.7 },
+  { col: '7 / span 6', mt: '18vh', ratio: '16/10', drift: 0.5 },
+  { col: '1 / span 5', mt: '16vh', ratio: '4/3', drift: 0.8 }
+];
+
+// Placeholder shots until real screenshots land in each project's coverImage.
+const MOCKS = {
+  'pacific-coast-contracting': '/mocks/mock-pcc.png',
+  roohconnect: '/mocks/mock-rooh.png',
+  exportkit: '/mocks/mock-exportkit.png',
+  stratalite: '/mocks/mock-stratalite.png',
+  skooltag: '/mocks/mock-skooltag.png'
+};
+const MOCK_CYCLE = Object.values(MOCKS);
+
+const pad = (n, w) => String(n).padStart(w, '0');
 
 export default function Home() {
+  const rootRef = useRef(null);
   const [projects, setProjects] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -34,62 +39,50 @@ export default function Home() {
       .finally(() => setLoaded(true));
   }, []);
 
+  useEffect(() => initHomeEffects(rootRef.current), []);
+
   return (
-    <>
+    <div ref={rootRef}>
       {/* ---------- Hero ---------- */}
-      <header className="hero">
-        <div className="eyebrow">{profile.eyebrow}</div>
-        <h1>{profile.name}</h1>
-
-        <div className="version-line">
-          <span>{profile.from}</span>
-          <span className="version-arrow">→</span>
-          <b>{profile.to}</b>
-          <span className="chip-beta">{profile.stage}</span>
-          <span className="version-sprint">{profile.sprint}</span>
+      <section className="fx-hero">
+        <div className="fx-hero-left">
+          <span className="fx-scribble" aria-hidden="true">
+            {home.scribble}
+          </span>
+          <h1>
+            {home.headline[0]}
+            <br />
+            {home.headline[1]}
+          </h1>
+          <div className="fx-hero-meta">{home.heroMeta}</div>
         </div>
 
-        <p className="hero-lede">{positioning}</p>
-
-        <div className="hero-actions">
-          <Link to="/work" className="btn btn-primary">
-            View case studies →
-          </Link>
-          <Link to="/writing" className="btn btn-ghost">
-            Read the writing
-          </Link>
+        <div className="fx-capsule">
+          <img src="/mocks/mock-portrait.png" alt="Portrait of Abhishek Manjhi" />
         </div>
-      </header>
 
-      {/* ---------- 01 Why a designer ---------- */}
-      <section>
-        <SectionLabel n="01">Why a designer, for a PM seat</SectionLabel>
-        <div className="objection">
-          {objection.map((para, i) => (
-            <p key={i}>
-              <Inline>{para}</Inline>
-            </p>
-          ))}
+        <div className="fx-hero-right">
+          <div className="fx-hand-note">{home.handNote}</div>
+          <p>
+            {home.heroPara.before}
+            <b>{home.heroPara.bold}</b>
+            {home.heroPara.after}
+          </p>
+          <div className="fx-avail">
+            <span className="fx-dot" />
+            {home.availability}
+          </div>
         </div>
+
+        <div className="fx-scroll-cue">( scroll ↓ )</div>
       </section>
 
-      {/* ---------- 02 Requirements met ---------- */}
-      <section>
-        <SectionLabel n="02">Requirements met</SectionLabel>
-        <div className="req-grid">
-          {requirements.map((r) => (
-            <article className="req-card" key={r.competency}>
-              <div className="req-competency">{r.competency}</div>
-              <h3 className="req-claim">{r.claim}</h3>
-              <p className="req-evidence">{r.evidence}</p>
-            </article>
-          ))}
+      {/* ---------- Selected Work ---------- */}
+      <section id="work" className="work-sec">
+        <div className="sec-head">
+          <h2 className="sec-title">Selected Work</h2>
+          <span className="sec-count">( {pad(projects.length || 5, 2)} )</span>
         </div>
-      </section>
-
-      {/* ---------- 03 Shipped ---------- */}
-      <section>
-        <SectionLabel n="03">Shipped</SectionLabel>
 
         {!loaded ? (
           <Loading />
@@ -99,104 +92,114 @@ export default function Home() {
             <p>{microcopy.workEmpty}</p>
           </div>
         ) : (
-          <>
-            <div className="index-list">
-              {projects.map((p) => (
-                <Link to={`/work/${p.slug}`} className="index-row" key={p._id}>
-                  <div className="index-top">
-                    {p.version && <span className="index-ver">{p.version}</span>}
-                    <span className="index-title">{p.title}</span>
+          <div className="work-grid">
+            {projects.map((p, i) => {
+              const lay = CARD_LAYOUT[i % CARD_LAYOUT.length];
+              const img = p.coverImage || MOCKS[p.slug] || MOCK_CYCLE[i % MOCK_CYCLE.length];
+              return (
+                <Link
+                  key={p._id}
+                  to={`/work/${p.slug}`}
+                  className="work-card"
+                  data-drift={lay.drift}
+                  style={{ gridColumn: lay.col, marginTop: lay.mt }}
+                >
+                  <div className="work-card-img" style={{ aspectRatio: lay.ratio }}>
+                    <div
+                      className="img"
+                      style={{ backgroundImage: `url('${img}')` }}
+                      role="img"
+                      aria-label={p.title}
+                    />
                   </div>
-                  {p.summary && <div className="index-summary">{p.summary}</div>}
-                  {[p.role, p.client, p.year].some(Boolean) && (
-                    <div className="index-meta">
-                      {[p.role, p.client, p.year].filter(Boolean).join('  ·  ')}
-                    </div>
+                  <div className="work-card-row">
+                    <span className="work-card-title">{p.title}</span>
+                    <span className="work-card-index">{pad(i + 1, 2)}</span>
+                  </div>
+                  {p.tags?.length > 0 && (
+                    <div className="work-card-tags">{p.tags.join(' — ')}</div>
                   )}
                   {p.metrics?.length > 0 && (
-                    <div className="metrics">
-                      {p.metrics.map((m, i) => (
-                        <span className="metric" key={i}>
-                          {m.value} {m.label}
-                        </span>
-                      ))}
+                    <div className="work-card-metrics">
+                      {p.metrics.map((m) => `${m.value} ${m.label}`).join(' · ')}
                     </div>
                   )}
                 </Link>
-              ))}
-            </div>
-            <Link to="/work" className="section-more">
-              All case studies →
-            </Link>
-          </>
+              );
+            })}
+          </div>
         )}
       </section>
 
-      {/* ---------- 04 In progress ---------- */}
-      <section>
-        <SectionLabel n="04">In progress</SectionLabel>
-        <p className="section-intro">{inProgress.intro}</p>
-
-        <div className="progress-list">
-          {inProgress.items.map((item) => (
-            <div className="progress-item" key={item.name}>
-              <div className="progress-head">
-                <span className="progress-name">{item.name}</span>
-                <span className="progress-pct">{item.percent}%</span>
+      {/* ---------- In Progress ---------- */}
+      <section id="progress" className="progress-sec">
+        <div className="sec-head">
+          <h2 className="sec-title">In Progress</h2>
+          <span className="sec-count">( {pad(inProgress.items.length, 2)} )</span>
+        </div>
+        <p className="progress-intro">{home.progressIntro}</p>
+        <div>
+          {inProgress.items.map((item, i) => (
+            <div className="prog-row" key={item.name}>
+              <span className="prog-index">{pad(i + 1, 3)}</span>
+              <div>
+                <div className="prog-name">{item.name}</div>
+                <div className="prog-detail">{item.detail}</div>
               </div>
               <div
-                className="progress-track"
+                className="prog-track"
                 role="progressbar"
                 aria-valuenow={item.percent}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={item.name}
               >
-                <div className="progress-fill" style={{ width: `${item.percent}%` }} />
+                <div className="prog-fill" style={{ width: `${item.percent}%` }} />
               </div>
-              <p className="progress-detail">{item.detail}</p>
+              <span className="prog-pct">{item.percent}%</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ---------- 05 Contact ---------- */}
-      <section id="contact">
-        <SectionLabel n="05">Contact</SectionLabel>
-        <h2 className="contact-heading">{contact.heading}</h2>
-        <p className="contact-body">{contact.body}</p>
-
-        <dl className="contact-fields">
-          <div>
-            <dt>Based in</dt>
-            <dd>{profile.location}</dd>
-          </div>
-          <div>
-            <dt>Role</dt>
-            <dd>{profile.role}</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd>
-              <span className="status-tag">{profile.status}</span>
-            </dd>
-          </div>
-        </dl>
-
-        <div className="hero-actions">
-          <a className="btn btn-primary" href={`mailto:${profile.email}`}>
-            Email me
-          </a>
-          <a className="btn btn-ghost" href={profile.linkedin} target="_blank" rel="noreferrer">
-            LinkedIn
-          </a>
-          <a className="btn btn-ghost" href={profile.resume}>
-            Resume (PDF)
-          </a>
+      {/* ---------- About ---------- */}
+      <section id="about" className="about-sec">
+        <h2 className="sec-title">About ( 03 )</h2>
+        <div>
+          <p className="about-statement">{home.aboutStatement}</p>
+          <p className="about-para">{home.aboutPara}</p>
         </div>
+      </section>
 
+      {/* ---------- Contact ---------- */}
+      <section id="contact" className="contact-sec">
+        <h2 className="sec-title">Contact ( 04 )</h2>
+        <div>
+          <div className="contact-hand" aria-hidden="true">
+            {home.contactHand}
+          </div>
+          <h3 className="contact-title">Let&rsquo;s talk</h3>
+          <p className="contact-para">{contact.body}</p>
+          <div className="contact-list">
+            <div className="contact-list-row">
+              <span className="k">Based in</span>
+              <span className="v">{profile.location}</span>
+            </div>
+            <div className="contact-list-row">
+              <span className="k">Role</span>
+              <span className="v">{profile.role}</span>
+            </div>
+            <div className="contact-list-row">
+              <span className="k">Status</span>
+              <span className="v">
+                <span className="fx-dot" />
+                {profile.status}
+              </span>
+            </div>
+          </div>
+        </div>
         <AppointmentForm />
       </section>
-    </>
+    </div>
   );
 }
