@@ -31,21 +31,6 @@ app.use('/api/appointments', appointmentRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-// TEMPORARY — diagnosing why RESEND_API_KEY isn't reaching the function at
-// runtime. Reveals presence/length only, never the value. Remove once fixed.
-app.get('/api/debug-env', (req, res) => {
-  const report = (name) => {
-    const v = process.env[name];
-    return { present: v !== undefined, length: v ? v.length : 0 };
-  };
-  res.json({
-    RESEND_API_KEY: report('RESEND_API_KEY'),
-    NOTIFY_EMAIL: report('NOTIFY_EMAIL'),
-    MONGODB_URI: report('MONGODB_URI'),
-    VERCEL_ENV: process.env.VERCEL_ENV || null
-  });
-});
-
 app.use('/api', (req, res) => res.status(404).json({ error: 'No such endpoint.' }));
 
 // eslint-disable-next-line no-unused-vars
