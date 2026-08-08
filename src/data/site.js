@@ -20,7 +20,7 @@ export const profile = {
 export const home = {
   scribble: 'やあ!',
   headline: 'Turning problems into products.',
-  heroMeta: "hey I'm abhishek Manjhi",
+  heroMeta: "Abhishek Manjhi | 4 Years exp · 20+ project · 4 industries",
   handNote: 'design → pm',
   heroPara: {
     before: 'Design Lead → Product Manager. Founder-level owner of ',
