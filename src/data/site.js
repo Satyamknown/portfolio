@@ -19,8 +19,8 @@ export const profile = {
 // Homepage (flowing design) copy
 export const home = {
   scribble: 'やあ!',
-  headline: ['Hey,', "I'm Abhishek"],
-  heroMeta: 'Mumbai, IN — 84-day sprint, BETA',
+  headline: ['Hey,', 'making things make sense'],
+  heroMeta: "hey I'm abhishek Manjhi,Mumbai, IN",
   handNote: 'design → pm',
   heroPara: {
     before: 'Design Lead → Product Manager. Founder-level owner of ',
