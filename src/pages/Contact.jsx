@@ -1,7 +1,15 @@
+import { useEffect, useState } from 'react';
+import feedback from '../lib/feedback.js';
 import { profile, contact } from '../data/site.js';
 import AppointmentForm from '../components/AppointmentForm.jsx';
 
 export default function Contact() {
+  const [prompt, setPrompt] = useState('');
+
+  useEffect(() => {
+    setPrompt('Meow! Tap the Call button if you want my attention — I am ready to chat.');
+  }, []);
+
   return (
     <section className="first">
       <div className="eyebrow">Contact</div>
@@ -27,7 +35,14 @@ export default function Contact() {
       </dl>
 
       <div className="hero-actions">
-        <a className="btn btn-primary" href={`mailto:${profile.email}`}>
+        <a
+          className="btn btn-primary"
+          href="tel:+918828447664"
+          onPointerDown={() => feedback.tap()}
+        >
+          Call me
+        </a>
+        <a className="btn btn-ghost" href={`mailto:${profile.email}`}>
           Email me
         </a>
         <a className="btn btn-ghost" href={profile.linkedin} target="_blank" rel="noreferrer">
@@ -38,7 +53,7 @@ export default function Contact() {
         </a>
       </div>
 
-      <AppointmentForm />
+      <AppointmentForm prompt={prompt} />
     </section>
   );
 }

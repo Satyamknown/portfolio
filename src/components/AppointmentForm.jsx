@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
 import { api } from '../lib/api.js';
+import feedback from '../lib/feedback.js';
 import { profile } from '../data/site.js';
 import ContactCat from './ContactCat.jsx';
 
 const EMPTY = { name: '', email: '', message: '', website: '' };
 
-export default function AppointmentForm() {
+export default function AppointmentForm({ prompt }) {
   const [data, setData] = useState(EMPTY);
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [error, setError] = useState(null);
@@ -32,10 +33,12 @@ export default function AppointmentForm() {
       await api.submitAppointment(data);
       setStatus('sent');
       setData(EMPTY);
+      feedback.success();
       cat.current?.submitSuccess(); // the real jump, only after a genuine success
     } catch (err) {
       setStatus('error');
       setError(err.message);
+      feedback.error();
       cat.current?.submitError();
     }
   }
@@ -44,7 +47,7 @@ export default function AppointmentForm() {
 
   return (
     <div className="cat-form">
-      <ContactCat ref={cat} onSettled={() => setSettled(true)} />
+      <ContactCat ref={cat} prompt={prompt} onSettled={() => setSettled(true)} />
 
       {sent ? (
         // Reserved in place so nothing shifts while the cat is mid-jump.
@@ -110,10 +113,15 @@ export default function AppointmentForm() {
           </div>
 
           <div className="af-actions">
-            <button className="af-submit" type="submit" disabled={status === 'sending'}>
+            <button
+              className="af-submit"
+              type="submit"
+              disabled={status === 'sending'}
+              onPointerDown={() => feedback.tap()}
+            >
               {status === 'sending' ? 'Sending…' : 'Request a time →'}
             </button>
-            <a className="af-alt" href={`mailto:${profile.email}`}>
+            <a className="af-alt" href={`mailto:${profile.email}`} onPointerDown={() => feedback.tap()}>
               or email directly
             </a>
           </div>
