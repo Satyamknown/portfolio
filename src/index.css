@@ -64,6 +64,11 @@ img{max-width:100%;height:auto}
 @keyframes floaty2{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(10px) rotate(-8deg)}}
 @keyframes floaty3{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(-3deg)}}
 @keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ambientDrift{
+  0%{transform:rotate(0deg) scale(1)}
+  50%{transform:rotate(180deg) scale(1.12)}
+  100%{transform:rotate(360deg) scale(1)}
+}
 @keyframes stickerPop{
   0%{transform:scale(0) rotate(var(--rot));opacity:0}
   18%{transform:scale(1.15) rotate(var(--rot));opacity:1}
@@ -71,9 +76,31 @@ img{max-width:100%;height:auto}
   100%{transform:scale(.6) rotate(var(--rot)) translateY(14px);opacity:0}
 }
 
-/* Custom cursor active (homepage, pointer:fine) */
+/* Custom cursor active (site-wide, pointer:fine) — see lib/cursor.js */
 @media (pointer:fine){
-  body.fx-cursor, body.fx-cursor a, body.fx-cursor button{cursor:none!important}
+  body.cc-active, body.cc-active a, body.cc-active button{cursor:none!important}
+}
+.custom-cursor{
+  position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
+}
+.cc-inner{
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  transform:scale(1);
+  transition:width .22s cubic-bezier(.34,1.56,.64,1),height .22s cubic-bezier(.34,1.56,.64,1),transform .12s ease;
+}
+.cc-inner.is-morphing{transform:scale(.86)}
+.cc-inner svg{width:100%;height:100%;overflow:visible;display:block}
+.cc-inner .cc-body{fill:var(--ink);stroke:var(--paper);stroke-width:3;stroke-linejoin:round;paint-order:stroke fill}
+.cc-inner .cc-cut{fill:var(--paper)}
+.cc-inner .cc-paper{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.cc-inner .cc-paperline{stroke:var(--ink-faint);stroke-width:1.5}
+.cur-factory{width:40px;height:40px}
+.cur-open-folder{width:42px;height:42px}
+.cur-paw{width:40px;height:40px}
+.cur-paw-closed{width:40px;height:40px}
+@media (prefers-reduced-motion:reduce){
+  .cc-inner{transition:none}
 }
 
 .scroll-indicator{
@@ -136,6 +163,21 @@ button, .btn, .af-submit, a{
   .site-head{padding:8px 20px}
   .site-head a,.site-head .site-name{font-size:16px}
   .nav-signature-img{height:56px}
+}
+
+/* Barely-there sand-toned drift behind every page. Oversized past the
+   viewport so the blurred gradient edges never clip, rotates very slowly so
+   it reads as ambient motion rather than a decoration you'd consciously
+   notice. Frozen by the global prefers-reduced-motion rule above. */
+.ambient-bg{
+  position:fixed;inset:-25vmax;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(38% 34% at 28% 32%,rgba(233,230,223,.85),transparent 70%),
+    radial-gradient(34% 38% at 76% 68%,rgba(239,236,229,.8),transparent 70%),
+    radial-gradient(30% 30% at 50% 85%,rgba(220,216,207,.5),transparent 70%);
+  filter:blur(70px);
+  animation:ambientDrift 110s linear infinite;
+  will-change:transform;
 }
 
 .top-glass{
@@ -255,7 +297,80 @@ button, .btn, .af-submit, a{
 .work-card-metrics{margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
 @media(max-width:800px){
   .work-grid{grid-template-columns:1fr;gap:56px}
-  .work-card{grid-column:1/-1!important;margin-top:0!important;transform:none!important}
+  /* Scoped to the grid on purpose: .fan-card also carries .work-card, and an
+     unscoped transform:none!important here silently flattened the fan. */
+  .work-grid .work-card{grid-column:1/-1!important;margin-top:0!important;transform:none!important}
+}
+
+/* ---------- Selected Work — fan carousel ---------- */
+/* Scroll runway: the deck pins for the length of the runway while page
+   scroll rotates it, one project per step. --fan-steps is set inline from
+   the project count, so adding work lengthens the runway automatically. */
+.fan-scroll{position:relative;height:calc(100vh + var(--fan-steps) * 42vh)}
+.fan-sticky{
+  position:sticky;top:0;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+.fan-wrap{display:flex;flex-direction:column;align-items:center;width:100%}
+/* min-height has to clear the arc, not just the card: outer cards drop by
+   `drop` rem (see arcFor in WorkFan.jsx) and rotate, so a container sized to
+   the card alone lets them spill onto the rail and caption below. */
+.fan-layout{
+  position:relative;width:100%;
+  min-height:19rem;
+  margin-bottom:3vh;
+}
+.fan-card{
+  position:absolute;top:0;left:0;
+  width:8.5rem;
+  transform-origin:50% 100%;
+  will-change:transform;
+}
+.fan-card .work-card-img{border-radius:0}
+.fan-card-index{
+  position:absolute;top:8px;right:8px;z-index:2;
+  font-family:var(--mono);font-size:10px;color:var(--paper);
+  background:rgba(23,21,18,.55);padding:2px 6px;
+  pointer-events:none;
+}
+/* Each min-height ≈ card height + the arc drop for that breakpoint's slot
+   count, plus a little slack for rotated corners. Undersize it and the
+   outer cards land on the rail. */
+@media(min-width:400px){.fan-layout{min-height:21rem}.fan-card{width:9.5rem}}
+@media(min-width:640px){.fan-layout{min-height:22rem}.fan-card{width:11rem}}
+@media(min-width:768px){.fan-layout{min-height:24rem}.fan-card{width:12.5rem}}
+@media(min-width:1024px){.fan-layout{min-height:30rem}.fan-card{width:15rem}}
+
+/* Passive progress rail — a read-out, never a control. */
+.fan-rail{
+  display:flex;align-items:center;gap:5px;
+  margin-bottom:3vh;pointer-events:none;
+}
+.fan-tick{
+  width:14px;height:2px;background:var(--line);
+  transition:background .3s ease,width .3s ease;
+}
+.fan-tick.is-active{background:var(--green);width:22px}
+
+.fan-caption{display:block;max-width:44ch;text-align:center;padding:0 var(--gutter)}
+.fan-caption .work-card-title{display:block;font-size:24px}
+.fan-caption .work-card-tags,.fan-caption .work-card-metrics{justify-content:center}
+.fan-caption-row{display:flex;flex-direction:column;align-items:center;gap:4px}
+.fan-caption .work-card-index{order:-1}
+.fan-caption:hover .work-card-title{color:var(--ink-faint)}
+
+@media(max-width:800px){
+  /* Shorter step on small screens so the deck doesn't take forever to walk. */
+  .fan-scroll{height:calc(100vh + var(--fan-steps) * 30vh)}
+}
+@media(max-width:600px){
+  /* Shorter still: 8 projects at 30vh each is a long thumb-scroll on a phone. */
+  .fan-scroll{height:calc(100vh + var(--fan-steps) * 24vh)}
+  .fan-caption{max-width:34ch}
+  .fan-caption .work-card-title{font-size:20px}
+  .fan-tick{width:8px;height:2px}
+  .fan-tick.is-active{width:14px}
+  .fan-rail{gap:4px}
 }
 
 /* ---------- In Progress ---------- */

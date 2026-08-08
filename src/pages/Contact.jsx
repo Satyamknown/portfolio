@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import feedback from '../lib/feedback.js';
+import { setCursorState } from '../lib/cursor.js';
 import { profile, contact } from '../data/site.js';
 import AppointmentForm from '../components/AppointmentForm.jsx';
 
@@ -11,7 +12,7 @@ export default function Contact() {
   }, []);
 
   return (
-    <section className="first">
+    <section className="first" data-cursor="paw">
       <div className="eyebrow">Contact</div>
       <h1 className="about-title">{contact.heading}</h1>
 
@@ -38,7 +39,10 @@ export default function Contact() {
         <a
           className="btn btn-primary"
           href="tel:+918828447664"
-          onPointerDown={() => feedback.tap()}
+          onPointerDown={() => {
+            feedback.tap();
+            setCursorState('paw-closed');
+          }}
         >
           Call me
         </a>

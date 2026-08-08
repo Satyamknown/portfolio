@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { api } from '../lib/api.js';
 import feedback from '../lib/feedback.js';
+import { setCursorState } from '../lib/cursor.js';
 import { profile } from '../data/site.js';
 import ContactCat from './ContactCat.jsx';
 
@@ -117,7 +118,10 @@ export default function AppointmentForm({ prompt }) {
               className="af-submit"
               type="submit"
               disabled={status === 'sending'}
-              onPointerDown={() => feedback.tap()}
+              onPointerDown={() => {
+                feedback.tap();
+                setCursorState('paw-closed');
+              }}
             >
               {status === 'sending' ? 'Sending…' : 'Request a time →'}
             </button>

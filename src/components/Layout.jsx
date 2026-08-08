@@ -31,6 +31,7 @@ export default function Layout({ children }) {
 
   return (
     <>
+      <div className="ambient-bg" aria-hidden="true" />
       <header className="site-head">
         <a href={onHome ? '#work' : '/work'}>works</a>
         <span className="site-name">

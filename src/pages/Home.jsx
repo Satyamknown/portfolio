@@ -1,19 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../lib/api.js';
 import { initHomeEffects, initReel } from '../lib/effects.js';
 import Loading from '../components/Loading.jsx';
 import AppointmentForm from '../components/AppointmentForm.jsx';
+import WorkFan from '../components/WorkFan.jsx';
 import { home, profile, contact, inProgress, microcopy } from '../data/site.js';
-
-// Offset-grid layout per card position, from the design handoff.
-const CARD_LAYOUT = [
-  { col: '1 / span 7', mt: '0', ratio: '16/10', drift: 0.4 },
-  { col: '9 / span 4', mt: '22vh', ratio: '3/4', drift: 0.9 },
-  { col: '2 / span 4', mt: '14vh', ratio: '1/1', drift: 0.7 },
-  { col: '7 / span 6', mt: '18vh', ratio: '16/10', drift: 0.5 },
-  { col: '1 / span 5', mt: '16vh', ratio: '4/3', drift: 0.8 }
-];
 
 // Placeholder shots until real screenshots land in each project's coverImage.
 const MOCKS = {
@@ -40,6 +31,18 @@ export default function Home() {
   const [loaded, setLoaded] = useState(false);
   const [reelOk, setReelOk] = useState(true);
   const [homeSettings, setHomeSettings] = useState({ videoUrl: '', videoPoster: '' });
+
+  // Stable reference so unrelated Home re-renders (video fallback, settings
+  // fetch resolving, etc.) don't cascade into WorkFan's GSAP effect and
+  // interrupt an in-flight animation.
+  const fanProjects = useMemo(
+    () =>
+      projects.map((p, i) => ({
+        ...p,
+        image: p.coverImage || MOCKS[p.slug] || MOCK_CYCLE[i % MOCK_CYCLE.length]
+      })),
+    [projects]
+  );
 
   useEffect(() => {
     Promise.all([api.listProjects(), api.getHomeSettings()])
@@ -72,7 +75,7 @@ export default function Home() {
           <span className="fx-scribble" aria-hidden="true">
             {home.scribble}
           </span>
-          <h1>
+          <h1 data-cursor="factory">
             {Array.isArray(home.headline) ? home.headline.join(' ') : home.headline}
           </h1>
           <div className="fx-hero-meta">{home.heroMeta}</div>
@@ -152,42 +155,7 @@ export default function Home() {
             <p>{microcopy.workEmpty}</p>
           </div>
         ) : (
-          <div className="work-grid">
-            {projects.map((p, i) => {
-              const lay = CARD_LAYOUT[i % CARD_LAYOUT.length];
-              const img = p.coverImage || MOCKS[p.slug] || MOCK_CYCLE[i % MOCK_CYCLE.length];
-              return (
-                <Link
-                  key={p._id}
-                  to={`/work/${p.slug}`}
-                  className="work-card"
-                  data-drift={lay.drift}
-                  style={{ gridColumn: lay.col, marginTop: lay.mt }}
-                >
-                  <div className="work-card-img" style={{ aspectRatio: lay.ratio }}>
-                    <div
-                      className="img"
-                      style={{ backgroundImage: `url('${img}')` }}
-                      role="img"
-                      aria-label={p.title}
-                    />
-                  </div>
-                  <div className="work-card-row">
-                    <span className="work-card-title">{p.title}</span>
-                    <span className="work-card-index">{pad(i + 1, 2)}</span>
-                  </div>
-                  {p.tags?.length > 0 && (
-                    <div className="work-card-tags">{p.tags.join(' — ')}</div>
-                  )}
-                  {p.metrics?.length > 0 && (
-                    <div className="work-card-metrics">
-                      {p.metrics.map((m) => `${m.value} ${m.label}`).join(' · ')}
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+          <WorkFan projects={fanProjects} />
         )}
       </section>
 
@@ -232,7 +200,7 @@ export default function Home() {
       </section>
 
       {/* ---------- Contact ---------- */}
-      <section id="contact" className="contact-sec">
+      <section id="contact" className="contact-sec" data-cursor="paw">
         <h2 className="sec-title">Contact ( 04 )</h2>
         <div>
           <div className="contact-hand" aria-hidden="true">

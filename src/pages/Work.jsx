@@ -31,7 +31,7 @@ export default function Work() {
       ) : (
         <div className="index-list">
           {projects.map((p) => (
-            <Link to={`/work/${p.slug}`} className="index-row" key={p._id}>
+            <Link to={`/work/${p.slug}`} className="index-row" key={p._id} data-cursor="open-folder">
               <div className="index-top">
                 {p.version && <span className="index-ver">{p.version}</span>}
                 <span className="index-title">{p.title}</span>
