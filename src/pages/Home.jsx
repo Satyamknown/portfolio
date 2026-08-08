@@ -69,9 +69,7 @@ export default function Home() {
             {home.scribble}
           </span>
           <h1>
-            {home.headline[0]}
-            <br />
-            {home.headline[1]}
+            {Array.isArray(home.headline) ? home.headline.join(' ') : home.headline}
           </h1>
           <div className="fx-hero-meta">{home.heroMeta}</div>
         </div>
