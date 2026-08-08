@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { profile } from '../data/site.js';
+import StatusSidebar from './StatusSidebar.jsx';
 
 function useIstClock() {
   const [time, setTime] = useState('');
@@ -30,19 +31,17 @@ export default function Layout({ children }) {
   const wrap = onHome ? '' : wide ? 'wrap-wide' : 'wrap';
 
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [showMobilePrompt, setShowMobilePrompt] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     setCookiesAccepted(window.localStorage.getItem('cookiesAccepted') === 'true');
+    setShowMobilePrompt(window.innerWidth <= 920);
 
-    const matcher = window.matchMedia('(pointer:coarse), (max-width: 920px)');
-    const updateMobile = () => setIsMobile(matcher.matches);
-
-    updateMobile();
-    matcher.addEventListener('change', updateMobile);
-    return () => matcher.removeEventListener('change', updateMobile);
+    const updateMobile = () => setShowMobilePrompt(window.innerWidth <= 920);
+    window.addEventListener('resize', updateMobile);
+    return () => window.removeEventListener('resize', updateMobile);
   }, []);
 
   const acceptCookies = () => {
@@ -50,6 +49,8 @@ export default function Layout({ children }) {
     window.localStorage.setItem('cookiesAccepted', 'true');
     setCookiesAccepted(true);
   };
+
+  const dismissMobilePrompt = () => setShowMobilePrompt(false);
 
   return (
     <>
@@ -66,6 +67,7 @@ export default function Layout({ children }) {
       <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
+      <StatusSidebar />
 
       {!cookiesAccepted && (
         <div className="cookie-banner" role="dialog" aria-live="polite">
@@ -79,9 +81,12 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      {isMobile && (
-        <div className="mobile-prompt-banner" aria-live="polite">
-          Please view this site on desktop for the best experience.
+      {showMobilePrompt && (
+        <div className="mobile-prompt-banner" role="status" aria-live="polite">
+          <span>Please view this site on desktop for the best experience.</span>
+          <button type="button" className="mobile-prompt-close" onClick={dismissMobilePrompt}>
+            ×
+          </button>
         </div>
       )}
 
