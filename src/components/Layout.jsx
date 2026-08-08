@@ -29,6 +29,28 @@ export default function Layout({ children }) {
   // Homepage sections span the full viewport; inner pages keep a reading column.
   const wrap = onHome ? '' : wide ? 'wrap-wide' : 'wrap';
 
+  const [cookiesAccepted, setCookiesAccepted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    setCookiesAccepted(window.localStorage.getItem('cookiesAccepted') === 'true');
+
+    const matcher = window.matchMedia('(pointer:coarse), (max-width: 920px)');
+    const updateMobile = () => setIsMobile(matcher.matches);
+
+    updateMobile();
+    matcher.addEventListener('change', updateMobile);
+    return () => matcher.removeEventListener('change', updateMobile);
+  }, []);
+
+  const acceptCookies = () => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('cookiesAccepted', 'true');
+    setCookiesAccepted(true);
+  };
+
   return (
     <>
       <div className="ambient-bg" aria-hidden="true" />
@@ -44,6 +66,24 @@ export default function Layout({ children }) {
       <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
+
+      {!cookiesAccepted && (
+        <div className="cookie-banner" role="dialog" aria-live="polite">
+          <p>
+            This site uses cookies to improve your experience and remember preferences. By continuing,
+            you accept cookies.
+          </p>
+          <button type="button" className="cookie-banner-button" onClick={acceptCookies}>
+            Accept cookies
+          </button>
+        </div>
+      )}
+
+      {isMobile && (
+        <div className="mobile-prompt-banner" aria-live="polite">
+          Please view this site on desktop for the best experience.
+        </div>
+      )}
 
       <footer className="site-footer">
         <div className="site-footer-inner">

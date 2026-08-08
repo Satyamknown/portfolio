@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
+import feedback from '../lib/feedback.js';
 
 // A hand-of-cards spread for Selected Work. Ports the fan/hover physics from
 // a Tailwind reference component onto this site's own markup and CSS
@@ -156,6 +157,7 @@ export default function WorkFan({ projects }) {
 
       directionRef.current = next > centerRef.current ? 'right' : 'left';
       centerRef.current = next;
+      feedback.shuffle();
       // Only a handful of state writes across the whole runway — the scroll
       // handler itself never sets state per event.
       setCenterIndex(next);

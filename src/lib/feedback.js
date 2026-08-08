@@ -287,6 +287,32 @@ function playChime() {
   });
 }
 
+function playShuffle() {
+  if (hasCooldown('shuffle', 120)) return;
+  setCooldown('shuffle');
+  emitVibration([4]);
+  if (!audioUnlocked || reducedMotion || !audioCtx || !masterGain) return;
+
+  playTone({
+    freq: 250 + Math.random() * 16 - 8,
+    length: 0.04,
+    type: 'triangle',
+    volume: SCROLL_VOLUME * 1.2,
+    attack: 0.002,
+    release: 0.03,
+    detune: Math.random() * 16 - 8
+  });
+
+  playNoiseBurst({
+    duration: 0.032,
+    volume: 0.038,
+    filterType: 'highpass',
+    filterFreq: 1600,
+    filterQ: 1.1,
+    attack: 0.0025
+  });
+}
+
 // Very subtle purr ambience for the cat's settled/happy beat — a low tone
 // with a gentle low-frequency tremolo so it reads as a rumble, not a drone.
 function playPurr() {
@@ -358,6 +384,9 @@ const feedback = {
   },
   scroll() {
     playPreset('scroll');
+  },
+  shuffle() {
+    playShuffle();
   },
   meow() {
     playMeow();

@@ -192,7 +192,7 @@ export default function Home() {
 
       {/* ---------- About ---------- */}
       <section id="about" className="about-sec">
-        <h2 className="sec-title">About ( 03 )</h2>
+        <h2 className="sec-title">About</h2>
         <div>
           <p className="about-statement">{home.aboutStatement}</p>
           <p className="about-para">{home.aboutPara}</p>
@@ -201,7 +201,7 @@ export default function Home() {
 
       {/* ---------- Contact ---------- */}
       <section id="contact" className="contact-sec" data-cursor="paw">
-        <h2 className="sec-title">Contact ( 04 )</h2>
+        <h2 className="sec-title">Contact</h2>
         <div>
           <div className="contact-hand" aria-hidden="true">
             {home.contactHand}
