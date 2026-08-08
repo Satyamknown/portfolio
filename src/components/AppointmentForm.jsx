@@ -50,7 +50,10 @@ export default function AppointmentForm() {
         // Reserved in place so nothing shifts while the cat is mid-jump.
         <div className={`af-sent-wrap ${settled ? 'is-in' : ''}`} role="status" aria-live="polite">
           <p className="af-sent-title">Thank you for the response. I&rsquo;ll get back to you.</p>
-          <p className="af-sent-note">Now we both are waiting for Abhishek to reply. 🐾</p>
+          <p className="af-sent-note">
+            If it&rsquo;s urgent, call me at{' '}
+            <a href="tel:+918828447664">8828447664</a>.
+          </p>
         </div>
       ) : (
         <form className="af" onSubmit={submit}>
