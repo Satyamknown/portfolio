@@ -1,0 +1,128 @@
+[
+ {
+  "id": 1,
+  "name": "peek",
+  "file": "01-peek.png",
+  "width": 148,
+  "height": 79,
+  "anchorX": 74.0,
+  "anchorY": 73
+ },
+ {
+  "id": 2,
+  "name": "wave",
+  "file": "02-wave.png",
+  "width": 184,
+  "height": 112,
+  "anchorX": 92.0,
+  "anchorY": 105
+ },
+ {
+  "id": 3,
+  "name": "point",
+  "file": "03-point.png",
+  "width": 160,
+  "height": 156,
+  "anchorX": 80.0,
+  "anchorY": 110
+ },
+ {
+  "id": 4,
+  "name": "tap",
+  "file": "04-tap.png",
+  "width": 156,
+  "height": 149,
+  "anchorX": 78.0,
+  "anchorY": 105
+ },
+ {
+  "id": 5,
+  "name": "ready",
+  "file": "05-ready.png",
+  "width": 148,
+  "height": 113,
+  "anchorX": 74.0,
+  "anchorY": 104
+ },
+ {
+  "id": 6,
+  "name": "crouch",
+  "file": "06-crouch.png",
+  "width": 118,
+  "height": 75,
+  "anchorX": 59.0,
+  "anchorY": 69
+ },
+ {
+  "id": 7,
+  "name": "takeoff",
+  "file": "07-takeoff.png",
+  "width": 151,
+  "height": 137,
+  "anchorX": 75.5,
+  "anchorY": 166
+ },
+ {
+  "id": 8,
+  "name": "air",
+  "file": "08-air.png",
+  "width": 181,
+  "height": 188,
+  "anchorX": 90.5,
+  "anchorY": 187
+ },
+ {
+  "id": 9,
+  "name": "landing",
+  "file": "09-landing.png",
+  "width": 205,
+  "height": 152,
+  "anchorX": 102.5,
+  "anchorY": 143
+ },
+ {
+  "id": 10,
+  "name": "settle",
+  "file": "10-settle.png",
+  "width": 190,
+  "height": 156,
+  "anchorX": 95.0,
+  "anchorY": 128
+ },
+ {
+  "id": 11,
+  "name": "sit",
+  "file": "11-sit.png",
+  "width": 145,
+  "height": 215,
+  "anchorX": 72.5,
+  "anchorY": 179
+ },
+ {
+  "id": 12,
+  "name": "blink",
+  "file": "12-blink.png",
+  "width": 262,
+  "height": 210,
+  "anchorX": 131.0,
+  "anchorY": 174
+ },
+ {
+  "id": 13,
+  "name": "tilt",
+  "file": "13-tilt.png",
+  "width": 143,
+  "height": 214,
+  "anchorX": 71.5,
+  "anchorY": 178
+ },
+ {
+  "id": 14,
+  "name": "happy",
+  "file": "14-happy.png",
+  "width": 185,
+  "height": 204,
+  "anchorX": 92.5,
+  "anchorY": 168
+ }
+]

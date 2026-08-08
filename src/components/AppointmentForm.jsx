@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { api } from '../lib/api.js';
 import { profile } from '../data/site.js';
+import ContactCat from './ContactCat.jsx';
 
 const EMPTY = { name: '', email: '', message: '', website: '' };
 
@@ -8,8 +9,20 @@ export default function AppointmentForm() {
   const [data, setData] = useState(EMPTY);
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [error, setError] = useState(null);
+  // The success copy waits for the cat to land and sit before it appears.
+  const [settled, setSettled] = useState(false);
+
+  const cat = useRef(null);
+  const nudged = useRef(false);
 
   const set = (key) => (e) => setData((d) => ({ ...d, [key]: e.target.value }));
+
+  // Only nudge on the first field focus — repeating it every tab would nag.
+  function handleFocus() {
+    if (nudged.current || status !== 'idle') return;
+    nudged.current = true;
+    cat.current?.focus();
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -19,63 +32,90 @@ export default function AppointmentForm() {
       await api.submitAppointment(data);
       setStatus('sent');
       setData(EMPTY);
+      cat.current?.submitSuccess(); // the real jump, only after a genuine success
     } catch (err) {
       setStatus('error');
       setError(err.message);
+      cat.current?.submitError();
     }
   }
 
-  if (status === 'sent') {
-    return (
-      <div className="af-sent" role="status">
-        Sent — thanks. I usually reply within a day.
-      </div>
-    );
-  }
+  const sent = status === 'sent';
 
   return (
-    <form className="af" onSubmit={submit}>
-      {error && <div className="af-error">{error}</div>}
+    <div className="cat-form">
+      <ContactCat ref={cat} onSettled={() => setSettled(true)} />
 
-      <div className="af-pair">
-        <label>
-          Name
-          <input required name="name" value={data.name} onChange={set('name')} />
-        </label>
-        <label>
-          Email
-          <input required type="email" name="email" value={data.email} onChange={set('email')} />
-        </label>
-      </div>
+      {sent ? (
+        // Reserved in place so nothing shifts while the cat is mid-jump.
+        <div className={`af-sent-wrap ${settled ? 'is-in' : ''}`} role="status" aria-live="polite">
+          <p className="af-sent-title">Thank you for the response. I&rsquo;ll get back to you.</p>
+          <p className="af-sent-note">Now we both are waiting for Abhishek to reply. 🐾</p>
+        </div>
+      ) : (
+        <form className="af" onSubmit={submit}>
+          {error && <div className="af-error">{error}</div>}
 
-      <label>
-        What&rsquo;s this about
-        <textarea
-          required
-          name="message"
-          rows={4}
-          value={data.message}
-          onChange={set('message')}
-          placeholder="Role, company, what you'd like to talk through…"
-        />
-      </label>
+          <div className="af-pair">
+            <label>
+              Name
+              <input
+                required
+                name="name"
+                value={data.name}
+                onChange={set('name')}
+                onFocus={handleFocus}
+              />
+            </label>
+            <label>
+              Email
+              <input
+                required
+                type="email"
+                name="email"
+                value={data.email}
+                onChange={set('email')}
+                onFocus={handleFocus}
+              />
+            </label>
+          </div>
 
-      {/* Honeypot — hidden from real users, bots tend to fill every field */}
-      <div className="hp-field" aria-hidden="true">
-        <label>
-          Website
-          <input tabIndex={-1} autoComplete="off" value={data.website} onChange={set('website')} />
-        </label>
-      </div>
+          <label>
+            What&rsquo;s this about
+            <textarea
+              required
+              name="message"
+              rows={4}
+              value={data.message}
+              onChange={set('message')}
+              onFocus={handleFocus}
+              placeholder="Role, company, what you'd like to talk through…"
+            />
+          </label>
 
-      <div className="af-actions">
-        <button className="af-submit" type="submit" disabled={status === 'sending'}>
-          {status === 'sending' ? 'Sending…' : 'Request a time →'}
-        </button>
-        <a className="af-alt" href={`mailto:${profile.email}`}>
-          or email directly
-        </a>
-      </div>
-    </form>
+          {/* Honeypot — hidden from real users, bots tend to fill every field */}
+          <div className="hp-field" aria-hidden="true">
+            <label>
+              Website
+              <input
+                tabIndex={-1}
+                autoComplete="off"
+                value={data.website}
+                onChange={set('website')}
+              />
+            </label>
+          </div>
+
+          <div className="af-actions">
+            <button className="af-submit" type="submit" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Request a time →'}
+            </button>
+            <a className="af-alt" href={`mailto:${profile.email}`}>
+              or email directly
+            </a>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }
