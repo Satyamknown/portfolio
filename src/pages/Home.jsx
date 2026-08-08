@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
-import { initHomeEffects } from '../lib/effects.js';
+import { initHomeEffects, initReel } from '../lib/effects.js';
 import Loading from '../components/Loading.jsx';
 import AppointmentForm from '../components/AppointmentForm.jsx';
 import { home, profile, contact, inProgress, microcopy } from '../data/site.js';
@@ -29,8 +29,16 @@ const pad = (n, w) => String(n).padStart(w, '0');
 
 export default function Home() {
   const rootRef = useRef(null);
+  const slotRef = useRef(null);
+  const reelRef = useRef(null);
+  const trackRef = useRef(null);
+  const heroLeftRef = useRef(null);
+  const heroRightRef = useRef(null);
+  const cueRef = useRef(null);
+
   const [projects, setProjects] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [reelOk, setReelOk] = useState(true);
 
   useEffect(() => {
     api
@@ -41,11 +49,22 @@ export default function Home() {
 
   useEffect(() => initHomeEffects(rootRef.current), []);
 
+  useEffect(
+    () =>
+      initReel({
+        slot: slotRef.current,
+        reel: reelRef.current,
+        track: trackRef.current,
+        fadeOut: [heroLeftRef.current, heroRightRef.current, cueRef.current]
+      }),
+    []
+  );
+
   return (
     <div ref={rootRef}>
       {/* ---------- Hero ---------- */}
       <section className="fx-hero">
-        <div className="fx-hero-left">
+        <div className="fx-hero-left" ref={heroLeftRef}>
           <span className="fx-scribble" aria-hidden="true">
             {home.scribble}
           </span>
@@ -57,11 +76,32 @@ export default function Home() {
           <div className="fx-hero-meta">{home.heroMeta}</div>
         </div>
 
-        <div className="fx-capsule">
-          <img src="/mocks/mock-portrait.png" alt="Portrait of Abhishek Manjhi" />
+        <div className="fx-reel-slot" ref={slotRef}>
+          <div className="fx-reel" ref={reelRef}>
+            {reelOk ? (
+              <video
+                className="fx-reel-media"
+                src="/mocks/reel.mp4"
+                poster="/mocks/mock-portrait.png"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Showreel of selected work"
+                onError={() => setReelOk(false)}
+              />
+            ) : (
+              <img
+                className="fx-reel-media"
+                src="/mocks/mock-portrait.png"
+                alt="Showreel placeholder"
+              />
+            )}
+          </div>
         </div>
 
-        <div className="fx-hero-right">
+        <div className="fx-hero-right" ref={heroRightRef}>
           <div className="fx-hand-note">{home.handNote}</div>
           <p>
             {home.heroPara.before}
@@ -74,8 +114,13 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="fx-scroll-cue">( scroll ↓ )</div>
+        <div className="fx-scroll-cue" ref={cueRef}>
+          ( scroll ↓ )
+        </div>
       </section>
+
+      {/* Scroll runway for the reel's expand → hold → exit sequence. */}
+      <div className="fx-reel-track" ref={trackRef} aria-hidden="true" />
 
       {/* ---------- Selected Work ---------- */}
       <section id="work" className="work-sec">

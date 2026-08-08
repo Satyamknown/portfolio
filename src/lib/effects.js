@@ -6,6 +6,126 @@
 const STICKERS = ['やあ!', '✳', '→', '☺', '★', 'デザイン', '✌', 'PM', '♪'];
 const STICKER_COLORS = ['#35c24a', '#1a1815', '#35c24a'];
 
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+
+// Where each stage of the showreel sits along the scroll track (0 → 1).
+const GROW_END = 0.42; // pill has become fullscreen
+const EXIT_START = 0.72; // fullscreen starts shrinking away
+const TRACK_VH = 1.7; // scroll distance the whole sequence occupies
+
+/**
+ * Drives the hero capsule: it grows from its pill footprint to a fullscreen
+ * showreel, holds, then shrinks and fades upward so Selected Work follows.
+ *
+ * The reel is lifted to position:fixed and its geometry is written every frame
+ * from the slot's live rect, so it reads as one continuous element rather than
+ * a swap between two.
+ */
+export function initReel({ slot, reel, track, fadeOut = [] }) {
+  if (!slot || !reel || !track) return () => {};
+
+  const reduced = window.matchMedia('(prefers-reduced-motion:reduce)');
+  const narrow = window.matchMedia('(max-width:920px)');
+
+  let raf = null;
+  let running = false;
+
+  const clear = () => {
+    reel.classList.remove('is-driving');
+    reel.removeAttribute('style');
+    track.style.height = '';
+    fadeOut.forEach((el) => el && (el.style.opacity = ''));
+  };
+
+  const draw = () => {
+    raf = null;
+    // A frame queued just before cleanup would otherwise keep rescheduling
+    // itself forever — StrictMode's double-invoke makes that easy to hit.
+    if (!running) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const end = Math.max(1, track.offsetTop + track.offsetHeight - vh);
+    const p = clamp(window.scrollY / end, 0, 1);
+
+    // Hero copy steps aside early so the video isn't competing with it.
+    const textFade = 1 - easeInOut(clamp(p / 0.3, 0, 1));
+    fadeOut.forEach((el) => el && (el.style.opacity = String(textFade)));
+
+    if (p <= 0) {
+      reel.classList.remove('is-driving');
+      reel.removeAttribute('style');
+      raf = requestAnimationFrame(draw);
+      return;
+    }
+
+    reel.classList.add('is-driving');
+
+    // Rest geometry is wherever the in-flow slot currently is.
+    const s = slot.getBoundingClientRect();
+    const grow = easeInOut(clamp(p / GROW_END, 0, 1));
+
+    const w = lerp(s.width, vw, grow);
+    const h = lerp(s.height, vh, grow);
+    const left = lerp(s.left, 0, grow);
+    const top = lerp(s.top, 0, grow);
+    let radius = lerp(200, 0, grow);
+
+    let opacity = 1;
+    let transform = 'none';
+    if (p > EXIT_START) {
+      const exit = easeInOut(clamp((p - EXIT_START) / (1 - EXIT_START), 0, 1));
+      opacity = 1 - exit;
+      radius = lerp(0, 28, exit);
+      transform = `translateY(${(-exit * 12).toFixed(2)}vh) scale(${lerp(1, 0.88, exit).toFixed(4)})`;
+    }
+
+    reel.style.position = 'fixed';
+    reel.style.zIndex = '30';
+    // inset is a shorthand for top/right/bottom/left, so it has to be cleared
+    // before the explicit left/top below — not after, or it wipes them.
+    reel.style.inset = 'auto';
+    reel.style.left = `${left.toFixed(1)}px`;
+    reel.style.top = `${top.toFixed(1)}px`;
+    reel.style.width = `${w.toFixed(1)}px`;
+    reel.style.height = `${h.toFixed(1)}px`;
+    reel.style.borderRadius = `${radius.toFixed(1)}px`;
+    reel.style.opacity = opacity.toFixed(3);
+    reel.style.transform = transform;
+    reel.style.pointerEvents = p > 0.05 ? 'none' : '';
+    reel.style.visibility = opacity < 0.01 ? 'hidden' : 'visible';
+
+    raf = requestAnimationFrame(draw);
+  };
+
+  const start = () => {
+    if (running) return;
+    running = true;
+    track.style.height = `${TRACK_VH * 100}vh`;
+    raf = requestAnimationFrame(draw);
+  };
+
+  const stop = () => {
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    clear();
+  };
+
+  const sync = () => (narrow.matches || reduced.matches ? stop() : start());
+
+  sync();
+  narrow.addEventListener('change', sync);
+  reduced.addEventListener('change', sync);
+
+  return () => {
+    narrow.removeEventListener('change', sync);
+    reduced.removeEventListener('change', sync);
+    stop();
+  };
+}
+
 export function initHomeEffects(root) {
   const cleanups = [];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
