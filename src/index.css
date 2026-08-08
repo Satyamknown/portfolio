@@ -650,57 +650,43 @@ a.section-note:hover{color:var(--ink)}
 }
 
 .splash-signature-wrap {
-  width: min(320px, 68vw);
+  width: min(290px, 68vw);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.splash-signature-svg {
+.splash-signature-img {
   width: 100%;
   height: auto;
-  overflow: visible;
+  display: block;
+  object-fit: contain;
+  /* Progressive clip reveal mimicking real-time handwriting */
+  clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
+  animation: signatureImageTrace 1.6s cubic-bezier(0.33, 1, 0.68, 1) 120ms forwards;
+  will-change: clip-path, filter;
+  filter: contrast(1.05);
 }
 
-/* Individual Stroke Dashoffset animations */
-.sig-stroke {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  will-change: stroke-dashoffset;
-}
-
-/* 1. Left stroke of 'A' (0ms to 400ms) */
-.sig-stroke-1 {
-  animation: drawSigStroke 400ms cubic-bezier(0.4, 0, 0.2, 1) 50ms forwards;
-}
-
-/* 2. Tall ascender loop of 'A' (300ms to 950ms) */
-.sig-stroke-2 {
-  animation: drawSigStroke 650ms cubic-bezier(0.33, 1, 0.68, 1) 320ms forwards;
-}
-
-/* 3. Cursive "bbhishek" lettering (750ms to 1600ms) */
-.sig-stroke-3 {
-  animation: drawSigStroke 850ms cubic-bezier(0.33, 1, 0.68, 1) 750ms forwards;
-}
-
-/* 4. Underline flourish (1400ms to 1780ms) */
-.sig-stroke-4 {
-  animation: drawSigStroke 380ms cubic-bezier(0.22, 1, 0.36, 1) 1400ms forwards;
-}
-
-@keyframes drawSigStroke {
-  from {
-    stroke-dashoffset: 1000;
+@keyframes signatureImageTrace {
+  0% {
+    clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
+    filter: contrast(1.15) brightness(0.95);
   }
-  to {
-    stroke-dashoffset: 0;
+  25% {
+    clip-path: polygon(0 0, 32% 0, 32% 100%, 0 100%);
+  }
+  65% {
+    clip-path: polygon(0 0, 72% 0, 72% 100%, 0 100%);
+  }
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    filter: contrast(1) brightness(1);
   }
 }
 
-/* Reduced motion fallback: show signature immediately */
-.splash-signature-svg.reduced-motion .sig-stroke {
-  stroke-dashoffset: 0;
+.splash-signature-img.reduced-motion {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   animation: none;
 }
 
