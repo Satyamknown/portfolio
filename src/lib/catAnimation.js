@@ -282,17 +282,23 @@ export function createCatAnimation(canvas, { onSettled, onSay } = {}) {
 
   function advance(dt) {
     if (!queue.length) return;
-    const wasFrame = queue[stepIndex]?.f;
     stepElapsed += dt;
     const cur = queue[stepIndex];
     if (stepElapsed < cur.t) return;
+
+    // The frame we were on before this step lands — captured before it's
+    // overwritten below, so landing-type sounds can fire once per arrival
+    // rather than once per queued step.
+    const arrivingFromFrame = prevFrame;
 
     stepElapsed -= cur.t;
     stepIndex += 1;
     prevFrame = cur.f;
 
-    if (cur && cur.f === F.TAP && wasFrame !== F.TAP) {
-      feedback.tap();
+    if (cur.f === F.TAP) {
+      feedback.pawTap();
+    } else if (cur.f === F.LANDING && arrivingFromFrame !== F.LANDING) {
+      feedback.boop();
     }
 
     if (stepIndex < queue.length) return;
@@ -308,6 +314,7 @@ export function createCatAnimation(canvas, { onSettled, onSay } = {}) {
     } else if (mode === 'waiting') {
       // Occasionally a happy beat, otherwise keep waiting calmly.
       const glad = Math.random() < 0.35;
+      if (glad) feedback.purr();
       play(glad ? happySequence() : waitSequence(), 'waiting', glad ? 'happy' : null);
     } else {
       queueNextIdle();
