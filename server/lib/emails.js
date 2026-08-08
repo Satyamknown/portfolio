@@ -118,60 +118,133 @@ ${footer()}`;
 }
 
 /* ------------------------------------------------------------------ *
- * 2. Auto-reply — what the sender gets back. Cat on watch duty.
+ * 2. Auto-reply — premium confirmation to the person who submitted.
+ *    Styled as an extension of the portfolio, not a mailchimp blast.
  * ------------------------------------------------------------------ */
-const CAT = `    /\\_/\\
-   ( -.- )  ~ z Z
-    > ^ <
-   (")_(")`;
 
-export function autoReplyEmail({ name }) {
+const PHONE_DISPLAY = '+91 88284 47664';
+const PHONE_TEL     = '+918828447664';
+
+export function autoReplyEmail({ name, email, message }) {
   const first = esc((name || '').trim().split(/\s+/)[0] || 'there');
 
+  // Message card rows — only render rows with values
+  const msgRows = [
+    { label: 'Name',    value: name },
+    { label: 'Email',   value: email },
+    { label: 'Message', value: message }
+  ].filter(r => r.value?.trim()).map(({ label, value }) => {
+    const isMessage = label === 'Message';
+    return `
+    <tr>
+      <td width="80" valign="top" style="padding:10px 14px 10px 0;font-family:${MONO};font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${FAINT};white-space:nowrap;border-bottom:1px solid ${LINE};">${esc(label)}</td>
+      <td valign="top" style="padding:10px 0;font-family:${isMessage ? SANS : MONO};font-size:${isMessage ? '15px' : '13px'};color:${INK};line-height:${isMessage ? '1.6' : '1.4'};border-bottom:1px solid ${LINE};">${isMessage ? paragraphs(value) : esc(value)}</td>
+    </tr>`;
+  }).join('');
+
   const inner = `
-<tr><td class="pad" style="padding:40px 36px 0;text-align:center;">
-  <div style="font-family:${MONO};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${FAINT};">
-    Message received
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<tr><td class="pad" style="padding:50px 36px 0;">
+  <div style="font-family:${MONO};font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:${GREEN};margin-bottom:18px;">
+    &#10003;&nbsp;&nbsp;Received
+  </div>
+  <div style="border-top:2px solid ${INK};border-bottom:1px solid ${LINE};padding:22px 0 24px;">
+    <h1 class="h1" style="margin:0;font-family:${SANS};font-size:42px;line-height:1.0;letter-spacing:-0.035em;font-weight:700;color:${INK};">
+      Thank you for<br>reaching out.
+    </h1>
   </div>
 </td></tr>
 
-<tr><td class="pad" style="padding:24px 36px 0;text-align:center;">
-  <h1 class="h1" style="margin:0;font-family:${SANS};font-size:34px;line-height:1.1;letter-spacing:-0.03em;font-weight:700;color:${INK};">
-    Got it, ${first}.
-  </h1>
+<!-- ── BODY COPY ──────────────────────────────────────────── -->
+<tr><td class="pad" style="padding:28px 36px 0;">
+  <p style="margin:0;font-family:${SANS};font-size:18px;line-height:1.65;color:${INK};font-weight:400;">
+    Hi ${first},
+  </p>
+  <p style="margin:14px 0 0;font-family:${SANS};font-size:16px;line-height:1.7;color:${SOFT};font-weight:300;">
+    Thank you for taking the time to get in touch. I&rsquo;ve received your
+    message and really appreciate you reaching out.
+  </p>
+  <p style="margin:14px 0 0;font-family:${SANS};font-size:16px;line-height:1.7;color:${SOFT};font-weight:300;">
+    I&rsquo;ll go through the details you&rsquo;ve shared and get back to you
+    as soon as I can. I&rsquo;m looking forward to learning more and seeing
+    how we can work together.
+  </p>
 </td></tr>
 
-<tr><td class="pad" style="padding:28px 36px 0;text-align:center;">
-  <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="border:1px solid ${LINE};background:#efece5;">
-    <tr><td style="padding:24px 34px;">
-      <pre style="margin:0;font-family:${MONO};font-size:13px;line-height:1.35;color:${INK};white-space:pre;">${CAT}</pre>
-      <div style="margin-top:16px;font-family:${MONO};font-size:12px;color:${GREEN};">
-        &#9733; guard cat on duty &#9733;
-      </div>
-    </td></tr>
+<!-- ── MESSAGE RECAP ─────────────────────────────────────── -->
+<tr><td class="pad" style="padding:34px 36px 0;">
+  <div style="font-family:${MONO};font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:${FAINT};margin-bottom:14px;">
+    Your message
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="background:#efece5;border:1px solid ${LINE};padding:4px 20px;">
+    <tbody>${msgRows}</tbody>
   </table>
 </td></tr>
 
-<tr><td class="pad" style="padding:26px 36px 0;text-align:center;">
-  <p style="margin:0;font-family:${SANS};font-size:17px;line-height:1.6;color:${SOFT};font-weight:300;">
-    &ldquo;Please wait right here. My bro will get back to you.&rdquo;
-  </p>
-  <p style="margin:16px 0 0;font-family:${SANS};font-size:15px;line-height:1.6;color:${FAINT};font-weight:300;">
-    Your note landed safely. Abhishek reads every one himself and usually
-    replies within a day — sooner if the cat naps less.
-  </p>
+<!-- ── PHONE CTA ──────────────────────────────────────────── -->
+<tr><td class="pad" style="padding:34px 36px 0;">
+  <div style="border:1px solid ${LINE};padding:28px 28px 26px;">
+    <div style="font-family:${MONO};font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:${FAINT};margin-bottom:14px;">
+      Need to reach me sooner?
+    </div>
+    <p style="margin:0 0 18px;font-family:${SANS};font-size:15px;line-height:1.65;color:${SOFT};font-weight:300;">
+      If your request is time-sensitive or you&rsquo;d simply prefer to speak
+      directly, feel free to give me a call.
+    </p>
+    <a href="tel:${PHONE_TEL}"
+       style="display:inline-block;background:${INK};color:${PAPER};font-family:${MONO};font-size:14px;letter-spacing:0.04em;padding:14px 28px;border-radius:999px;text-decoration:none;">
+      &#128222;&nbsp;&nbsp;${PHONE_DISPLAY}
+    </a>
+    <p style="margin:16px 0 0;font-family:${MONO};font-size:11px;color:${FAINT};">
+      I&rsquo;ll do my best to pick up or call back promptly.
+    </p>
+  </div>
 </td></tr>
 
-<tr><td class="pad" style="padding:28px 36px 36px;text-align:center;">
-  <div style="border-top:1px solid ${LINE};padding-top:22px;font-family:${MONO};font-size:11px;color:${FAINT};">
-    No reply needed — this one&rsquo;s automatic.
+<!-- ── SIGN-OFF ───────────────────────────────────────────── -->
+<tr><td class="pad" style="padding:32px 36px 44px;">
+  <p style="margin:0 0 4px;font-family:${SANS};font-size:15px;line-height:1.6;color:${SOFT};font-weight:300;">
+    Thanks again for reaching out.
+  </p>
+  <p style="margin:18px 0 0;font-family:${SANS};font-size:15px;color:${INK};font-weight:600;">
+    Best,<br>Abhishek
+  </p>
+  <p style="margin:6px 0 0;font-family:${MONO};font-size:11px;color:${FAINT};line-height:1.6;">
+    Designer &amp; Developer<br>
+    <a href="tel:${PHONE_TEL}" style="color:${FAINT};text-decoration:none;">${PHONE_DISPLAY}</a>
+  </p>
+  <div style="margin-top:28px;border-top:1px solid ${LINE};padding-top:16px;font-family:${MONO};font-size:10px;color:${FAINT};">
+    This is an automated confirmation &mdash; no reply needed. Abhishek will be in touch soon.
   </div>
 </td></tr>
 ${footer()}`;
 
+  const textPhone = PHONE_DISPLAY;
   return {
-    subject: 'Got it — the cat is on it 🐾',
-    html: shell(inner, 'Your message landed. Abhishek usually replies within a day.'),
-    text: `Got it, ${first}.\n\n${CAT}\n\n"Please wait right here. My bro will get back to you."\n\nYour note landed safely. Abhishek reads every one himself and usually replies within a day.\n\nNo reply needed — this one's automatic.`
+    subject: `Thank you for reaching out, ${(name || '').trim().split(/\s+/)[0] || first} — I\u2019ll be in touch soon`,
+    html: shell(inner, `Got your message, ${(name||'').trim().split(/\s+/)[0]||'there'}. Abhishek will get back to you soon.`),
+    text: [
+      `Hi ${(name || '').trim().split(/\s+/)[0] || 'there'},`,
+      '',
+      `Thank you for taking the time to get in touch. I've received your message and really appreciate you reaching out.`,
+      '',
+      `I'll go through the details you've shared and get back to you as soon as I can.`,
+      '',
+      '--- Your Message ---',
+      name    ? `Name:    ${name}`    : '',
+      email   ? `Email:   ${email}`   : '',
+      message ? `Message: ${message}` : '',
+      '',
+      'Need to reach me sooner?',
+      `Call me directly: ${textPhone}`,
+      '',
+      'Thanks again,',
+      'Abhishek',
+      `Designer & Developer · ${textPhone}`,
+      '',
+      '(This is an automated confirmation — no reply needed.)'
+    ].filter(l => l !== null).join('\n')
   };
 }

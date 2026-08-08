@@ -46,9 +46,9 @@ export function sendAppointmentEmail({ name, email, message }) {
  * domain in Resend — the shared onboarding@resend.dev address may only
  * deliver to the account owner, so this is allowed to fail on its own.
  */
-export function sendAutoReply({ name, email }) {
+export function sendAutoReply({ name, email, message }) {
   if (!email) return Promise.resolve({ sent: false, reason: 'no recipient' });
-  const { subject, html, text } = autoReplyEmail({ name });
+  const { subject, html, text } = autoReplyEmail({ name, email, message });
   return send({
     to: email,
     replyTo: process.env.NOTIFY_EMAIL || undefined,
