@@ -34,7 +34,9 @@ export default function Layout({ children }) {
       <header className="site-head">
         <a href={onHome ? '#work' : '/work'}>works</a>
         <span className="site-name">
-          <Link to="/">abhishek manjhi</Link>
+          <Link to="/" aria-label="Abhishek Manjhi">
+            <img src="/signature.png" alt="Abhishek Manjhi" className="nav-signature-img" />
+          </Link>
         </span>
         <a href={onHome ? '#contact' : '/contact'}>contact</a>
       </header>
