@@ -78,17 +78,17 @@ img{max-width:100%;height:auto}
 .site-head a:first-child{justify-self:start}
 .site-head a:last-child{justify-self:end}
 .site-name{justify-self:center;display:inline-flex;align-items:center}
-.site-name a{color:var(--ink);display:inline-flex;align-items:center}
+.site-name a{color:var(--ink);display:inline-flex;align-items:center;padding:2px 0}
 .nav-signature-img{
-  height:30px;width:auto;display:block;object-fit:contain;
+  height:48px;width:auto;display:block;object-fit:contain;
   filter:contrast(1.05);
   transition:transform .25s ease,opacity .25s ease;
 }
-.site-name a:hover .nav-signature-img{transform:scale(1.08)}
+.site-name a:hover .nav-signature-img{transform:scale(1.06)}
 @media(max-width:600px){
-  .site-head{padding:16px 20px}
+  .site-head{padding:14px 20px}
   .site-head a,.site-head .site-name{font-size:16px}
-  .nav-signature-img{height:24px}
+  .nav-signature-img{height:36px}
 }
 
 .top-glass{
