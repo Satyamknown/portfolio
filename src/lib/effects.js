@@ -9,6 +9,8 @@ const STICKER_COLORS = ['#35c24a', '#1a1815', '#35c24a'];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+const getViewportWidth = () => window.visualViewport?.width || window.innerWidth;
+const getViewportHeight = () => window.visualViewport?.height || window.innerHeight;
 
 // Where each stage of the showreel sits along the scroll track (0 → 1).
 const GROW_END = 0.42; // pill has become fullscreen
@@ -44,8 +46,8 @@ export function initReel({ slot, reel, track, fadeOut = [] }) {
     // A frame queued just before cleanup would otherwise keep rescheduling
     // itself forever — StrictMode's double-invoke makes that easy to hit.
     if (!running) return;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw = getViewportWidth();
+    const vh = getViewportHeight();
     const end = Math.max(1, track.offsetTop + track.offsetHeight - vh);
     const p = clamp(window.scrollY / end, 0, 1);
 
@@ -102,7 +104,7 @@ export function initReel({ slot, reel, track, fadeOut = [] }) {
   const start = () => {
     if (running) return;
     running = true;
-    track.style.height = `${TRACK_VH * 100}vh`;
+    track.style.height = `${Math.round(TRACK_VH * getViewportHeight())}px`;
     raf = requestAnimationFrame(draw);
   };
 
@@ -115,13 +117,21 @@ export function initReel({ slot, reel, track, fadeOut = [] }) {
 
   const sync = () => (narrow.matches || reduced.matches ? stop() : start());
 
+  const onResize = () => {
+    if (running) track.style.height = `${Math.round(TRACK_VH * getViewportHeight())}px`;
+  };
+
   sync();
   narrow.addEventListener('change', sync);
   reduced.addEventListener('change', sync);
+  window.addEventListener('resize', onResize);
+  window.visualViewport?.addEventListener('resize', onResize);
 
   return () => {
     narrow.removeEventListener('change', sync);
     reduced.removeEventListener('change', sync);
+    window.removeEventListener('resize', onResize);
+    window.visualViewport?.removeEventListener('resize', onResize);
     stop();
   };
 }
@@ -135,7 +145,7 @@ export function initHomeEffects(root) {
   if (!reducedMotion) {
     const driftEls = () => (root ? Array.from(root.querySelectorAll('[data-drift]')) : []);
     const onScroll = () => {
-      const vh = window.innerHeight;
+      const vh = getViewportHeight();
       driftEls().forEach((el) => {
         const speed = parseFloat(el.dataset.drift) || 0;
         const r = el.getBoundingClientRect();
@@ -157,7 +167,7 @@ export function initHomeEffects(root) {
       // Let inner scrollables (editor preview etc.) behave normally
       if (e.target.closest && e.target.closest('.editor, textarea')) return;
       e.preventDefault();
-      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const max = document.documentElement.scrollHeight - getViewportHeight();
       target = Math.max(0, Math.min(max, target + e.deltaY));
     };
     window.addEventListener('wheel', onWheel, { passive: false });

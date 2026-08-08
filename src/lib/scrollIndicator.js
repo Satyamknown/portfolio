@@ -21,8 +21,10 @@ export function initScrollIndicator() {
   let hideTimeout = null;
   const crossed = new Set([0]);
 
-  const layout = () => ({
-    viewportHeight: window.innerHeight,
+  const getViewportHeight = () => window.visualViewport?.height || window.innerHeight;
+
+const layout = () => ({
+    viewportHeight: getViewportHeight(),
     contentHeight: document.documentElement.scrollHeight
   });
 
