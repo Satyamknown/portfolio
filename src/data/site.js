@@ -19,7 +19,7 @@ export const profile = {
 // Homepage (flowing design) copy
 export const home = {
   scribble: 'やあ!',
-  headline: 'making things make sense',
+  headline: 'Turning problems into products.',
   heroMeta: "hey I'm abhishek Manjhi",
   handNote: 'design → pm',
   heroPara: {
