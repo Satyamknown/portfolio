@@ -11,7 +11,7 @@
  * React owns the high-level state only. The rAF loop lives here and never
  * triggers a render.
  */
-
+import feedback from './feedback.js';
 const MANIFEST = '/cat/frames.json';
 
 // Logical animation space, scaled to whatever the canvas actually is.
@@ -282,6 +282,7 @@ export function createCatAnimation(canvas, { onSettled, onSay } = {}) {
 
   function advance(dt) {
     if (!queue.length) return;
+    const wasFrame = queue[stepIndex]?.f;
     stepElapsed += dt;
     const cur = queue[stepIndex];
     if (stepElapsed < cur.t) return;
@@ -289,6 +290,10 @@ export function createCatAnimation(canvas, { onSettled, onSay } = {}) {
     stepElapsed -= cur.t;
     stepIndex += 1;
     prevFrame = cur.f;
+
+    if (cur && cur.f === F.TAP && wasFrame !== F.TAP) {
+      feedback.tap();
+    }
 
     if (stepIndex < queue.length) return;
 
@@ -414,7 +419,10 @@ export function createCatAnimation(canvas, { onSettled, onSay } = {}) {
 
   const api = {
     focus() {
-      if (mode === 'idle') play(focusSequence(), 'focus', 'focus');
+      if (mode === 'idle') {
+        feedback.meow();
+        play(focusSequence(), 'focus', 'focus');
+      }
     },
     submitSuccess() {
       if (mode === 'jumping' || mode === 'waiting' || mode === 'happy') return;

@@ -298,6 +298,18 @@ Real visitors won't get the auto-reply until a domain is verified in Resend and
 
 ---
 
+## 12. Recent local changes
+
+- Added contact page cat attention prompt and phone CTA prompt text.
+- Wired explicit tap sound feedback to contact phone link, form submit button, and email alternate link.
+- Added `src/lib/feedback.js` with audio/tap presets and browser audio unlock handling.
+- Added `src/lib/interaction.js` to initialize global tap/typing feedback and button press state.
+- Added `src/lib/scrollIndicator.js` and removed scroll haptics, keeping the visual scroll thumb only.
+- Updated `src/components/ContactCat.jsx` to make the cat prompt bubble accessible and render the current prompt.
+- Updated `src/components/AppointmentForm.jsx` to trigger cat focus and feedback on form interaction and submission.
+- Updated `src/pages/Contact.jsx` prompt copy and contact CTA.
+- Committed and pushed the contact prompt / feedback changes to `origin/main`.
+
 ## 11. Conventions
 
 - Match surrounding style: no semicolon-free experiments, no new dependencies without

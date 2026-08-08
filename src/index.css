@@ -37,6 +37,16 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 ::selection{background:var(--ink);color:var(--paper)}
 
 a{color:var(--ink);text-decoration:none;transition:color .25s}
@@ -64,6 +74,43 @@ img{max-width:100%;height:auto}
 /* Custom cursor active (homepage, pointer:fine) */
 @media (pointer:fine){
   body.fx-cursor, body.fx-cursor a, body.fx-cursor button{cursor:none!important}
+}
+
+.scroll-indicator{
+  position:fixed;top:0;right:12px;bottom:0;pointer-events:none;z-index:60;
+}
+.scroll-indicator__thumb{
+  position:absolute;right:0;width:4px;border-radius:999px;background:#1a1815;
+  opacity:0.18;transition:opacity .3s ease,width .3s ease,transform .2s ease;
+  will-change:transform,opacity,width;
+  pointer-events:auto;
+}
+.scroll-indicator--active .scroll-indicator__thumb{
+  opacity:0.82;
+}
+.scroll-indicator--idle .scroll-indicator__thumb{
+  opacity:0.18;
+}
+.scroll-indicator--dragging .scroll-indicator__thumb{
+  width:6px;
+  opacity:0.92;
+}
+.scroll-indicator__thumb:hover{
+  width:5px;
+  opacity:0.92;
+}
+
+button[data-pressed], .btn[data-pressed], .af-submit[data-pressed], a[data-pressed]{
+  transform:scale(0.97);
+}
+
+button, .btn, .af-submit, a{
+  transition:transform .12s ease, background .25s ease, color .25s ease, border-color .25s ease;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .scroll-indicator__thumb{transition:none;}
+  button, .btn, .af-submit, a{transition:none;}
 }
 
 /* ---------- Header ---------- */

@@ -53,6 +53,9 @@ export const api = {
   updatePost: (id, payload) => request(`/posts/${id}`, { method: 'PUT', body: payload }),
   deletePost: (id) => request(`/posts/${id}`, { method: 'DELETE' }),
 
+  getHomeSettings: () => request('/home-settings'),
+  updateHomeSettings: (payload) => request('/home-settings', { method: 'PUT', body: payload }),
+
   submitAppointment: (payload) => request('/appointments', { method: 'POST', body: payload })
 };
 

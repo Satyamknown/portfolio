@@ -39,11 +39,15 @@ export default function Home() {
   const [projects, setProjects] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [reelOk, setReelOk] = useState(true);
+  const [homeSettings, setHomeSettings] = useState({ videoUrl: '', videoPoster: '' });
 
   useEffect(() => {
-    api
-      .listProjects()
-      .then(setProjects)
+    Promise.all([api.listProjects(), api.getHomeSettings()])
+      .then(([projects, settings]) => {
+        setProjects(projects);
+        setHomeSettings(settings);
+      })
+      .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);
 
@@ -76,7 +80,20 @@ export default function Home() {
 
         <div className="fx-reel-slot" ref={slotRef}>
           <div className="fx-reel" ref={reelRef}>
-            {reelOk ? (
+            {reelOk && homeSettings.videoUrl ? (
+              <video
+                className="fx-reel-media"
+                src={homeSettings.videoUrl}
+                poster={homeSettings.videoPoster || '/mocks/mock-portrait.png'}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Showreel of selected work"
+                onError={() => setReelOk(false)}
+              />
+            ) : reelOk ? (
               <video
                 className="fx-reel-media"
                 src="/mocks/reel.mp4"
@@ -92,7 +109,7 @@ export default function Home() {
             ) : (
               <img
                 className="fx-reel-media"
-                src="/mocks/mock-portrait.png"
+                src={homeSettings.videoPoster || '/mocks/mock-portrait.png'}
                 alt="Showreel placeholder"
               />
             )}

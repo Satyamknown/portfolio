@@ -7,6 +7,7 @@ import authRoutes from '../server/routes/auth.js';
 import projectRoutes from '../server/routes/projects.js';
 import postRoutes from '../server/routes/posts.js';
 import appointmentRoutes from '../server/routes/appointments.js';
+import homeSettingsRoutes from '../server/routes/homeSettings.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/home-settings', homeSettingsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

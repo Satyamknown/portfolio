@@ -20,6 +20,7 @@ export default function Admin() {
   const [editing, setEditing] = useState(null); // { kind, data, id }
   const [notice, setNotice] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const [homeSettings, setHomeSettings] = useState({ videoUrl: '', videoPoster: '' });
 
   useEffect(() => {
     if (!auth.isSignedIn()) {
@@ -31,9 +32,14 @@ export default function Admin() {
 
   async function refresh() {
     try {
-      const [pr, po] = await Promise.all([api.listProjects(true), api.listPosts(true)]);
+      const [pr, po, settings] = await Promise.all([
+        api.listProjects(true),
+        api.listPosts(true),
+        api.getHomeSettings()
+      ]);
       setProjects(pr);
       setPosts(po);
+      setHomeSettings(settings);
     } catch (e) {
       if (e.message.toLowerCase().includes('sign in') || e.message.includes('expired')) {
         navigate('/login');
@@ -275,7 +281,7 @@ export default function Admin() {
   }
 
   // ---------- List view ----------
-  const items = tab === 'projects' ? projects : posts;
+  const items = tab === 'projects' ? projects : tab === 'posts' ? posts : [];
 
   return (
     <section className="first">
@@ -299,16 +305,60 @@ export default function Admin() {
         >
           Posts ({posts.length})
         </button>
+        <button
+          className={`admin-tab ${tab === 'settings' ? 'active' : ''}`}
+          onClick={() => setTab('settings')}
+        >
+          Settings
+        </button>
       </div>
 
       <div style={{ marginBottom: 20 }}>
-        <button className="btn btn-primary btn-sm" onClick={() => startNew(tab)}>
-          + New {tab === 'projects' ? 'case study' : 'post'}
-        </button>
+        {tab !== 'settings' && (
+          <button className="btn btn-primary btn-sm" onClick={() => startNew(tab)}>
+            + New {tab === 'projects' ? 'case study' : 'post'}
+          </button>
+        )}
       </div>
 
       {!loaded ? (
         <div className="loading">Loading…</div>
+      ) : tab === 'settings' ? (
+        <div className="panel">
+          <div className="field">
+            <label htmlFor="videoUrl">Hero video URL</label>
+            <input
+              id="videoUrl"
+              value={homeSettings.videoUrl}
+              placeholder="https://..."
+              onChange={(e) => setHomeSettings((prev) => ({ ...prev, videoUrl: e.target.value }))}
+            />
+            <div className="field-hint">Paste a direct MP4 URL or an asset URL from your CDN.</div>
+          </div>
+          <div className="field">
+            <label htmlFor="videoPoster">Hero video poster image</label>
+            <input
+              id="videoPoster"
+              value={homeSettings.videoPoster}
+              placeholder="https://..."
+              onChange={(e) => setHomeSettings((prev) => ({ ...prev, videoPoster: e.target.value }))}
+            />
+            <div className="field-hint">Optional fallback image if the video cannot play.</div>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn btn-primary" onClick={async () => {
+              try {
+                await api.updateHomeSettings(homeSettings);
+                setNotice({ type: 'ok', text: 'Home settings saved.' });
+                refresh();
+              } catch (e) {
+                setNotice({ type: 'error', text: e.message });
+              }
+            }}>
+              Save Settings
+            </button>
+          </div>
+        </div>
       ) : items.length === 0 ? (
         <div className="empty">
           <h3>Nothing here yet</h3>
