@@ -196,13 +196,66 @@ The next version should be driven by those signals, not by adding more formats f
     role: 'Product designer',
     client: 'Vancouver-based',
     tags: ['B2B SaaS', 'End-to-end', 'Complex workflows'],
-    metrics: [],
-    coverImage: '/mocks/mock-stratalite.png',
+    metrics: [
+      { value: '20', label: 'ecosystem entities' },
+      { value: '5', label: 'platform roles' },
+      { value: '4', label: 'stakeholder rings' },
+      { value: '13', label: 'permission actions mapped' }
+    ],
+    coverImage: '/case-studies/stratalite-cover.png',
     order: 3,
     published: true,
-    body: `B2B SaaS property management, end to end.
+    body: `A live B2B property-management platform designed from the ecosystem model through to production implementation.
 
-Designed a live B2B SaaS property management platform from end to end — the case study that carried a Round 1 interview at a product design studio.`
+## The challenge
+
+Stratalite coordinates property owners, project managers, vendors, finance teams, residents, and external services across one operational workflow. The design challenge was not a single screen. It was making responsibilities, permissions, handoffs, payments, quotations, invoices, and disputes understandable across a complex system.
+
+I started by modelling the system before designing the interface. That decision reduced the risk of producing polished screens that contradicted how the business actually operated.
+
+## Mapping the ecosystem before a single screen
+
+The stakeholder model captures 20 entities across four rings, including five people who interact directly with the platform: Super Admin, PMC Admin, Manager, Independent Manager, and Vendor.
+
+![Stakeholder map covering the Stratalite ecosystem](/case-studies/stratalite-stakeholder-map.png "20 entities mapped across four stakeholder rings before interface design began")
+
+This made dependencies visible early: legal and regulatory constraints, payment and notification services, property teams, finance, residents, vendors, and the external groups affected by platform decisions.
+
+## Turning relationships into a product model
+
+The system map connected user roles, core modules, financial flows, audit requirements, pain points, motivations, and desired outcomes. It became the shared reference for deciding what belonged in the product and how concepts related to each other.
+
+![System map connecting roles, modules, financial flows and outcomes](/case-studies/stratalite-system-map.png "The product model linked pain points and motivations to platform modules and measurable outcomes")
+
+The core product covered property management, project creation and tracking, vendor discovery and shortlisting, dashboards and KPIs, messaging, calendar and scheduling, quotation management, and milestone tracking.
+
+## Information architecture
+
+Once the system model was stable, I translated it into an information architecture covering the complete platform rather than designing isolated feature flows.
+
+![Stratalite information architecture](/case-studies/stratalite-ia-map.png "The complete information architecture aligned navigation and workflows across roles")
+
+The architecture created a consistent structure while allowing each role to see a different operational slice of the same platform.
+
+## Role-based access was a product decision
+
+Permissions were mapped action by action across five roles. Access was not inherited simply because a role appeared senior. For example, Super Admin has platform-level authority but intentionally has no access to quotations and invoices; financial visibility stays with the people participating in the permission model.
+
+![Role-based access-control matrix for five platform roles](/case-studies/stratalite-rbac.png "Thirteen actions mapped as full, conditional or unavailable access across five roles")
+
+This separation traded administrative convenience for stronger financial privacy, clearer accountability, and fewer opportunities for accidental access.
+
+## From model to a shipped platform
+
+The final Manager dashboard brought the system into one operational view: live, new and completed projects; upcoming events; project status; messages; quotations; and recent updates. The implementation was reviewed and approved against the design.
+
+![Approved Stratalite Manager dashboard implementation](/case-studies/stratalite-dashboard-screen.png "The production dashboard brought project state, communication and next actions into one view")
+
+## Outcome
+
+The result was an end-to-end product system rather than a collection of screens: the ecosystem map defined who mattered, the system map defined how concepts connected, the information architecture defined where work lived, and the access model defined who could act.
+
+This case study carried a Round 1 interview at a product design studio because it demonstrated the reasoning behind the interface as clearly as the interface itself.`
   },
   {
     slug: 'skooltag',
@@ -312,13 +365,19 @@ The product had to work for founders who only open it once a week. Every interac
 
 await connectDB();
 
+const forceSeed = process.env.FORCE_SEED === '1';
+
 for (const p of projects) {
-  await Project.findOneAndUpdate({ slug: p.slug }, p, {
+  const result = await Project.updateOne(
+    { slug: p.slug },
+    forceSeed ? { $set: p } : { $setOnInsert: p },
+    {
     upsert: true,
-    returnDocument: 'after',
     setDefaultsOnInsert: true
-  });
-  console.log(`upserted  ${p.version.padEnd(5)} ${p.title}`);
+    }
+  );
+  const action = result.upsertedCount ? 'inserted' : forceSeed ? 'updated' : 'preserved';
+  console.log(`${action.padEnd(9)} ${p.version.padEnd(5)} ${p.title}`);
 }
 
 // Clear the placeholder record used while verifying the build.
