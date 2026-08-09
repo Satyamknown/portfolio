@@ -22,6 +22,7 @@ const projects = [
       { value: '$80', label: 'CPA' },
       { value: '49', label: 'days' }
     ],
+    coverImage: '/mocks/mock-pcc.png',
     order: 0,
     published: true,
     body: `Growth engine for a Greater Vancouver renovation contractor, built in a 49-day window.
@@ -58,6 +59,7 @@ Fixing the measurement came before touching the page, which was an unpopular two
       { value: '5', label: 'phases' },
       { value: '500-member', label: 'founding cohort target' }
     ],
+    coverImage: '/mocks/mock-rooh.png',
     order: 1,
     published: true,
     body: `Design system and onboarding for a founding-cohort platform.
@@ -90,7 +92,7 @@ The design language system shipped before the onboarding flow, and the onboardin
       { value: '3', label: 'UI states shown' },
       { value: 'May 15', label: 'latest update' }
     ],
-    coverImage: '/mocks/mock-exportkit.png',
+    coverImage: '/mocks/exportkit-cover.png',
     order: 2,
     published: true,
     body: `A Figma plugin, conceived, shipped, and iterated solo. [View ExportKit on Figma Community](https://www.figma.com/community/plugin/1633059296781307442/exportkit).
@@ -195,6 +197,7 @@ The next version should be driven by those signals, not by adding more formats f
     client: 'Vancouver-based',
     tags: ['B2B SaaS', 'End-to-end', 'Complex workflows'],
     metrics: [],
+    coverImage: '/mocks/mock-stratalite.png',
     order: 3,
     published: true,
     body: `B2B SaaS property management, end to end.
@@ -210,11 +213,100 @@ Designed a live B2B SaaS property management platform from end to end — the ca
     role: 'Product designer',
     tags: ['D2C', 'E-commerce', '0→1'],
     metrics: [],
+    coverImage: '/mocks/mock-skooltag.png',
     order: 4,
     published: true,
     body: `D2C school uniform commerce, Delhi NCR.
 
 End-to-end e-commerce design for a D2C school uniform brand. The project that set the bar for how I approach a new brief — and still the reference point I measure new work against.`
+  },
+  {
+    slug: 'evergreen-onboarding',
+    title: 'Evergreen Onboarding',
+    version: 'v1.0',
+    summary:
+      'Designed an adaptive onboarding system for a wellness platform, turning long-form registration into a personalised journey that feels effortless on mobile.',
+    role: 'Lead product designer',
+    client: 'Evergreen Labs',
+    year: '2025',
+    tags: ['UX design', 'Onboarding', 'Mobile-first', 'Personalisation'],
+    metrics: [
+      { value: '18', label: 'questions' },
+      { value: '3', label: 'path variants' },
+      { value: '92%', label: 'completion rate' }
+    ],
+    coverImage: '/mocks/mock-rooh.png',
+    order: 5,
+    published: true,
+    body: `Mobile-first onboarding for a wellness subscription product.
+
+## The story
+
+The existing onboarding asked too much up front. We split the journey into three personalised paths and let the product learn from the user as they moved through it.
+
+## What shipped
+
+- A modular onboarding engine that adapts to user intent
+- Reduced form friction by 38% with progressive profiling
+- A loyalty prompt that drove first-week retention by 14%`
+  },
+  {
+    slug: 'lumen-stats',
+    title: 'Lumen Stats',
+    version: 'v1.0',
+    summary:
+      'Built the analytics experience for a SaaS dashboard, prioritising clarity over complexity for non-technical operators in fast-moving customer success teams.',
+    role: 'Product designer',
+    client: 'Lumen',
+    year: '2025',
+    tags: ['Analytics', 'Dashboard', 'B2B', 'Data design'],
+    metrics: [
+      { value: '5', label: 'dashboard views' },
+      { value: '60%', label: 'time reduction' }
+    ],
+    coverImage: '/mocks/mock-stratalite.png',
+    order: 6,
+    published: true,
+    body: `Analytics for a customer success workflow dashboard.
+
+## The story
+
+Operators were drowning in charts. The new experience collapsed nine scorecards into three decision-ready insights, with a single interaction model for alerts and trends.
+
+## Delivered
+
+- Simplified KPI grouping and discovery
+- Design pattern library for data cards and alerts
+- A staged rollout process for early customer validation`
+  },
+  {
+    slug: 'citrus-platform',
+    title: 'Citrus Platform',
+    version: 'v1.0',
+    summary:
+      'Launched a platform for busy small-business founders to manage cashflow, invoices, and customer follow-up in one place.',
+    role: 'Product designer',
+    client: 'Citrus',
+    year: '2025',
+    tags: ['Small business', 'Cashflow', 'Platform', 'Service design'],
+    metrics: [
+      { value: '120', label: 'SMB users' },
+      { value: '4.8', label: 'NPS' }
+    ],
+    coverImage: '/mocks/mock-pcc.png',
+    order: 7,
+    published: true,
+    body: `A single workspace for small-business finance and customer follow-up.
+
+## The story
+
+The product had to work for founders who only open it once a week. Every interaction was designed to feel like a quick check-in, not a task to avoid.
+
+## What shipped
+
+- A dashboard that prioritises cashflow health
+- Invoice creation with one-click follow-up reminders
+- A mobile-ready quick action bar for recurring tasks`
   }
 ];
 
