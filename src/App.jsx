@@ -12,6 +12,7 @@ import Contact from './pages/Contact.jsx';
 import Login from './pages/Login.jsx';
 import Admin from './pages/Admin.jsx';
 import NotFound from './pages/NotFound.jsx';
+import Tracker from './pages/Tracker.jsx';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(() => {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/tracker" element={<Tracker />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
