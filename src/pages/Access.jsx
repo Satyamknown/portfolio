@@ -27,10 +27,7 @@ export default function Access({ onUnlock }) {
       <section className="access-card" aria-labelledby="access-title">
         <div className="access-kicker">Private portfolio</div>
         <h1 id="access-title">Enter the access password</h1>
-        <p>
-          This portfolio is shared selectively with hiring teams and collaborators. Use the
-          password included with Abhishek&apos;s resume to continue.
-        </p>
+        <p>Use the access password given by Abhishek to continue.</p>
 
         <form className="access-form" onSubmit={submit}>
           <label htmlFor="site-password">Password</label>
