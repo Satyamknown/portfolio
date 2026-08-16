@@ -308,14 +308,22 @@ const dayTotalMin = (x) => 20 + (x.rm || 0) + (x.bm || 0);
 
 // ─── STORAGE ─────────────────────────────────────────────────
 const TRACKER_API = "/api/tracker";
+const LOCAL_FALLBACK_KEY = "pm-tracker-36wk-v1";
 const emptyState = { days: {}, resources: [], notes: {}, time: {} };
 async function loadState() {
-  const response = await fetch(TRACKER_API);
-  if (!response.ok) throw new Error("Could not load tracker progress.");
-  const data = await response.json();
-  return { ...emptyState, ...(data.state || {}) };
+  try {
+    const response = await fetch(TRACKER_API);
+    if (!response.ok) throw new Error("Could not load tracker progress.");
+    const data = await response.json();
+    return { ...emptyState, ...(data.state || {}) };
+  } catch (err) {
+    const local = window.localStorage.getItem(LOCAL_FALLBACK_KEY);
+    if (local) return { ...emptyState, ...JSON.parse(local) };
+    throw err;
+  }
 }
 async function saveState(s) {
+  window.localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(s));
   const response = await fetch(TRACKER_API, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -339,14 +347,34 @@ export default function Tracker() {
   const latestState = useRef(null);
 
   useEffect(() => {
-    loadState().then(setState).catch(() => setState({ ...emptyState }));
+    loadState()
+      .then((loaded) => {
+        latestState.current = loaded;
+        setState(loaded);
+      })
+      .catch(() => {
+        const fallback = { ...emptyState };
+        latestState.current = fallback;
+        setState(fallback);
+      });
   }, []);
 
   useEffect(() => {
-    const flush = () => { if (saveTimer.current && latestState.current) { clearTimeout(saveTimer.current); saveState(latestState.current); } };
+    const flush = () => {
+      if (!saveTimer.current || !latestState.current) return;
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+      saveState(latestState.current).catch(() => {});
+    };
+    const flushWhenHidden = () => {
+      if (document.hidden) flush();
+    };
     window.addEventListener("beforeunload", flush);
-    document.addEventListener("visibilitychange", () => { if (document.hidden) flush(); });
-    return () => window.removeEventListener("beforeunload", flush);
+    document.addEventListener("visibilitychange", flushWhenHidden);
+    return () => {
+      window.removeEventListener("beforeunload", flush);
+      document.removeEventListener("visibilitychange", flushWhenHidden);
+    };
   }, []);
 
   useEffect(() => {
@@ -356,13 +384,29 @@ export default function Tracker() {
     }
   }, [timer?.running]);
 
-  const persist = (next) => {
-    setState(next); latestState.current = next; setSaveStatus("saving");
+  const scheduleSave = (next) => {
+    latestState.current = next;
+    setSaveStatus("saving");
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
-      await saveState(next); setSaveStatus("saved");
-      setTimeout(() => setSaveStatus(s => s === "saved" ? "idle" : s), 1800);
+      try {
+        await saveState(next);
+        saveTimer.current = null;
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus(s => s === "saved" ? "idle" : s), 1800);
+      } catch {
+        setSaveStatus("error");
+      }
     }, 150);
+  };
+
+  const persist = (nextOrUpdater) => {
+    setState((prev) => {
+      const base = prev || { ...emptyState };
+      const next = typeof nextOrUpdater === "function" ? nextOrUpdater(base) : nextOrUpdater;
+      scheduleSave(next);
+      return next;
+    });
   };
 
   if (!state) return <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", color: T.mut, fontFamily: FONT_BODY }}>Loading your journey…</div>;
@@ -376,17 +420,22 @@ export default function Tracker() {
   const hoursLogged = (totalMinLogged / 60).toFixed(1);
 
   const toggleTask = (d, taskId) => {
-    const ds = { ...dayState(d) }; const tasks = { ...(ds.tasks || {}) };
-    tasks[taskId] = !tasks[taskId];
-    persist({ ...state, days: { ...state.days, [d]: { ...ds, tasks } } });
+    persist((prev) => {
+      const ds = { ...(prev.days[d] || {}) };
+      const tasks = { ...(ds.tasks || {}) };
+      tasks[taskId] = !tasks[taskId];
+      return { ...prev, days: { ...prev.days, [d]: { ...ds, tasks } } };
+    });
   };
-  const setDone = (d, val) => persist({ ...state, days: { ...state.days, [d]: { ...dayState(d), done: val } } });
-  const setNote = (d, txt) => persist({ ...state, notes: { ...state.notes, [d]: txt } });
+  const setDone = (d, val) => persist((prev) => ({ ...prev, days: { ...prev.days, [d]: { ...(prev.days[d] || {}), done: val } } }));
+  const setNote = (d, txt) => persist((prev) => ({ ...prev, notes: { ...prev.notes, [d]: txt } }));
   const logTime = (d, taskId, mins) => {
     if (mins < 1) return;
-    const dayTime = { ...(state.time[d] || {}) };
-    dayTime[taskId] = (dayTime[taskId] || 0) + mins;
-    persist({ ...state, time: { ...state.time, [d]: dayTime } });
+    persist((prev) => {
+      const dayTime = { ...(prev.time[d] || {}) };
+      dayTime[taskId] = (dayTime[taskId] || 0) + mins;
+      return { ...prev, time: { ...prev.time, [d]: dayTime } };
+    });
   };
   const startTimer = (day, taskId, label, targetMin) => {
     if (timer && timer.elapsed >= 60) logTime(timer.day, timer.taskId, Math.round(timer.elapsed / 60));
@@ -398,10 +447,10 @@ export default function Tracker() {
   };
   const addResource = () => {
     if (!resForm.title.trim()) return;
-    persist({ ...state, resources: [{ id: Date.now(), ...resForm }, ...state.resources] });
+    persist((prev) => ({ ...prev, resources: [{ id: Date.now(), ...resForm }, ...prev.resources] }));
     setResForm({ title: "", url: "", tag: "General" });
   };
-  const delResource = (id) => persist({ ...state, resources: state.resources.filter(r => r.id !== id) });
+  const delResource = (id) => persist((prev) => ({ ...prev, resources: prev.resources.filter(r => r.id !== id) }));
 
   const dayObj = ALL_DAYS.find(x => x.d === currentDay);
   const weekObj = WEEKS.find(w => w.w === dayObj.w);
@@ -472,26 +521,94 @@ export default function Tracker() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, color: T.txt, fontFamily: FONT_BODY, paddingBottom: timer ? 150 : 90 }}>
+    <div className="tracker-app" style={{ minHeight: "100vh", background: T.bg, color: T.txt, fontFamily: FONT_BODY, paddingBottom: timer ? 150 : 90 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         input, textarea, select { font-family: ${FONT_BODY}; }
         ::placeholder { color: ${T.dim}; }
+        .tracker-app {
+          position: relative;
+          isolation: isolate;
+          overflow-x: hidden;
+        }
+        .tracker-app::before {
+          content: "";
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          pointer-events: none;
+          background:
+            linear-gradient(90deg, rgba(255,107,44,.06), transparent 32%),
+            radial-gradient(620px 420px at 86% -80px, rgba(232,177,78,.14), transparent 72%),
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+          background-size: auto, auto, 44px 44px, 44px 44px;
+        }
+        .tracker-topbar {
+          box-shadow: 0 18px 50px rgba(0,0,0,.2);
+        }
+        .tracker-frame {
+          width: min(1680px, calc(100vw - 48px));
+          margin: 0 auto;
+        }
+        .tracker-content {
+          padding: 24px 0 108px;
+        }
+        .tracker-tabs button {
+          min-height: 46px;
+        }
+        @media (min-width: 980px) {
+          .tracker-content {
+            padding-left: 156px;
+            padding-right: 12px;
+          }
+          .tracker-tabs {
+            top: 116px !important;
+            bottom: auto !important;
+            left: 24px !important;
+            right: auto !important;
+            width: 116px !important;
+            background: rgba(20,17,15,.78) !important;
+            border: 1px solid ${T.line} !important;
+            border-radius: 16px !important;
+            box-shadow: 0 18px 44px rgba(0,0,0,.28);
+            overflow: hidden;
+          }
+          .tracker-tabs > div {
+            max-width: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .tracker-tabs button {
+            padding: 15px 8px !important;
+            border-top: none !important;
+            border-left-width: 2px !important;
+            border-left-style: solid !important;
+          }
+        }
+        @media (max-width: 760px) {
+          .tracker-frame {
+            width: calc(100vw - 28px);
+          }
+          .tracker-content {
+            padding-top: 18px;
+          }
+        }
         @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
       `}</style>
 
-      <div style={{ padding: "18px 16px 12px", borderBottom: `1px solid ${T.line}`, background: T.bg, position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+      <div className="tracker-topbar" style={{ padding: "18px 0 12px", borderBottom: `1px solid ${T.line}`, background: `${T.bg}F4`, backdropFilter: "blur(18px)", position: "sticky", top: 0, zIndex: 10 }}>
+        <div className="tracker-frame">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, gap: 8, flexWrap: "wrap" }}>
             <div style={{ fontFamily: FONT_HEAD, fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em" }}>PM<span style={{ color: T.ember }}>·</span>36<span style={{ color: T.dim, fontWeight: 400, fontSize: 12 }}> wk</span></div>
             <div style={{ fontSize: 11.5, color: T.mut, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span>Day <span style={{ color: T.ember, fontWeight: 600 }}>{currentDay}</span>/{TOTAL_DAYS} · Wk {dayObj.w}/36 · {pct}% · <span style={{ color: T.gold }}>{hoursLogged}h</span></span>
               <span style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 10, whiteSpace: "nowrap",
-                background: saveStatus === "saving" ? `${T.gold}22` : saveStatus === "saved" ? `${T.green}22` : "transparent",
-                color: saveStatus === "saving" ? T.gold : saveStatus === "saved" ? T.green : T.dim,
-                border: saveStatus === "idle" ? "none" : `1px solid ${saveStatus === "saving" ? T.gold : T.green}44` }}>
-                {saveStatus === "saving" ? "● saving…" : saveStatus === "saved" ? "✓ saved" : ""}
+                background: saveStatus === "saving" ? `${T.gold}22` : saveStatus === "saved" ? `${T.green}22` : saveStatus === "error" ? `${T.red}22` : "transparent",
+                color: saveStatus === "saving" ? T.gold : saveStatus === "saved" ? T.green : saveStatus === "error" ? T.red : T.dim,
+                border: saveStatus === "idle" ? "none" : `1px solid ${saveStatus === "saving" ? T.gold : saveStatus === "saved" ? T.green : T.red}44` }}>
+                {saveStatus === "saving" ? "● saving…" : saveStatus === "saved" ? "✓ saved" : saveStatus === "error" ? "save failed — local copy kept" : ""}
               </span>
             </div>
           </div>
@@ -513,7 +630,7 @@ export default function Tracker() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "18px 16px" }}>
+      <div className="tracker-frame tracker-content">
 
         {tab === "today" && (
           <div>
@@ -724,7 +841,7 @@ export default function Tracker() {
 
       {timer && (
         <div style={{ position: "fixed", bottom: 54, left: 0, right: 0, zIndex: 25 }}>
-          <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px" }}>
+          <div className="tracker-frame">
             <div style={{ background: T.panel2, border: `1px solid ${timer.elapsed >= timer.target ? T.green : T.ember}66`, borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 30px rgba(0,0,0,.5)" }}>
               <div style={{ fontFamily: FONT_HEAD, fontWeight: 700, fontSize: 22, color: timer.elapsed >= timer.target ? T.green : T.ember, minWidth: 64 }}>{fmt(timer.elapsed)}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -740,10 +857,10 @@ export default function Tracker() {
         </div>
       )}
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: `${T.bg}F2`, backdropFilter: "blur(10px)", borderTop: `1px solid ${T.line}`, zIndex: 20 }}>
+      <div className="tracker-tabs" style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: `${T.bg}F2`, backdropFilter: "blur(10px)", borderTop: `1px solid ${T.line}`, zIndex: 20 }}>
         <div style={{ maxWidth: 680, margin: "0 auto", display: "flex" }}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: "12px 0 14px", background: "none", border: "none", cursor: "pointer", fontFamily: FONT_HEAD, fontSize: 12, fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? T.ember : T.mut, borderTop: `2px solid ${tab === t.id ? T.ember : "transparent"}` }}>{t.label}</button>
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: "12px 0 14px", background: "none", border: "none", cursor: "pointer", fontFamily: FONT_HEAD, fontSize: 12, fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? T.ember : T.mut, borderTop: `2px solid ${tab === t.id ? T.ember : "transparent"}`, borderLeftColor: tab === t.id ? T.ember : "transparent" }}>{t.label}</button>
           ))}
         </div>
       </div>

@@ -8,6 +8,7 @@ function authHeaders() {
 async function request(path, options = {}) {
   const res = await fetch(`/api${path}`, {
     method: options.method || 'GET',
+    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders()
@@ -35,6 +36,10 @@ export const auth = {
 };
 
 export const api = {
+  checkAccess: () => request('/access'),
+  unlockAccess: (password) => request('/access', { method: 'POST', body: { password } }),
+  lockAccess: () => request('/access', { method: 'DELETE' }),
+
   login: async (email, password) => {
     const data = await request('/auth/login', { method: 'POST', body: { email, password } });
     auth.setToken(data.token);

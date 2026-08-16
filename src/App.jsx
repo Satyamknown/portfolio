@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Splash from './components/Splash.jsx';
 import Home from './pages/Home.jsx';
@@ -13,8 +13,13 @@ import Login from './pages/Login.jsx';
 import Admin from './pages/Admin.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Tracker from './pages/Tracker.jsx';
+import Access from './pages/Access.jsx';
+import { api } from './lib/api.js';
 
 export default function App() {
+  const { pathname } = useLocation();
+  const isStandaloneTool = pathname.startsWith('/tracker');
+  const [access, setAccess] = useState({ checking: true, ok: false });
   const [showSplash, setShowSplash] = useState(() => {
     // Show splash once per session on initial load
     return !sessionStorage.getItem('hasSeenSplash');
@@ -24,6 +29,40 @@ export default function App() {
     sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
   };
+
+  useEffect(() => {
+    let alive = true;
+    api
+      .checkAccess()
+      .then((result) => {
+        if (alive) setAccess({ checking: false, ok: !result.required || result.ok });
+      })
+      .catch(() => {
+        if (alive) setAccess({ checking: false, ok: false });
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const handleAccessUnlock = () => setAccess({ checking: false, ok: true });
+
+  if (access.checking) {
+    return <div className="access-loading">Checking access...</div>;
+  }
+
+  if (!access.ok) {
+    return <Access onUnlock={handleAccessUnlock} />;
+  }
+
+  if (isStandaloneTool) {
+    return (
+      <Routes>
+        <Route path="/tracker" element={<Tracker />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    );
+  }
 
   return (
     <>
@@ -39,7 +78,6 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/tracker" element={<Tracker />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
