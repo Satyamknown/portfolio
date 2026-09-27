@@ -7,11 +7,12 @@
     "dev": "concurrently -n API,WEB -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node server/dev.js",
     "dev:web": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/publish-case-studies.js",
     "preview": "vite preview",
     "lint": "oxlint",
     "hash": "node scripts/hash.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "publish:case-studies": "node scripts/publish-case-studies.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

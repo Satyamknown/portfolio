@@ -851,6 +851,9 @@ a.section-note:hover{color:var(--ink)}
 .prose figure{margin:32px 0}
 .prose figure img{width:100%;display:block;border:1px solid var(--line)}
 .prose figcaption{margin-top:10px;font-size:13px;color:var(--ink-faint);text-align:center;font-family:var(--mono)}
+.prose table{width:100%;border-collapse:collapse;margin:8px 0 28px;font-size:15px;display:block;overflow-x:auto}
+.prose th,.prose td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.5;color:var(--body-strong);font-weight:300}
+.prose th{font-weight:600;color:var(--ink);background:var(--surface-2)}
 
 /* Forms (admin) */
 .field{margin-bottom:20px}

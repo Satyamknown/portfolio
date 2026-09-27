@@ -2,48 +2,14 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import { connectDB } from '../server/db.js';
 import Project from '../server/models/Project.js';
+import pcc from './case-studies/pacific-coast-contracting.js';
+import stratalite from './case-studies/stratalite.js';
+import skooltag from './case-studies/skooltag.js';
 
 // Fields left out on purpose are the ones only Abhishek can fill — install
 // counts, years, and metrics for the two older projects. Blank beats invented.
 const projects = [
-  {
-    slug: 'pacific-coast-contracting',
-    title: 'Pacific Coast Contracting',
-    version: 'v1.4',
-    summary:
-      'Owned the full paid funnel for a kitchen renovation campaign — landing page, conversion tracking, and ad account structure — then extended the same tracking discipline across all four PCC divisions.',
-    role: 'Design & growth lead',
-    client: 'Pacific Coast Contracting',
-    year: '2026',
-    tags: ['Google Ads', 'GTM', 'GA4', 'Landing pages', 'Local SEO'],
-    metrics: [
-      { value: '52', label: 'calls' },
-      { value: '18', label: 'strong leads' },
-      { value: '$80', label: 'CPA' },
-      { value: '49', label: 'days' }
-    ],
-    coverImage: '/mocks/mock-pcc.png',
-    order: 0,
-    published: true,
-    body: `Growth engine for a Greater Vancouver renovation contractor, built in a 49-day window.
-
-## The story
-
-The brief was a landing page. The first thing I did was not design it.
-
-A tracking audit across GTM, GA4, Google Ads, and HubSpot showed conversions firing on page load rather than on form submit — so the client's entire sense of which campaigns worked was noise. Every optimization decision from the prior quarter had been made on numbers that weren't measuring anything.
-
-Fixing the measurement came before touching the page, which was an unpopular two weeks.
-
-> The 52 calls at $80 CPA are the number *after* the numbers became real.
-
-## What shipped
-
-- A rebuilt conversion tracking layer across three GTM containers
-- The kitchen renovation landing page, designed and built
-- Restructured ad account matched to the corrected event model
-- The same tracking discipline extended across all four PCC divisions`
-  },
+  pcc,
   {
     slug: 'roohconnect',
     title: 'RoohConnect',
@@ -187,92 +153,8 @@ The v2 roadmap was prioritised by user value and repeat usage, not by what was m
 
 The next version should be driven by those signals, not by adding more formats for their own sake.`
   },
-  {
-    slug: 'stratalite',
-    title: 'Stratalite',
-    version: 'v1.1',
-    summary:
-      'Designed a live B2B SaaS property management platform end to end — the case study that carried a Round 1 interview at a product design studio.',
-    role: 'Product designer',
-    client: 'Vancouver-based',
-    tags: ['B2B SaaS', 'End-to-end', 'Complex workflows'],
-    metrics: [
-      { value: '20', label: 'ecosystem entities' },
-      { value: '5', label: 'platform roles' },
-      { value: '4', label: 'stakeholder rings' },
-      { value: '13', label: 'permission actions mapped' }
-    ],
-    coverImage: '/case-studies/stratalite-cover.png',
-    order: 3,
-    published: true,
-    body: `A live B2B property-management platform designed from the ecosystem model through to production implementation.
-
-## The challenge
-
-Stratalite coordinates property owners, project managers, vendors, finance teams, residents, and external services across one operational workflow. The design challenge was not a single screen. It was making responsibilities, permissions, handoffs, payments, quotations, invoices, and disputes understandable across a complex system.
-
-I started by modelling the system before designing the interface. That decision reduced the risk of producing polished screens that contradicted how the business actually operated.
-
-## Mapping the ecosystem before a single screen
-
-The stakeholder model captures 20 entities across four rings, including five people who interact directly with the platform: Super Admin, PMC Admin, Manager, Independent Manager, and Vendor.
-
-![Stakeholder map covering the Stratalite ecosystem](/case-studies/stratalite-stakeholder-map.png "20 entities mapped across four stakeholder rings before interface design began")
-
-This made dependencies visible early: legal and regulatory constraints, payment and notification services, property teams, finance, residents, vendors, and the external groups affected by platform decisions.
-
-## Turning relationships into a product model
-
-The system map connected user roles, core modules, financial flows, audit requirements, pain points, motivations, and desired outcomes. It became the shared reference for deciding what belonged in the product and how concepts related to each other.
-
-![System map connecting roles, modules, financial flows and outcomes](/case-studies/stratalite-system-map.png "The product model linked pain points and motivations to platform modules and measurable outcomes")
-
-The core product covered property management, project creation and tracking, vendor discovery and shortlisting, dashboards and KPIs, messaging, calendar and scheduling, quotation management, and milestone tracking.
-
-## Information architecture
-
-Once the system model was stable, I translated it into an information architecture covering the complete platform rather than designing isolated feature flows.
-
-![Stratalite information architecture](/case-studies/stratalite-ia-map.png "The complete information architecture aligned navigation and workflows across roles")
-
-The architecture created a consistent structure while allowing each role to see a different operational slice of the same platform.
-
-## Role-based access was a product decision
-
-Permissions were mapped action by action across five roles. Access was not inherited simply because a role appeared senior. For example, Super Admin has platform-level authority but intentionally has no access to quotations and invoices; financial visibility stays with the people participating in the permission model.
-
-![Role-based access-control matrix for five platform roles](/case-studies/stratalite-rbac.png "Thirteen actions mapped as full, conditional or unavailable access across five roles")
-
-This separation traded administrative convenience for stronger financial privacy, clearer accountability, and fewer opportunities for accidental access.
-
-## From model to a shipped platform
-
-The final Manager dashboard brought the system into one operational view: live, new and completed projects; upcoming events; project status; messages; quotations; and recent updates. The implementation was reviewed and approved against the design.
-
-![Approved Stratalite Manager dashboard implementation](/case-studies/stratalite-dashboard-screen.png "The production dashboard brought project state, communication and next actions into one view")
-
-## Outcome
-
-The result was an end-to-end product system rather than a collection of screens: the ecosystem map defined who mattered, the system map defined how concepts connected, the information architecture defined where work lived, and the access model defined who could act.
-
-This case study carried a Round 1 interview at a product design studio because it demonstrated the reasoning behind the interface as clearly as the interface itself.`
-  },
-  {
-    slug: 'skooltag',
-    title: 'Skooltag',
-    version: 'v1.0',
-    summary:
-      'End-to-end e-commerce design for a D2C school uniform brand. The project that set the bar for how I approach a new brief — and still the reference point I measure new work against.',
-    role: 'Product designer',
-    tags: ['D2C', 'E-commerce', '0→1'],
-    metrics: [],
-    coverImage: '/mocks/mock-skooltag.png',
-    order: 4,
-    published: true,
-    body: `D2C school uniform commerce, Delhi NCR.
-
-End-to-end e-commerce design for a D2C school uniform brand. The project that set the bar for how I approach a new brief — and still the reference point I measure new work against.`
-  },
+  stratalite,
+  skooltag,
   {
     slug: 'evergreen-onboarding',
     title: 'Evergreen Onboarding',
