@@ -27,7 +27,7 @@ const projects = [
     ],
     coverImage: '/mocks/mock-rooh.png',
     order: 1,
-    published: true,
+    published: false,
     body: `Design system and onboarding for a founding-cohort platform.
 
 ## The story
@@ -60,7 +60,7 @@ The design language system shipped before the onboarding flow, and the onboardin
     ],
     coverImage: '/mocks/exportkit-cover.png',
     order: 2,
-    published: true,
+    published: false,
     body: `A Figma plugin, conceived, shipped, and iterated solo. [View ExportKit on Figma Community](https://www.figma.com/community/plugin/1633059296781307442/exportkit).
 
 ## Executive summary

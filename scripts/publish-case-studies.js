@@ -14,9 +14,21 @@ import skooltag from './case-studies/skooltag.js';
 
 const caseStudies = [pcc, stratalite, skooltag];
 
-// Placeholder projects with invented clients and metrics. Hidden, not deleted,
-// so they can be restored from /admin if ever needed.
-const hideSlugs = ['evergreen-onboarding', 'lumen-stats', 'citrus-platform'];
+// One-time hide batches. Each batch runs once (recorded in `publish_log`), so a
+// project re-published later from /admin is not hidden again on the next deploy.
+// Hidden = published:false after a backup, never deleted.
+const hideBatches = [
+  {
+    key: '2026-09-28-placeholders',
+    // Placeholder projects with invented clients and metrics.
+    slugs: ['evergreen-onboarding', 'lumen-stats', 'citrus-platform']
+  },
+  {
+    key: '2026-09-28-three-case-studies-only',
+    // Keep the site to the three PM case studies while job hunting.
+    slugs: ['roohconnect', 'exportkit', 'manbal', 'stratalite-dashboards']
+  }
+];
 
 if (!process.env.MONGODB_URI) {
   console.log('[publish-case-studies] MONGODB_URI not set, skipping.');
@@ -49,13 +61,18 @@ try {
     );
   }
 
-  for (const slug of hideSlugs) {
-    const doc = await Project.findOne({ slug }).lean();
-    if (!doc || doc.published === false) continue;
-    const { _id, ...rest } = doc;
-    await backups.insertOne({ ...rest, originalId: _id, backedUpAt: new Date() });
-    await Project.updateOne({ slug }, { $set: { published: false } });
-    console.log(`[publish-case-studies] hidden  ${slug}`);
+  const log = mongoose.connection.collection('publish_log');
+  for (const batch of hideBatches) {
+    if (await log.findOne({ key: batch.key })) continue;
+    for (const slug of batch.slugs) {
+      const doc = await Project.findOne({ slug }).lean();
+      if (!doc || doc.published === false) continue;
+      const { _id, ...rest } = doc;
+      await backups.insertOne({ ...rest, originalId: _id, backedUpAt: new Date() });
+      await Project.updateOne({ slug }, { $set: { published: false } });
+      console.log(`[publish-case-studies] hidden  ${slug}`);
+    }
+    await log.insertOne({ key: batch.key, slugs: batch.slugs, ranAt: new Date() });
   }
 } catch (err) {
   console.error('[publish-case-studies] skipped, database error:', err.message);
