@@ -14,6 +14,10 @@ import skooltag from './case-studies/skooltag.js';
 
 const caseStudies = [pcc, stratalite, skooltag];
 
+// Placeholder projects with invented clients and metrics. Hidden, not deleted,
+// so they can be restored from /admin if ever needed.
+const hideSlugs = ['evergreen-onboarding', 'lumen-stats', 'citrus-platform'];
+
 if (!process.env.MONGODB_URI) {
   console.log('[publish-case-studies] MONGODB_URI not set, skipping.');
   process.exit(0);
@@ -43,6 +47,15 @@ try {
     console.log(
       `[publish-case-studies] ${existing ? 'updated' : 'inserted'} ${cs.slug} ${existing?.version || '-'} -> ${cs.version}`
     );
+  }
+
+  for (const slug of hideSlugs) {
+    const doc = await Project.findOne({ slug }).lean();
+    if (!doc || doc.published === false) continue;
+    const { _id, ...rest } = doc;
+    await backups.insertOne({ ...rest, originalId: _id, backedUpAt: new Date() });
+    await Project.updateOne({ slug }, { $set: { published: false } });
+    console.log(`[publish-case-studies] hidden  ${slug}`);
   }
 } catch (err) {
   console.error('[publish-case-studies] skipped, database error:', err.message);

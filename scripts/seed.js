@@ -172,7 +172,7 @@ The next version should be driven by those signals, not by adding more formats f
     ],
     coverImage: '/mocks/mock-rooh.png',
     order: 5,
-    published: true,
+    published: false,
     body: `Mobile-first onboarding for a wellness subscription product.
 
 ## The story
@@ -201,7 +201,7 @@ The existing onboarding asked too much up front. We split the journey into three
     ],
     coverImage: '/mocks/mock-stratalite.png',
     order: 6,
-    published: true,
+    published: false,
     body: `Analytics for a customer success workflow dashboard.
 
 ## The story
@@ -230,7 +230,7 @@ Operators were drowning in charts. The new experience collapsed nine scorecards 
     ],
     coverImage: '/mocks/mock-pcc.png',
     order: 7,
-    published: true,
+    published: false,
     body: `A single workspace for small-business finance and customer follow-up.
 
 ## The story
