@@ -44,7 +44,9 @@ Shared work: the dev team built and deployed the sites and wired the forms. A co
 
 ## Setting up the delivery system
 
-I merged the eight sheets into one master tracker (the chart at the top of this page). It holds **258 items**, dated September 2025 to August 2026. Every item sits in exactly one of three queues:
+I merged the eight sheets into one master tracker. It holds **258 items**, dated September 2025 to August 2026. Every item sits in exactly one of three queues:
+
+![Master tracker split by owner](/case-studies/pacific-coast-contracting/tracker.webp "258 items, one tracker, three owners: with me for review, with developers, completed")
 
 | Queue | Items | Rule |
 |---|---|---|
