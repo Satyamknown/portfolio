@@ -1,16 +1,16 @@
 // Skooltag case study (PM framing). Facts sourced from the Figma file
 // 3tbYHEmj1wddRierSmyBfl and /Users/abhishek/Downloads/apm-resume/projects/skooltag.md.
-// Year left blank on purpose: the file's dates point to roughly 2023–24 but are unconfirmed.
+// Done at Student Junction, 2021–22 (confirmed by Abhishek on 2026-09-28), not as a Rsquare client.
 
 export default {
   slug: 'skooltag',
   title: 'Skooltag',
-  version: 'v2.1',
+  version: 'v2.2',
   summary:
     'A school-uniform retailer that had sold offline in Delhi NCR since 1989 was moving online, and the team had no product manager. Alongside design, I wrote the backend requirements, split the build into phases, mapped the back office for three operational roles and organised the developer handoff.',
-  role: 'Product design lead · requirements & delivery',
+  role: 'Design lead · requirements & delivery',
   client: 'Skooltag · Delhi NCR',
-  year: '',
+  year: '2021-22',
   tags: ['Requirements (SRS)', 'Phasing & roadmap', 'Stakeholder management', 'Developer handoff', 'E-commerce'],
   metrics: [
     { value: '15-page', label: 'SRS' },
@@ -24,7 +24,7 @@ export default {
   body: `## At a glance
 
 - **The work:** take a 35-year-old offline uniform business online: a parent ordering app, a school-partnership website, and a back office for admins, stores, delivery agents and schools.
-- **Team:** two designers (me and one other) and three developers, at Rsquare Web Studio. There was no product manager.
+- **Team:** two designers (me and one other) and three developers, at Student Junction. There was no product manager.
 - **My part:** product design lead, plus the requirements, phasing, client questions and handoff.
 - **What exists:** a 15-page SRS, a three-phase plan with estimates, 3 journey maps, 272 steps of back-office flows, 85 app screens in 14 flows, and a 62-screen prototype.
 - **What I can't show:** launch numbers. I don't have them.
