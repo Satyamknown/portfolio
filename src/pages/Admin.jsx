@@ -15,6 +15,16 @@ const EMPTY_POST = {
 
 const shareUrl = (link) => `${window.location.origin}/go/${link.token}`;
 
+// The four links a resume carries. Each one is the company's share link, so every click is
+// counted under that company; ?to= lands it on one case study.
+const RESUME_LINKS = [
+  { label: 'Portfolio', to: '' },
+  { label: 'PCC case study', to: '/work/pacific-coast-contracting' },
+  { label: 'Stratalite case study', to: '/work/stratalite' },
+  { label: 'Skooltag case study', to: '/work/skooltag' }
+];
+const resumeUrl = (link, to) => (to ? `${shareUrl(link)}?to=${to}` : shareUrl(link));
+
 export default function Admin() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('projects');
@@ -29,6 +39,7 @@ export default function Admin() {
   const [linkLabel, setLinkLabel] = useState('');
   const [creatingLink, setCreatingLink] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [openLinkId, setOpenLinkId] = useState(null);
 
   useEffect(() => {
     if (!auth.isSignedIn()) {
@@ -160,6 +171,7 @@ export default function Admin() {
     try {
       const link = await api.createAccessLink(label);
       setLinks((prev) => [link, ...prev]);
+      setOpenLinkId(link._id);
       setLinkLabel('');
       setNotice({ type: 'ok', text: `Created a link for "${link.label}".` });
     } catch (e) {
@@ -169,15 +181,17 @@ export default function Admin() {
     }
   }
 
-  async function copyLink(link) {
+  async function copyLink(link, text = shareUrl(link), key = link._id) {
     try {
-      await navigator.clipboard.writeText(shareUrl(link));
-      setCopiedId(link._id);
-      setTimeout(() => setCopiedId((current) => (current === link._id ? null : current)), 2000);
+      await navigator.clipboard.writeText(text);
+      setCopiedId(key);
+      setTimeout(() => setCopiedId((current) => (current === key ? null : current)), 2000);
     } catch {
       setNotice({ type: 'error', text: 'Could not copy. Select the link and copy it by hand.' });
     }
   }
+
+  const allResumeLinks = (link) => RESUME_LINKS.map((r) => `${r.label}: ${resumeUrl(link, r.to)}`).join('\n');
 
   async function toggleLink(link) {
     try {
@@ -475,11 +489,43 @@ export default function Admin() {
                   <button className="btn btn-ghost btn-sm" onClick={() => copyLink(link)}>
                     {copiedId === link._id ? 'Copied' : 'Copy'}
                   </button>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    aria-expanded={openLinkId === link._id}
+                    onClick={() => setOpenLinkId((id) => (id === link._id ? null : link._id))}
+                  >
+                    Resume links
+                  </button>
                   <button className="btn btn-ghost btn-sm" onClick={() => toggleLink(link)}>
                     {link.active ? 'Pause' : 'Resume'}
                   </button>
                   <button className="btn btn-danger btn-sm" onClick={() => removeLink(link)}>Delete</button>
                 </div>
+                {openLinkId === link._id && (
+                  <div className="resume-links">
+                    <p className="resume-links-hint">
+                      Paste these into the resume you send {link.label}. Every click on them is counted under {link.label}.
+                    </p>
+                    {RESUME_LINKS.map((r) => {
+                      const key = `${link._id}:${r.label}`;
+                      return (
+                        <div key={r.label} className="resume-link">
+                          <span className="resume-link-label">{r.label}</span>
+                          <span className="resume-link-url">{resumeUrl(link, r.to)}</span>
+                          <button className="btn btn-ghost btn-sm" onClick={() => copyLink(link, resumeUrl(link, r.to), key)}>
+                            {copiedId === key ? 'Copied' : 'Copy'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => copyLink(link, allResumeLinks(link), `${link._id}:all`)}
+                    >
+                      {copiedId === `${link._id}:all` ? 'Copied all 4' : 'Copy all 4'}
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}

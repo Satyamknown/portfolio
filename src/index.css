@@ -945,6 +945,13 @@ a.section-note:hover{color:var(--ink)}
 .share-row-main{flex:1;min-width:0}
 .share-url{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-top:4px;overflow-wrap:anywhere;user-select:all}
 .share-row-actions{flex-wrap:wrap}
+.resume-links{flex-basis:100%;margin-top:14px;padding:14px 16px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.resume-links-hint{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 4px}
+.resume-link{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center}
+.resume-link-label{font-size:13px;font-weight:600}
+.resume-link-url{font-family:var(--mono);font-size:12px;color:var(--ink-soft);overflow-wrap:anywhere;user-select:all}
+.resume-links > .btn{align-self:flex-start;margin-top:4px}
+@media(max-width:640px){.resume-link{grid-template-columns:1fr auto}.resume-link-label{grid-column:1/-1}}
 
 /* Resume tracking: one row per share link, human opens vs bot hits */
 .track{margin-bottom:40px}
