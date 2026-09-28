@@ -8,6 +8,7 @@ const router = Router();
 const MAX_LABEL_LENGTH = 80;
 const TOKEN_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 const TOKEN_PATTERN = /^[a-z0-9-]{1,64}$/;
+const WORK_PATH = /^\/work\/[a-z0-9-]{1,80}$/;
 
 function labelSlug(label) {
   const slug = label
@@ -42,11 +43,14 @@ export async function openAccessLink(req, res, next) {
         )
       : null;
 
+    // ?to= lets a link land on one case study. Only same-site /work/<slug> paths, so it cannot redirect off-site.
+    const to = typeof req.query.to === 'string' && WORK_PATH.test(req.query.to) ? req.query.to : '/';
+
     // Unknown, paused and malformed tokens all get the same redirect, so the response never says which it was.
-    if (!link) return res.redirect(302, '/?link=expired');
+    if (!link) return res.redirect(302, `${to}?link=expired`);
 
     res.setHeader('Set-Cookie', createAccessCookie());
-    res.redirect(302, '/');
+    res.redirect(302, to);
   } catch (err) {
     next(err);
   }

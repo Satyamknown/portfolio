@@ -8,11 +8,16 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import Project from '../server/models/Project.js';
+import AccessLink from '../server/models/AccessLink.js';
 import pcc from './case-studies/pacific-coast-contracting.js';
 import stratalite from './case-studies/stratalite.js';
 import skooltag from './case-studies/skooltag.js';
 
 const caseStudies = [pcc, stratalite, skooltag];
+
+// The share link printed on the resumes: /go/<token>?to=/work/<slug> opens a case study
+// without the password. Created once; pause it from /admin like any other link.
+const RESUME_LINK_TOKEN = 'resume-wuh1qhvkap';
 
 // One-time hide batches. Each batch runs once (recorded in `publish_log`), so a
 // project re-published later from /admin is not hidden again on the next deploy.
@@ -60,6 +65,13 @@ try {
       `[publish-case-studies] ${existing ? 'updated' : 'inserted'} ${cs.slug} ${existing?.version || '-'} -> ${cs.version}`
     );
   }
+
+  const resumeLink = await AccessLink.updateOne(
+    { token: RESUME_LINK_TOKEN },
+    { $setOnInsert: { label: 'Resume links' } },
+    { upsert: true }
+  );
+  if (resumeLink.upsertedCount) console.log('[publish-case-studies] created the resume share link');
 
   const log = mongoose.connection.collection('publish_log');
   for (const batch of hideBatches) {
