@@ -114,5 +114,45 @@
   {
     "label": "Superleap",
     "token": "r-superleap-41a1"
+  },
+  {
+    "label": "Kinnect",
+    "token": "r-kinnect-hbfi"
+  },
+  {
+    "label": "Accorian",
+    "token": "r-accorian-qjup"
+  },
+  {
+    "label": "Peak XV portfolio (AI cybersec)",
+    "token": "r-peakxv-zppa"
+  },
+  {
+    "label": "Joveo",
+    "token": "r-joveo-p13n"
+  },
+  {
+    "label": "Witness The Fitness",
+    "token": "r-wtf-yrpy"
+  },
+  {
+    "label": "Indegene",
+    "token": "r-indegene-ltxf"
+  },
+  {
+    "label": "Redacto",
+    "token": "r-redacto-kcbt"
+  },
+  {
+    "label": "greytHR",
+    "token": "r-greythr-lwrx"
+  },
+  {
+    "label": "mCaffeine",
+    "token": "r-mcaffeine-c0en"
+  },
+  {
+    "label": "Coverfox",
+    "token": "r-coverfox-o6o4"
   }
 ]
