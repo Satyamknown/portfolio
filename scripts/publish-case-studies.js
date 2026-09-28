@@ -12,8 +12,9 @@ import AccessLink from '../server/models/AccessLink.js';
 import pcc from './case-studies/pacific-coast-contracting.js';
 import stratalite from './case-studies/stratalite.js';
 import skooltag from './case-studies/skooltag.js';
+import stratalitePlatformTesting from './case-studies/stratalite-platform-testing.js';
 
-const caseStudies = [pcc, stratalite, skooltag];
+const caseStudies = [pcc, stratalite, skooltag, stratalitePlatformTesting];
 
 // The share link printed on the resumes: /go/<token>?to=/work/<slug> opens a case study
 // without the password. Created once; pause it from /admin like any other link.
