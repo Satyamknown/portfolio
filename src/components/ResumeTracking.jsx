@@ -56,7 +56,8 @@ export default function ResumeTracking({ links, stats }) {
   const rows = useMemo(() => {
     return links
       .map((link) => {
-        const s = stats[link._id] || { pages: {}, bots: 0, lastBotAt: null };
+        // Opens come from the event log (people only, scanner bursts removed), not the raw counter.
+        const s = stats[link._id] || { pages: {}, opens: 0, lastOpenedAt: null, bots: 0, scans: 0, lastBotAt: null };
         const other = Object.entries(s.pages)
           .filter(([to]) => !KNOWN.has(to))
           .reduce((sum, [, n]) => sum + n, 0);
@@ -64,17 +65,18 @@ export default function ResumeTracking({ links, stats }) {
           link,
           pages: s.pages,
           other,
-          bots: s.bots,
+          opens: s.opens || 0,
+          bots: (s.bots || 0) + (s.scans || 0),
           lastBotAt: s.lastBotAt ? new Date(s.lastBotAt) : null,
-          last: link.lastOpenedAt ? new Date(link.lastOpenedAt) : null
+          last: s.lastOpenedAt ? new Date(s.lastOpenedAt) : null
         };
       })
       .sort((a, b) => (b.last?.getTime() || 0) - (a.last?.getTime() || 0) || a.link.label.localeCompare(b.link.label));
   }, [links, stats]);
 
-  const opened = rows.filter((r) => r.link.opens > 0).length;
+  const opened = rows.filter((r) => r.opens > 0).length;
   const shown = rows.filter((r) =>
-    filter === 'opened' ? r.link.opens > 0 : filter === 'unopened' ? !(r.link.opens > 0) : true
+    filter === 'opened' ? r.opens > 0 : filter === 'unopened' ? !(r.opens > 0) : true
   );
   const showOther = rows.some((r) => r.other > 0);
 
@@ -123,7 +125,7 @@ export default function ResumeTracking({ links, stats }) {
                 <th key={p.to} scope="col" className="num">{p.label}</th>
               ))}
               {showOther && <th scope="col" className="num">Other</th>}
-              <th scope="col" className="num is-bot" title="Link previews, crawlers and mail scanners. Not counted as opens.">
+              <th scope="col" className="num is-bot" title="Link previews, crawlers, mail scanners and systems that fetch every link in a resume at once. Not counted as opens.">
                 Bots
               </th>
             </tr>
@@ -136,8 +138,8 @@ export default function ResumeTracking({ links, stats }) {
                 </td>
               </tr>
             ) : (
-              shown.map(({ link, pages, other, bots, lastBotAt, last }) => (
-                <tr key={link._id} className={link.opens > 0 ? 'is-opened' : ''}>
+              shown.map(({ link, opens, pages, other, bots, lastBotAt, last }) => (
+                <tr key={link._id} className={opens > 0 ? 'is-opened' : ''}>
                   <th scope="row" className="track-company">
                     <span className="track-label">{link.label}</span>
                     <span className="track-token">
@@ -146,7 +148,7 @@ export default function ResumeTracking({ links, stats }) {
                     </span>
                   </th>
                   <td className="num">
-                    <span className={`track-opens ${link.opens ? '' : 'is-zero'}`}>{link.opens || 0}</span>
+                    <span className={`track-opens ${opens ? '' : 'is-zero'}`}>{opens}</span>
                   </td>
                   <td>
                     {last ? (

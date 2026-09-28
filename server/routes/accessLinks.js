@@ -90,26 +90,59 @@ router.delete('/owner', (req, res) => {
   res.json({ owner: false });
 });
 
-// Per-link breakdown for the Resume tracking view: human opens by landing page, and
-// bot/preview hits kept apart. Covers the 180 days the events are kept.
+// Per-link breakdown for the Resume tracking view. "Opens" here are people only:
+// - bots, previews and mail scanners are counted apart (visitor.js);
+// - the owner's own browsers are counted apart (owner cookie);
+// - a burst of SCAN_BURST+ hits on one link within SCAN_WINDOW_MS is a scanner that
+//   pretends to be a browser (LinkedIn and ATS systems fetch every link in an uploaded
+//   PDF at once). No person opens four links in the same few seconds.
+// Covers the 180 days the events are kept.
+const SCAN_WINDOW_MS = 20 * 1000;
+const SCAN_BURST = 3;
+
+function markBursts(events) {
+  const scan = new Set();
+  for (let i = 0; i < events.length; i += 1) {
+    let j = i;
+    while (j + 1 < events.length && events[j + 1].at - events[i].at <= SCAN_WINDOW_MS) j += 1;
+    if (j - i + 1 >= SCAN_BURST) for (let k = i; k <= j; k += 1) scan.add(k);
+  }
+  return scan;
+}
+
 router.get('/stats', async (req, res, next) => {
   try {
-    const rows = await AccessLinkEvent.aggregate([
-      { $group: { _id: { link: '$link', bot: '$bot', owner: '$owner', to: '$to' }, count: { $sum: 1 }, lastAt: { $max: '$at' } } }
-    ]);
+    const events = await AccessLinkEvent.find({}, { link: 1, at: 1, to: 1, bot: 1, owner: 1 }).sort({ at: 1 }).lean();
+    const byLink = new Map();
+    for (const e of events) {
+      const key = String(e.link);
+      if (!byLink.has(key)) byLink.set(key, []);
+      byLink.get(key).push(e);
+    }
 
     const stats = {};
-    for (const { _id, count, lastAt } of rows) {
-      const entry = (stats[_id.link] ||= { pages: {}, humanEvents: 0, bots: 0, lastBotAt: null, mine: 0 });
-      if (_id.owner) {
-        entry.mine += count;
-      } else if (_id.bot) {
-        entry.bots += count;
-        if (!entry.lastBotAt || lastAt > entry.lastBotAt) entry.lastBotAt = lastAt;
-      } else {
-        entry.pages[_id.to] = (entry.pages[_id.to] || 0) + count;
-        entry.humanEvents += count;
+    for (const [key, list] of byLink) {
+      const entry = { pages: {}, opens: 0, lastOpenedAt: null, bots: 0, lastBotAt: null, scans: 0, mine: 0 };
+      const people = list.filter((e) => !e.bot && !e.owner);
+      const burst = markBursts(people);
+      people.forEach((e, i) => {
+        if (burst.has(i)) {
+          entry.scans += 1;
+          if (!entry.lastBotAt || e.at > entry.lastBotAt) entry.lastBotAt = e.at;
+          return;
+        }
+        entry.opens += 1;
+        entry.pages[e.to] = (entry.pages[e.to] || 0) + 1;
+        if (!entry.lastOpenedAt || e.at > entry.lastOpenedAt) entry.lastOpenedAt = e.at;
+      });
+      for (const e of list) {
+        if (e.owner) entry.mine += 1;
+        else if (e.bot) {
+          entry.bots += 1;
+          if (!entry.lastBotAt || e.at > entry.lastBotAt) entry.lastBotAt = e.at;
+        }
       }
+      stats[key] = entry;
     }
     res.json(stats);
   } catch (err) {
