@@ -5,7 +5,7 @@
 export default {
   slug: 'skooltag',
   title: 'Skooltag',
-  version: 'v2.3',
+  version: 'v2.4',
   summary:
     'A school-uniform retailer that had sold offline in Delhi NCR since 1989 was moving online, and the team had no product manager. Alongside design, I wrote the backend requirements, split the build into phases, mapped the back office for three operational roles and organised the developer handoff.',
   role: 'UI/UX designer · brand, app & back office',
@@ -27,7 +27,7 @@ export default {
 - **Team:** two designers (me and one other) and three developers, at Student Junction. There was no product manager.
 - **My part:** the brand from zero, the app design through 5 iterations, and the back-office requirements, phasing and handoff.
 - **What exists:** the brand, now on Skooltag's shop sign and posters; a 15-page SRS, a three-phase plan with estimates, 3 journey maps, 272 steps of back-office flows, 85 app screens in 14 flows, and a 62-screen prototype.
-- **What I can't show:** launch numbers. I don't have them.
+- **Scope:** the design of the app and the back office, the website assets, and the brand. The build was the developers' work, so there are no launch numbers here.
 
 ## The business problem
 
