@@ -99,6 +99,7 @@ router.delete('/owner', (req, res) => {
 // Covers the 180 days the events are kept.
 const SCAN_WINDOW_MS = 20 * 1000;
 const SCAN_BURST = 3;
+const PAIR_WINDOW_MS = 2 * 1000;
 
 function markBursts(events) {
   const scan = new Set();
@@ -106,6 +107,13 @@ function markBursts(events) {
     let j = i;
     while (j + 1 < events.length && events[j + 1].at - events[i].at <= SCAN_WINDOW_MS) j += 1;
     if (j - i + 1 >= SCAN_BURST) for (let k = i; k <= j; k += 1) scan.add(k);
+    // A person opens one page at a time; two different pages within 2 s is a machine
+    // (e.g. a PDF previewer resolving every link as the application is submitted).
+    const next = events[i + 1];
+    if (next && next.at - events[i].at <= PAIR_WINDOW_MS && next.to !== events[i].to) {
+      scan.add(i);
+      scan.add(i + 1);
+    }
   }
   return scan;
 }
