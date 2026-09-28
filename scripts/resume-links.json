@@ -74,5 +74,45 @@
   {
     "label": "Kiwi (datavruti)",
     "token": "r-kiwi-ea86"
+  },
+  {
+    "label": "Airtel Digital",
+    "token": "r-airtel-53vl"
+  },
+  {
+    "label": "Stealth Startup (APM Growth)",
+    "token": "r-stealth-qg3d"
+  },
+  {
+    "label": "Olyv",
+    "token": "r-olyv-sqq1"
+  },
+  {
+    "label": "Aviate",
+    "token": "r-aviate-gva1"
+  },
+  {
+    "label": "GIVA",
+    "token": "r-giva-cxdt"
+  },
+  {
+    "label": "Volody",
+    "token": "r-volody-6g3u"
+  },
+  {
+    "label": "Kale Logistics",
+    "token": "r-kale-0imv"
+  },
+  {
+    "label": "LEAD Group",
+    "token": "r-leadgroup-34yg"
+  },
+  {
+    "label": "Wing Assistant",
+    "token": "r-wing-1ouy"
+  },
+  {
+    "label": "Superleap",
+    "token": "r-superleap-41a1"
   }
 ]
