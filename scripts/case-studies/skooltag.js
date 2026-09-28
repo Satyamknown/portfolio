@@ -5,7 +5,7 @@
 export default {
   slug: 'skooltag',
   title: 'Skooltag',
-  version: 'v2.4',
+  version: 'v2.5',
   summary:
     'A school-uniform retailer that had sold offline in Delhi NCR since 1989 was moving online, and the team had no product manager. Alongside design, I wrote the backend requirements, split the build into phases, mapped the back office for three operational roles and organised the developer handoff.',
   role: 'UI/UX designer · brand, app & back office',
@@ -170,7 +170,7 @@ The website carried the B2B side. Its 45-node information architecture includes 
 - The per-feature time columns in the phase plan are empty. Two top-level estimates aren't enough to track progress against.
 - The brief fields on the cover page ("Why are we doing this?" and "What are the design constraints and goals?") were never filled in.
 - The back office exists only as requirements, flows and journey maps. No dashboard screens were designed in this file.
-- The SRS names the KPIs to measure, but I don't have any launch results.
+- The SRS names the KPIs to measure; the build, and any results, were outside my part.
 
 **What I'd do differently**
 
