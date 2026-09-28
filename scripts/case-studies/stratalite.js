@@ -1,7 +1,7 @@
 export default {
   slug: 'stratalite',
   title: 'Stratalite',
-  version: 'v2.0',
+  version: 'v2.1',
   summary:
     'Scoped the roles, permissions and success metrics for a 5-role property-management SaaS, then checked the build against the design and ran 106 UAT cases across roles. The product is live in beta.',
   role: 'Design lead · delivery & UAT',
@@ -14,7 +14,7 @@ export default {
     { value: '5 roles', label: 'by 13 actions in the access matrix' },
     { value: '10', label: 'KPIs traced to source fields' },
   ],
-  coverImage: '/case-studies/stratalite/stakeholder-map.webp',
+  coverImage: '/case-studies/stratalite/cover.webp',
   order: 1,
   published: true,
   body: `## At a glance

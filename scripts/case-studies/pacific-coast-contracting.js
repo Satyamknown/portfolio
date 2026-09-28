@@ -1,7 +1,7 @@
 export default {
   slug: 'pacific-coast-contracting',
   title: 'Pacific Coast Contracting',
-  version: 'v2.0',
+  version: 'v2.1',
   summary:
     'Ran delivery for one contractor split into four brands and four websites: a 258-item tracker with clear owners, a row-by-row reconciliation that showed 83% of the client\'s "pending" list was already done, and scope for each site based on keyword data.',
   role: 'Design lead · delivery & tracking',
@@ -14,7 +14,7 @@ export default {
     { value: '88', label: 'pages shipped' },
     { value: '4', label: 'brands, 4 sites' }
   ],
-  coverImage: '/case-studies/pacific-coast-contracting/tracker.webp',
+  coverImage: '/case-studies/pacific-coast-contracting/cover.webp',
   order: 0,
   published: true,
   body: `## At a glance

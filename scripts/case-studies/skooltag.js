@@ -5,7 +5,7 @@
 export default {
   slug: 'skooltag',
   title: 'Skooltag',
-  version: 'v2.0',
+  version: 'v2.1',
   summary:
     'A school-uniform retailer that had sold offline in Delhi NCR since 1989 was moving online, and the team had no product manager. Alongside design, I wrote the backend requirements, split the build into phases, mapped the back office for three operational roles and organised the developer handoff.',
   role: 'Product design lead · requirements & delivery',
@@ -18,7 +18,7 @@ export default {
     { value: '272', label: 'back-office flow steps' },
     { value: '85', label: 'screens handed off' }
   ],
-  coverImage: '/case-studies/skooltag/web-app-handoff.webp',
+  coverImage: '/case-studies/skooltag/cover.webp',
   order: 2,
   published: true,
   body: `## At a glance
