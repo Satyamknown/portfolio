@@ -19,7 +19,6 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 app.use('/api/access', accessRoutes);
-app.use('/api/auth', authRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.use(['/api/projects', '/api/posts', '/api/appointments', '/api/home-settings', '/api/tracker'], requireSiteAccess);
@@ -35,6 +34,8 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Sign-in needs the database for its one-time links.
+app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/appointments', appointmentRoutes);
