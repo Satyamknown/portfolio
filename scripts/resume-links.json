@@ -323,5 +323,65 @@
     "token": "r-versatile-pqoc",
     "jobUrl": "https://www.linkedin.com/jobs/view/4471326571",
     "role": "Product Manager"
+  },
+  {
+    "label": "Cite AI",
+    "token": "r-citeai-mkci",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471524739",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "Indico Labs",
+    "token": "r-indico-p4jj",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470980960",
+    "role": "Junior Product Manager"
+  },
+  {
+    "label": "SMC Group (AI PM)",
+    "token": "r-smcai-iex8",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472731361",
+    "role": "AI Product Manager"
+  },
+  {
+    "label": "Endava",
+    "token": "r-endava-kifg",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4363471760",
+    "role": "Product Owner"
+  },
+  {
+    "label": "Ourshopee",
+    "token": "r-ourshopee-x6pc",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470567227",
+    "role": "Product Manager"
+  },
+  {
+    "label": "OnArrival",
+    "token": "r-onarrival-w2ha",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470308159",
+    "role": "Product Manager (Flights)"
+  },
+  {
+    "label": "Prudent Technologies",
+    "token": "r-prudent-7c8t",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471375883",
+    "role": "Product Manager"
+  },
+  {
+    "label": "Obrimo Technologies",
+    "token": "r-obrimo-dsq0",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469473925",
+    "role": "Product Owner / Product Manager"
+  },
+  {
+    "label": "Bharti AXA Life",
+    "token": "r-bhartiaxa-uhan",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470142606",
+    "role": "Digital Product Manager"
+  },
+  {
+    "label": "CredHive",
+    "token": "r-credhive-27j2",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472752698",
+    "role": "Product Manager - Credit Data"
   }
 ]
