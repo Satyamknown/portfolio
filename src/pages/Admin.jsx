@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, auth, slugify, formatDate } from '../lib/api.js';
 import Editor from '../components/Editor.jsx';
+import ResumeTracking from '../components/ResumeTracking.jsx';
 
 const EMPTY_PROJECT = {
   title: '', slug: '', summary: '', role: '', client: '', year: '', version: '',
@@ -24,6 +25,7 @@ export default function Admin() {
   const [loaded, setLoaded] = useState(false);
   const [homeSettings, setHomeSettings] = useState({ videoUrl: '', videoPoster: '' });
   const [links, setLinks] = useState([]);
+  const [linkStats, setLinkStats] = useState({});
   const [linkLabel, setLinkLabel] = useState('');
   const [creatingLink, setCreatingLink] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
@@ -38,16 +40,18 @@ export default function Admin() {
 
   async function refresh() {
     try {
-      const [pr, po, settings, ls] = await Promise.all([
+      const [pr, po, settings, ls, stats] = await Promise.all([
         api.listProjects(true),
         api.listPosts(true),
         api.getHomeSettings(),
-        api.listAccessLinks()
+        api.listAccessLinks(),
+        api.accessLinkStats()
       ]);
       setProjects(pr);
       setPosts(po);
       setHomeSettings(settings);
       setLinks(ls);
+      setLinkStats(stats);
     } catch (e) {
       if (e.message.toLowerCase().includes('sign in') || e.message.includes('expired')) {
         navigate('/login');
@@ -424,6 +428,9 @@ export default function Admin() {
         </div>
       ) : tab === 'links' ? (
         <>
+          {links.length > 0 && <ResumeTracking links={links} stats={linkStats} />}
+
+          <h3 className="track-title track-manage">Manage links</h3>
           <form className="panel share-form" onSubmit={createLink}>
             <div className="field">
               <label htmlFor="linkLabel">Who is this link for?</label>

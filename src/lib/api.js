@@ -62,6 +62,7 @@ export const api = {
   updateHomeSettings: (payload) => request('/home-settings', { method: 'PUT', body: payload }),
 
   listAccessLinks: () => request('/access-links'),
+  accessLinkStats: () => request('/access-links/stats'),
   createAccessLink: (label) => request('/access-links', { method: 'POST', body: { label } }),
   setAccessLinkActive: (id, active) => request(`/access-links/${id}`, { method: 'PATCH', body: { active } }),
   deleteAccessLink: (id) => request(`/access-links/${id}`, { method: 'DELETE' }),

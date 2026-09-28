@@ -9,6 +9,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import Project from '../server/models/Project.js';
 import AccessLink from '../server/models/AccessLink.js';
+import { ensureResumeLinks } from './resume-links.js';
 import pcc from './case-studies/pacific-coast-contracting.js';
 import stratalite from './case-studies/stratalite.js';
 import skooltag from './case-studies/skooltag.js';
@@ -16,8 +17,8 @@ import stratalitePlatformTesting from './case-studies/stratalite-platform-testin
 
 const caseStudies = [pcc, stratalite, skooltag, stratalitePlatformTesting];
 
-// The share link printed on the resumes: /go/<token>?to=/work/<slug> opens a case study
-// without the password. Created once; pause it from /admin like any other link.
+// The share link on the master resume and the portfolio download: /go/<token>?to=/work/<slug>
+// opens a case study without the password. Per-company links come from resume-links.json. Created once; pause it from /admin like any other link.
 const RESUME_LINK_TOKEN = 'resume-wuh1qhvkap';
 
 // One-time hide batches. Each batch runs once (recorded in `publish_log`), so a
@@ -73,6 +74,8 @@ try {
     { upsert: true }
   );
   if (resumeLink.upsertedCount) console.log('[publish-case-studies] created the resume share link');
+  // Per-company resume links from scripts/resume-links.json, same create-if-missing rule.
+  await ensureResumeLinks();
 
   const log = mongoose.connection.collection('publish_log');
   for (const batch of hideBatches) {

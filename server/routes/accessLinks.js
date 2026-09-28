@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import AccessLink from '../models/AccessLink.js';
+import AccessLinkEvent from '../models/AccessLinkEvent.js';
 import { requireAuth } from '../middleware/auth.js';
 import { createAccessCookie } from '../lib/access.js';
+import { classifyVisitor } from '../lib/visitor.js';
 
 const router = Router();
 const MAX_LABEL_LENGTH = 80;
@@ -36,15 +38,30 @@ export async function openAccessLink(req, res, next) {
 
   try {
     const token = req.params.token || '';
-    const link = TOKEN_PATTERN.test(token)
-      ? await AccessLink.findOneAndUpdate(
-          { token, active: true },
-          { $inc: { opens: 1 }, $set: { lastOpenedAt: new Date() } }
-        )
-      : null;
+    const visitor = classifyVisitor(req);
+    const now = new Date();
+    // Crawlers, unfurlers and mail scanners are logged but never counted as opens.
+    let link = null;
+    if (TOKEN_PATTERN.test(token)) {
+      link = visitor.bot
+        ? await AccessLink.findOne({ token, active: true }, { _id: 1 })
+        : await AccessLink.findOneAndUpdate(
+            { token, active: true },
+            { $inc: { opens: 1 }, $set: { lastOpenedAt: now } }
+          );
+    }
 
     // ?to= lets a link land on one case study. Only same-site /work/<slug> paths, so it cannot redirect off-site.
     const to = typeof req.query.to === 'string' && WORK_PATH.test(req.query.to) ? req.query.to : '/';
+
+    if (link) {
+      // Awaited so a serverless freeze cannot drop it; a failed write must not block the visitor.
+      try {
+        await AccessLinkEvent.create({ link: link._id, at: now, to, ...visitor });
+      } catch (err) {
+        console.error('Could not record a share-link open:', err.message);
+      }
+    }
 
     // Unknown, paused and malformed tokens all get the same redirect, so the response never says which it was.
     if (!link) return res.redirect(302, `${to}?link=expired`);
@@ -57,6 +74,31 @@ export async function openAccessLink(req, res, next) {
 }
 
 router.use(requireAuth);
+
+// Per-link breakdown for the Resume tracking view: human opens by landing page, and
+// bot/preview hits kept apart. Covers the 180 days the events are kept.
+router.get('/stats', async (req, res, next) => {
+  try {
+    const rows = await AccessLinkEvent.aggregate([
+      { $group: { _id: { link: '$link', bot: '$bot', to: '$to' }, count: { $sum: 1 }, lastAt: { $max: '$at' } } }
+    ]);
+
+    const stats = {};
+    for (const { _id, count, lastAt } of rows) {
+      const entry = (stats[_id.link] ||= { pages: {}, humanEvents: 0, bots: 0, lastBotAt: null });
+      if (_id.bot) {
+        entry.bots += count;
+        if (!entry.lastBotAt || lastAt > entry.lastBotAt) entry.lastBotAt = lastAt;
+      } else {
+        entry.pages[_id.to] = (entry.pages[_id.to] || 0) + count;
+        entry.humanEvents += count;
+      }
+    }
+    res.json(stats);
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/', async (req, res, next) => {
   try {
@@ -109,6 +151,7 @@ router.delete('/:id', async (req, res, next) => {
   try {
     const link = await AccessLink.findByIdAndDelete(req.params.id);
     if (!link) return res.status(404).json({ error: 'Link not found.' });
+    await AccessLinkEvent.deleteMany({ link: link._id });
     res.json({ ok: true });
   } catch (err) {
     if (err.name === 'CastError') return res.status(404).json({ error: 'Link not found.' });

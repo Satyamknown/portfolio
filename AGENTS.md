@@ -170,7 +170,8 @@ Catch-all: 404
 | —      | `/api/posts…`            |      | Same shape as projects                 |
 | POST   | `/api/appointments`      | —    | Contact form                           |
 | GET/POST/PATCH/DELETE | `/api/access-links[/:id]` | ✓ | Share links (admin only)   |
-| GET    | `/go/:token`             | —    | Share link: sets the access cookie, redirects to `/` |
+| GET    | `/api/access-links/stats` | ✓   | Per-link opens by landing page, bot hits apart (180-day events) |
+| GET    | `/go/:token`             | —    | Share link: sets the access cookie, redirects to `/` or `?to=/work/<slug>`; logs an event, bots/scanners are not counted in `opens` |
 
 Drafts never leak: unpublished items are excluded from list and detail responses, and
 `?all=1` requires a valid token. This is verified behaviour — keep it that way.
