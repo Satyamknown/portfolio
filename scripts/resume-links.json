@@ -1,31 +1,48 @@
 [
   {
     "label": "Cactus Communications",
-    "token": "r-cactus-7j4x"
+    "token": "r-cactus-7j4x",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4464826725",
+    "role": "Associate Project Manager, DMS East"
   },
   {
     "label": "IDfy",
-    "token": "r-idfy-1wa2"
+    "token": "r-idfy-1wa2",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4458229316",
+    "role": "Assistant Manager - Product Delivery"
   },
   {
     "label": "Techvizo",
-    "token": "r-techvizo-ivkb"
+    "token": "r-techvizo-ivkb",
+    "jobUrl": "https://www.techvizo.com/career/project-coordinator/",
+    "role": "Project Coordinator",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Tekno Point",
-    "token": "r-teknopoint-7r1e"
+    "token": "r-teknopoint-7r1e",
+    "jobUrl": "https://careers.teknopoint.in/jobs/Careers/72268000000960009/Assistant-Project-Manager",
+    "role": "Assistant Project Manager"
   },
   {
     "label": "Tata CLiQ",
-    "token": "r-tatacliq-diqv"
+    "token": "r-tatacliq-diqv",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470935218",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Nerve Solutions",
-    "token": "r-nerve-e9u7"
+    "token": "r-nerve-e9u7",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4462274909",
+    "role": "Junior Product Manager"
   },
   {
     "label": "LimeTray",
-    "token": "r-limetray-kkdf"
+    "token": "r-limetray-kkdf",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4461147861",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "eReleGo",
@@ -33,11 +50,17 @@
   },
   {
     "label": "Certinal",
-    "token": "r-certinal-6okf"
+    "token": "r-certinal-6okf",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472018825",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Data Eminence",
-    "token": "r-dataeminence-fsxy"
+    "token": "r-dataeminence-fsxy",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469452798",
+    "role": "Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Zenopsys",
@@ -45,158 +68,259 @@
   },
   {
     "label": "Shaadi.com",
-    "token": "r-shaadi-06uw"
+    "token": "r-shaadi-06uw",
+    "jobUrl": "https://openroles.peopleinteractive.in/apply?job=5393",
+    "role": "Associate Product Manager"
   },
   {
     "label": "Bizdata",
-    "token": "r-bizdata-3ddl"
+    "token": "r-bizdata-3ddl",
+    "jobUrl": "https://bizdata360.keka.com/careers/applyjob/160250",
+    "role": "Associate Product Manager"
   },
   {
     "label": "SpotDraft",
-    "token": "r-spotdraft-jc37"
+    "token": "r-spotdraft-jc37",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4464600920",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Recruiterflow",
-    "token": "r-recruiterflow-wklc"
+    "token": "r-recruiterflow-wklc",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470798644",
+    "role": "Associate Product Manager"
   },
   {
     "label": "FRND",
-    "token": "r-frnd-82z8"
+    "token": "r-frnd-82z8",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4464312490",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "JUSPAY",
-    "token": "r-juspay-ansa"
+    "token": "r-juspay-ansa",
+    "jobUrl": "https://joinus.juspay.in/?jobId=APRD01",
+    "role": "Associate Product Manager"
   },
   {
     "label": "Osfin.ai",
-    "token": "r-osfin-4eyc"
+    "token": "r-osfin-4eyc",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4466191892",
+    "role": "Associate Product Manager"
   },
   {
     "label": "Kiwi (datavruti)",
-    "token": "r-kiwi-ea86"
+    "token": "r-kiwi-ea86",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469066299",
+    "role": "APM, Partner Integration APIs",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Airtel Digital",
-    "token": "r-airtel-53vl"
+    "token": "r-airtel-53vl",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4468516890",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Stealth Startup (APM Growth)",
-    "token": "r-stealth-qg3d"
+    "token": "r-stealth-qg3d",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469385281",
+    "role": "Associate Product Manager, Growth",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Olyv",
-    "token": "r-olyv-sqq1"
+    "token": "r-olyv-sqq1",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469722490",
+    "role": "Technical Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Aviate",
-    "token": "r-aviate-gva1"
+    "token": "r-aviate-gva1",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4455710436",
+    "role": "AI Product Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "GIVA",
-    "token": "r-giva-cxdt"
+    "token": "r-giva-cxdt",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471443632",
+    "role": "Associate Program Manager, CX",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Volody",
-    "token": "r-volody-6g3u"
+    "token": "r-volody-6g3u",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469762028",
+    "role": "Business Analyst",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Kale Logistics",
-    "token": "r-kale-0imv"
+    "token": "r-kale-0imv",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469712951",
+    "role": "Project Manager",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "LEAD Group",
-    "token": "r-leadgroup-34yg"
+    "token": "r-leadgroup-34yg",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471443349",
+    "role": "Program Manager, Product Delivery",
+    "appliedAt": "2026-09-28"
   },
   {
     "label": "Wing Assistant",
-    "token": "r-wing-1ouy"
+    "token": "r-wing-1ouy",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470125462",
+    "role": "Customer Success & Product Manager"
   },
   {
     "label": "Superleap",
-    "token": "r-superleap-41a1"
+    "token": "r-superleap-41a1",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470287041",
+    "role": "Product Manager"
   },
   {
     "label": "Kinnect",
-    "token": "r-kinnect-hbfi"
+    "token": "r-kinnect-hbfi",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470900129",
+    "role": "Project Executive",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Accorian",
-    "token": "r-accorian-qjup"
+    "token": "r-accorian-qjup",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470800038",
+    "role": "Project Associate / PM"
   },
   {
     "label": "Peak XV portfolio (AI cybersec)",
-    "token": "r-peakxv-zppa"
+    "token": "r-peakxv-zppa",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469440203",
+    "role": "Founding Product Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Joveo",
-    "token": "r-joveo-p13n"
+    "token": "r-joveo-p13n",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472446626",
+    "role": "Associate Program Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Witness The Fitness",
-    "token": "r-wtf-yrpy"
+    "token": "r-wtf-yrpy",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472491646",
+    "role": "UI/UX Product Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Indegene",
-    "token": "r-indegene-ltxf"
+    "token": "r-indegene-ltxf",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471344051",
+    "role": "GenAI Business Analyst",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Redacto",
-    "token": "r-redacto-kcbt"
+    "token": "r-redacto-kcbt",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471319963",
+    "role": "Program Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "greytHR",
-    "token": "r-greythr-lwrx"
+    "token": "r-greythr-lwrx",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470254098",
+    "role": "Implementation Specialist"
   },
   {
     "label": "mCaffeine",
-    "token": "r-mcaffeine-c0en"
+    "token": "r-mcaffeine-c0en",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4468579748",
+    "role": "Business Analyst"
   },
   {
     "label": "Coverfox",
-    "token": "r-coverfox-o6o4"
+    "token": "r-coverfox-o6o4",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4469311231",
+    "role": "Business Analyst"
   },
   {
     "label": "Gamma Technologies",
-    "token": "r-gamma-6pn0"
+    "token": "r-gamma-6pn0",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470031530",
+    "role": "Website Technical Program Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "FirstDraft Studio",
-    "token": "r-firstdraft-8zwu"
+    "token": "r-firstdraft-8zwu",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470848454",
+    "role": "Project Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "SleekSky",
-    "token": "r-sleeksky-m9eh"
+    "token": "r-sleeksky-m9eh",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471503731",
+    "role": "Product Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "RaftLabs",
-    "token": "r-raftlabs-2h5n"
+    "token": "r-raftlabs-2h5n",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4470863820",
+    "role": "Product Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Codewalla",
-    "token": "r-codewalla-zp5c"
+    "token": "r-codewalla-zp5c",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4468726153",
+    "role": "Product Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "T-Hub",
-    "token": "r-thub-7tgh"
+    "token": "r-thub-7tgh",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472731644",
+    "role": "Innovation Program Manager",
+    "appliedAt": "2026-09-29"
   },
   {
     "label": "Sprinto",
-    "token": "r-sprinto-yjtv"
+    "token": "r-sprinto-yjtv",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471094313",
+    "role": "Product Manager"
   },
   {
     "label": "Alaan",
-    "token": "r-alaan-glqd"
+    "token": "r-alaan-glqd",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472028588",
+    "role": "Implementation Manager"
   },
   {
     "label": "Haystek",
-    "token": "r-haystek-btjt"
+    "token": "r-haystek-btjt",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4467391514",
+    "role": "Project Coordinator"
   },
   {
     "label": "Arcesium",
-    "token": "r-arcesium-l3w9"
+    "token": "r-arcesium-l3w9",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4472727191",
+    "role": "Product Specialist"
   },
   {
     "label": "Versatile Club",
-    "token": "r-versatile-pqoc"
+    "token": "r-versatile-pqoc",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4471326571",
+    "role": "Product Manager"
   }
 ]

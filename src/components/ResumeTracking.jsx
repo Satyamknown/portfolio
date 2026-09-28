@@ -16,6 +16,8 @@ const FILTERS = [
   { id: 'unopened', label: 'Not opened' }
 ];
 
+const appliedFormat = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' });
+
 const istFormat = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata',
   day: 'numeric',
@@ -142,6 +144,19 @@ export default function ResumeTracking({ links, stats }) {
                 <tr key={link._id} className={opens > 0 ? 'is-opened' : ''}>
                   <th scope="row" className="track-company">
                     <span className="track-label">{link.label}</span>
+                    {(link.appliedAt || link.jobUrl) && (
+                      <span className="track-applied">
+                        {link.appliedAt ? `Applied ${appliedFormat.format(new Date(link.appliedAt))}` : 'Not applied'}
+                        {link.jobUrl && (
+                          <>
+                            {' · '}
+                            <a href={link.jobUrl} target="_blank" rel="noopener noreferrer">
+                              {link.role || 'Job posting'} ↗
+                            </a>
+                          </>
+                        )}
+                      </span>
+                    )}
                     <span className="track-token">
                       {link.token}
                       {!link.active && <span className="status-tag draft">Paused</span>}

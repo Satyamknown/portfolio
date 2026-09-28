@@ -6,7 +6,11 @@ const AccessLinkSchema = new mongoose.Schema(
     token: { type: String, required: true, unique: true, index: true },
     active: { type: Boolean, default: true },
     opens: { type: Number, default: 0 },
-    lastOpenedAt: Date
+    lastOpenedAt: Date,
+    // Resume links only, synced from scripts/resume-links.json on deploy.
+    role: String,
+    jobUrl: String,
+    appliedAt: Date
   },
   { timestamps: true }
 );

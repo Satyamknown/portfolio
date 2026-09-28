@@ -8,13 +8,20 @@ import AccessLinkEvent from '../server/models/AccessLinkEvent.js';
 const TOKEN_PATTERN = /^[a-z0-9-]{1,64}$/;
 const links = JSON.parse(readFileSync(new URL('./resume-links.json', import.meta.url), 'utf8'));
 
-// Create what is missing. Existing links are left alone, so opens, lastOpenedAt, a pause
-// set from /admin and the label are never reset by a deploy.
+// Create what is missing. Existing links keep opens, lastOpenedAt, a pause set from /admin
+// and the label; only the application details (role, job posting, applied date), which
+// live in the JSON and nowhere else, are refreshed on every deploy.
 export async function ensureResumeLinks(log = console.log) {
   let created = 0;
-  for (const { label, token } of links) {
+  for (const { label, token, role, jobUrl, appliedAt } of links) {
     if (!TOKEN_PATTERN.test(token)) throw new Error(`Bad token in resume-links.json: ${token}`);
-    const result = await AccessLink.updateOne({ token }, { $setOnInsert: { label } }, { upsert: true });
+    const details = { role, jobUrl, appliedAt: appliedAt ? new Date(`${appliedAt}T00:00:00+05:30`) : undefined };
+    for (const key of Object.keys(details)) if (details[key] === undefined) delete details[key];
+    const result = await AccessLink.updateOne(
+      { token },
+      { $setOnInsert: { label }, ...(Object.keys(details).length ? { $set: details } : {}) },
+      { upsert: true }
+    );
     if (result.upsertedCount) {
       created += 1;
       log(`[resume-links] created ${token} (${label})`);
