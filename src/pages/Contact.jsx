@@ -52,7 +52,7 @@ export default function Contact() {
         <a className="btn btn-ghost" href={profile.linkedin} target="_blank" rel="noreferrer">
           LinkedIn
         </a>
-        <a className="btn btn-ghost" href={profile.resume}>
+        <a className="btn btn-ghost" href={profile.resume} download="Abhishek-Manjhi-Resume.pdf">
           Resume (PDF)
         </a>
       </div>
