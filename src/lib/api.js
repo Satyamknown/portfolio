@@ -61,6 +61,11 @@ export const api = {
   getHomeSettings: () => request('/home-settings'),
   updateHomeSettings: (payload) => request('/home-settings', { method: 'PUT', body: payload }),
 
+  listAccessLinks: () => request('/access-links'),
+  createAccessLink: (label) => request('/access-links', { method: 'POST', body: { label } }),
+  setAccessLinkActive: (id, active) => request(`/access-links/${id}`, { method: 'PATCH', body: { active } }),
+  deleteAccessLink: (id) => request(`/access-links/${id}`, { method: 'DELETE' }),
+
   submitAppointment: (payload) => request('/appointments', { method: 'POST', body: payload })
 };
 

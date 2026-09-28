@@ -12,6 +12,8 @@ const EMPTY_POST = {
   title: '', slug: '', excerpt: '', tags: '', coverImage: '', body: '', published: false
 };
 
+const shareUrl = (link) => `${window.location.origin}/go/${link.token}`;
+
 export default function Admin() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('projects');
@@ -21,6 +23,10 @@ export default function Admin() {
   const [notice, setNotice] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [homeSettings, setHomeSettings] = useState({ videoUrl: '', videoPoster: '' });
+  const [links, setLinks] = useState([]);
+  const [linkLabel, setLinkLabel] = useState('');
+  const [creatingLink, setCreatingLink] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     if (!auth.isSignedIn()) {
@@ -32,14 +38,16 @@ export default function Admin() {
 
   async function refresh() {
     try {
-      const [pr, po, settings] = await Promise.all([
+      const [pr, po, settings, ls] = await Promise.all([
         api.listProjects(true),
         api.listPosts(true),
-        api.getHomeSettings()
+        api.getHomeSettings(),
+        api.listAccessLinks()
       ]);
       setProjects(pr);
       setPosts(po);
       setHomeSettings(settings);
+      setLinks(ls);
     } catch (e) {
       if (e.message.toLowerCase().includes('sign in') || e.message.includes('expired')) {
         navigate('/login');
@@ -134,6 +142,55 @@ export default function Admin() {
       setNotice({ type: 'ok', text: `Saved "${payload.title}".` });
       setEditing(null);
       refresh();
+    } catch (e) {
+      setNotice({ type: 'error', text: e.message });
+    }
+  }
+
+  async function createLink(event) {
+    event.preventDefault();
+    const label = linkLabel.trim();
+    if (!label) return;
+
+    setCreatingLink(true);
+    try {
+      const link = await api.createAccessLink(label);
+      setLinks((prev) => [link, ...prev]);
+      setLinkLabel('');
+      setNotice({ type: 'ok', text: `Created a link for "${link.label}".` });
+    } catch (e) {
+      setNotice({ type: 'error', text: e.message });
+    } finally {
+      setCreatingLink(false);
+    }
+  }
+
+  async function copyLink(link) {
+    try {
+      await navigator.clipboard.writeText(shareUrl(link));
+      setCopiedId(link._id);
+      setTimeout(() => setCopiedId((current) => (current === link._id ? null : current)), 2000);
+    } catch {
+      setNotice({ type: 'error', text: 'Could not copy. Select the link and copy it by hand.' });
+    }
+  }
+
+  async function toggleLink(link) {
+    try {
+      const updated = await api.setAccessLinkActive(link._id, !link.active);
+      setLinks((prev) => prev.map((l) => (l._id === updated._id ? updated : l)));
+      setNotice({ type: 'ok', text: `${updated.active ? 'Resumed' : 'Paused'} the link for "${updated.label}".` });
+    } catch (e) {
+      setNotice({ type: 'error', text: e.message });
+    }
+  }
+
+  async function removeLink(link) {
+    if (!window.confirm(`Delete the link for "${link.label}"? New visitors will see the password screen. Anyone who already opened it keeps access for up to 30 days.`)) return;
+    try {
+      await api.deleteAccessLink(link._id);
+      setLinks((prev) => prev.filter((l) => l._id !== link._id));
+      setNotice({ type: 'ok', text: `Deleted the link for "${link.label}".` });
     } catch (e) {
       setNotice({ type: 'error', text: e.message });
     }
@@ -306,6 +363,12 @@ export default function Admin() {
           Posts ({posts.length})
         </button>
         <button
+          className={`admin-tab ${tab === 'links' ? 'active' : ''}`}
+          onClick={() => setTab('links')}
+        >
+          Share links ({links.length})
+        </button>
+        <button
           className={`admin-tab ${tab === 'settings' ? 'active' : ''}`}
           onClick={() => setTab('settings')}
         >
@@ -314,7 +377,7 @@ export default function Admin() {
       </div>
 
       <div style={{ marginBottom: 20 }}>
-        {tab !== 'settings' && (
+        {(tab === 'projects' || tab === 'posts') && (
           <button className="btn btn-primary btn-sm" onClick={() => startNew(tab)}>
             + New {tab === 'projects' ? 'case study' : 'post'}
           </button>
@@ -359,6 +422,61 @@ export default function Admin() {
             </button>
           </div>
         </div>
+      ) : tab === 'links' ? (
+        <>
+          <form className="panel share-form" onSubmit={createLink}>
+            <div className="field">
+              <label htmlFor="linkLabel">Who is this link for?</label>
+              <div className="share-form-row">
+                <input
+                  id="linkLabel"
+                  value={linkLabel}
+                  maxLength={80}
+                  placeholder="Cactus Communications"
+                  onChange={(e) => setLinkLabel(e.target.value)}
+                />
+                <button className="btn btn-primary" type="submit" disabled={!linkLabel.trim() || creatingLink}>
+                  {creatingLink ? 'Creating...' : 'Create link'}
+                </button>
+              </div>
+              <div className="field-hint">
+                Opening the link unlocks the site without the password for 30 days. Pausing or deleting it stops new unlocks only.
+              </div>
+            </div>
+          </form>
+
+          {links.length === 0 ? (
+            <div className="empty">
+              <h3>No share links yet</h3>
+              <p>Create one for each company you send the portfolio to, then see when they open it.</p>
+            </div>
+          ) : (
+            links.map((link) => (
+              <div key={link._id} className="admin-row">
+                <div className="share-row-main">
+                  <div className="admin-row-title">{link.label}</div>
+                  <div className="share-url">{shareUrl(link)}</div>
+                  <div className="admin-row-meta">
+                    {link.opens} {link.opens === 1 ? 'open' : 'opens'} · last opened{' '}
+                    {link.lastOpenedAt ? formatDate(link.lastOpenedAt) : 'never'}
+                  </div>
+                </div>
+                <div className="admin-row-actions share-row-actions">
+                  <span className={`status-tag ${link.active ? '' : 'draft'}`}>
+                    {link.active ? 'Active' : 'Paused'}
+                  </span>
+                  <button className="btn btn-ghost btn-sm" onClick={() => copyLink(link)}>
+                    {copiedId === link._id ? 'Copied' : 'Copy'}
+                  </button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => toggleLink(link)}>
+                    {link.active ? 'Pause' : 'Resume'}
+                  </button>
+                  <button className="btn btn-danger btn-sm" onClick={() => removeLink(link)}>Delete</button>
+                </div>
+              </div>
+            ))
+          )}
+        </>
       ) : items.length === 0 ? (
         <div className="empty">
           <h3>Nothing here yet</h3>

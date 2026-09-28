@@ -98,6 +98,17 @@
   font-size:13px;
 }
 
+.access-card .access-notice{
+  border:1px solid var(--amber);
+  background:var(--amber-dim);
+  color:var(--ink);
+  font-weight:400;
+  font-size:14px;
+  line-height:1.5;
+  padding:12px 14px;
+  margin:-8px 0 22px;
+}
+
 @media(max-width:560px){
   .access-card{padding:26px}
   .access-input-row{display:grid}

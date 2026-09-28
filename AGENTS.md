@@ -53,6 +53,7 @@ right author. Check with `git log --format='%an <%ae>' -1` before pushing.
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/go/(.*)", "destination": "/api" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ]
 }
@@ -61,6 +62,7 @@ right author. Check with `git log --format='%an <%ae>' -1` before pushing.
 The first rule is **load-bearing**. Without it Vercel's filesystem routing looks for
 `api/projects.js`, `api/posts.js` etc., finds nothing, and 404s every API call. All
 `/api/*` traffic must land on the single `api/index.js` function, which routes internally.
+The `/go/*` rule sends share links to the same function; it must sit above the SPA catch-all.
 
 ---
 
@@ -167,6 +169,8 @@ Catch-all: 404
 | POST/PUT/DELETE | `/api/projects[/:id]` | ✓ |                                     |
 | —      | `/api/posts…`            |      | Same shape as projects                 |
 | POST   | `/api/appointments`      | —    | Contact form                           |
+| GET/POST/PATCH/DELETE | `/api/access-links[/:id]` | ✓ | Share links (admin only)   |
+| GET    | `/go/:token`             | —    | Share link: sets the access cookie, redirects to `/` |
 
 Drafts never leak: unpublished items are excluded from list and detail responses, and
 `?all=1` requires a valid token. This is verified behaviour — keep it that way.

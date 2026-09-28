@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import './Access.css';
 
 export default function Access({ onUnlock }) {
+  const { search } = useLocation();
+  const linkExpired = new URLSearchParams(search).get('link') === 'expired';
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -28,6 +31,12 @@ export default function Access({ onUnlock }) {
         <div className="access-kicker">Private portfolio</div>
         <h1 id="access-title">Enter the access password</h1>
         <p>Use the access password given by Abhishek to continue.</p>
+
+        {linkExpired && (
+          <p className="access-notice" role="status">
+            This link is no longer active. Ask Abhishek for a new one, or enter the password.
+          </p>
+        )}
 
         <form className="access-form" onSubmit={submit}>
           <label htmlFor="site-password">Password</label>

@@ -10,6 +10,7 @@ import postRoutes from '../server/routes/posts.js';
 import appointmentRoutes from '../server/routes/appointments.js';
 import homeSettingsRoutes from '../server/routes/homeSettings.js';
 import trackerRoutes from '../server/routes/tracker.js';
+import accessLinkRoutes, { openAccessLink } from '../server/routes/accessLinks.js';
 import { requireSiteAccess } from '../server/lib/access.js';
 
 const app = express();
@@ -39,6 +40,10 @@ app.use('/api/posts', postRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/home-settings', homeSettingsRoutes);
 app.use('/api/tracker', trackerRoutes);
+app.use('/api/access-links', accessLinkRoutes);
+
+// Magic links sit outside requireSiteAccess: they are how a visitor gets the cookie in the first place.
+app.get('/go{/:token}', openAccessLink);
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'No such endpoint.' }));
 

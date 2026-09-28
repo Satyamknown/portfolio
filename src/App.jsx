@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Splash from './components/Splash.jsx';
 import Home from './pages/Home.jsx';
@@ -17,7 +17,8 @@ import Access from './pages/Access.jsx';
 import { api } from './lib/api.js';
 
 export default function App() {
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const navigate = useNavigate();
   const isStandaloneTool = pathname.startsWith('/tracker');
   const [access, setAccess] = useState({ checking: true, ok: false });
   const [showSplash, setShowSplash] = useState(() => {
@@ -44,6 +45,17 @@ export default function App() {
       alive = false;
     };
   }, []);
+
+  // A share link lands on "/" or "/?link=expired". Once the site is unlocked, drop the
+  // leftover flag so it does not end up in a URL someone copies. Replace, not push.
+  useEffect(() => {
+    if (!access.ok) return;
+    const params = new URLSearchParams(search);
+    if (!params.has('link')) return;
+    params.delete('link');
+    const rest = params.toString();
+    navigate({ pathname, search: rest ? `?${rest}` : '', hash }, { replace: true });
+  }, [access.ok, pathname, search, hash, navigate]);
 
   const handleAccessUnlock = () => setAccess({ checking: false, ok: true });
 
