@@ -158,5 +158,45 @@
   {
     "label": "Gamma Technologies",
     "token": "r-gamma-6pn0"
+  },
+  {
+    "label": "FirstDraft Studio",
+    "token": "r-firstdraft-8zwu"
+  },
+  {
+    "label": "SleekSky",
+    "token": "r-sleeksky-m9eh"
+  },
+  {
+    "label": "RaftLabs",
+    "token": "r-raftlabs-2h5n"
+  },
+  {
+    "label": "Codewalla",
+    "token": "r-codewalla-zp5c"
+  },
+  {
+    "label": "T-Hub",
+    "token": "r-thub-7tgh"
+  },
+  {
+    "label": "Sprinto",
+    "token": "r-sprinto-yjtv"
+  },
+  {
+    "label": "Alaan",
+    "token": "r-alaan-glqd"
+  },
+  {
+    "label": "Haystek",
+    "token": "r-haystek-btjt"
+  },
+  {
+    "label": "Arcesium",
+    "token": "r-arcesium-l3w9"
+  },
+  {
+    "label": "Versatile Club",
+    "token": "r-versatile-pqoc"
   }
 ]
