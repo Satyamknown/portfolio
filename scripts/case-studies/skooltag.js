@@ -5,10 +5,10 @@
 export default {
   slug: 'skooltag',
   title: 'Skooltag',
-  version: 'v2.2',
+  version: 'v2.3',
   summary:
     'A school-uniform retailer that had sold offline in Delhi NCR since 1989 was moving online, and the team had no product manager. Alongside design, I wrote the backend requirements, split the build into phases, mapped the back office for three operational roles and organised the developer handoff.',
-  role: 'Design lead · requirements & delivery',
+  role: 'UI/UX designer · brand, app & back office',
   client: 'Skooltag · Delhi NCR',
   year: '2021-22',
   tags: ['Requirements (SRS)', 'Phasing & roadmap', 'Stakeholder management', 'Developer handoff', 'E-commerce'],
@@ -25,8 +25,8 @@ export default {
 
 - **The work:** take a 35-year-old offline uniform business online: a parent ordering app, a school-partnership website, and a back office for admins, stores, delivery agents and schools.
 - **Team:** two designers (me and one other) and three developers, at Student Junction. There was no product manager.
-- **My part:** product design lead, plus the requirements, phasing, client questions and handoff.
-- **What exists:** a 15-page SRS, a three-phase plan with estimates, 3 journey maps, 272 steps of back-office flows, 85 app screens in 14 flows, and a 62-screen prototype.
+- **My part:** the brand from zero, the app design through 5 iterations, and the back-office requirements, phasing and handoff.
+- **What exists:** the brand, now on Skooltag's shop sign and posters; a 15-page SRS, a three-phase plan with estimates, 3 journey maps, 272 steps of back-office flows, 85 app screens in 14 flows, and a 62-screen prototype.
 - **What I can't show:** launch numbers. I don't have them.
 
 ## The business problem
@@ -41,6 +41,12 @@ The online version had to serve four groups at once:
 - **Delivery agents**, who carry orders and collect cash.
 
 So this was a customer app plus a back office that had to hold online and offline sales, stock across stores, and school commissions in one place.
+
+## The brand, out in the world
+
+There was no design system or brand to inherit. I built Skooltag's brand from zero, the logo, colours and the asset kit I handed over, while a developer was already shipping. This is a Skooltag factory outlet today: the brand on the shop sign, and on the school-shoe posters out front.
+
+![A Skooltag factory outlet: the yellow Skooltag sign above the shop, with school bags hanging below and co-branded school-shoe posters on the pavement](/case-studies/skooltag/storefront.webp "A Skooltag factory outlet: the brand on the shop sign and on the shoe posters out front.")
 
 ## No PM on the team: what I took on
 
