@@ -13,6 +13,8 @@ const AccessLinkEventSchema = new mongoose.Schema(
     to: { type: String, default: '/' },
     device: { type: String, enum: ['desktop', 'mobile', 'bot'], required: true },
     bot: { type: Boolean, default: false },
+    // Opened from a browser the owner marked as theirs: logged, never counted.
+    owner: { type: Boolean, default: false },
     // Two-letter code from Vercel's x-vercel-ip-country header, when present.
     country: String
   },

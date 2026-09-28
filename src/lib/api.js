@@ -63,6 +63,8 @@ export const api = {
 
   listAccessLinks: () => request('/access-links'),
   accessLinkStats: () => request('/access-links/stats'),
+  ownerStatus: () => request('/access-links/owner'),
+  setOwner: (on) => request('/access-links/owner', { method: on ? 'POST' : 'DELETE' }),
   createAccessLink: (label) => request('/access-links', { method: 'POST', body: { label } }),
   setAccessLinkActive: (id, active) => request(`/access-links/${id}`, { method: 'PATCH', body: { active } }),
   deleteAccessLink: (id) => request(`/access-links/${id}`, { method: 'DELETE' }),

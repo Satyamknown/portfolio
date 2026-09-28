@@ -5,6 +5,7 @@ import AccessLinkEvent from '../models/AccessLinkEvent.js';
 import { requireAuth } from '../middleware/auth.js';
 import { createAccessCookie } from '../lib/access.js';
 import { classifyVisitor } from '../lib/visitor.js';
+import { clearOwnerCookie, createOwnerCookie, isOwner } from '../lib/owner.js';
 
 const router = Router();
 const MAX_LABEL_LENGTH = 80;
@@ -39,11 +40,13 @@ export async function openAccessLink(req, res, next) {
   try {
     const token = req.params.token || '';
     const visitor = classifyVisitor(req);
+    // The owner's own browsers (marked from the dashboard) are logged but never counted either.
+    const owner = isOwner(req);
     const now = new Date();
     // Crawlers, unfurlers and mail scanners are logged but never counted as opens.
     let link = null;
     if (TOKEN_PATTERN.test(token)) {
-      link = visitor.bot
+      link = visitor.bot || owner
         ? await AccessLink.findOne({ token, active: true }, { _id: 1 })
         : await AccessLink.findOneAndUpdate(
             { token, active: true },
@@ -57,7 +60,7 @@ export async function openAccessLink(req, res, next) {
     if (link) {
       // Awaited so a serverless freeze cannot drop it; a failed write must not block the visitor.
       try {
-        await AccessLinkEvent.create({ link: link._id, at: now, to, ...visitor });
+        await AccessLinkEvent.create({ link: link._id, at: now, to, ...visitor, owner });
       } catch (err) {
         console.error('Could not record a share-link open:', err.message);
       }
@@ -75,18 +78,32 @@ export async function openAccessLink(req, res, next) {
 
 router.use(requireAuth);
 
+// "Don't count my own clicks": marks this browser as the owner's. The dashboard calls it
+// on every visit, so any browser where the owner signs in stops counting.
+router.get('/owner', (req, res) => res.json({ owner: isOwner(req) }));
+router.post('/owner', (req, res) => {
+  res.setHeader('Set-Cookie', createOwnerCookie());
+  res.json({ owner: true });
+});
+router.delete('/owner', (req, res) => {
+  res.setHeader('Set-Cookie', clearOwnerCookie());
+  res.json({ owner: false });
+});
+
 // Per-link breakdown for the Resume tracking view: human opens by landing page, and
 // bot/preview hits kept apart. Covers the 180 days the events are kept.
 router.get('/stats', async (req, res, next) => {
   try {
     const rows = await AccessLinkEvent.aggregate([
-      { $group: { _id: { link: '$link', bot: '$bot', to: '$to' }, count: { $sum: 1 }, lastAt: { $max: '$at' } } }
+      { $group: { _id: { link: '$link', bot: '$bot', owner: '$owner', to: '$to' }, count: { $sum: 1 }, lastAt: { $max: '$at' } } }
     ]);
 
     const stats = {};
     for (const { _id, count, lastAt } of rows) {
-      const entry = (stats[_id.link] ||= { pages: {}, humanEvents: 0, bots: 0, lastBotAt: null });
-      if (_id.bot) {
+      const entry = (stats[_id.link] ||= { pages: {}, humanEvents: 0, bots: 0, lastBotAt: null, mine: 0 });
+      if (_id.owner) {
+        entry.mine += count;
+      } else if (_id.bot) {
         entry.bots += count;
         if (!entry.lastBotAt || lastAt > entry.lastBotAt) entry.lastBotAt = lastAt;
       } else {

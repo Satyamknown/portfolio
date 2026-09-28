@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { api } from '../lib/api.js';
 
 // Landing pages worth a column. Anything else a link reached is summed under "Other".
 const PAGES = [
@@ -44,6 +45,12 @@ function Count({ value, muted }) {
 
 export default function ResumeTracking({ links, stats }) {
   const [filter, setFilter] = useState('all');
+  // Any browser where the owner opens this dashboard stops counting its own share-link clicks.
+  const [owner, setOwner] = useState(null);
+  useEffect(() => {
+    api.setOwner(true).then((r) => setOwner(r.owner)).catch(() => setOwner(null));
+  }, []);
+  const toggleOwner = () => api.setOwner(!owner).then((r) => setOwner(r.owner)).catch(() => {});
   const now = Date.now();
 
   const rows = useMemo(() => {
@@ -79,6 +86,16 @@ export default function ResumeTracking({ links, stats }) {
           <p className="track-summary">
             {opened} of {rows.length} links opened by a person. Page counts and bot hits cover the last 180 days.
           </p>
+          {owner !== null && (
+            <p className="track-owner">
+              {owner
+                ? 'This browser is marked as yours: your own clicks on these links are not counted. Open this dashboard once on your phone to do the same there.'
+                : 'This browser is counted like any visitor.'}{' '}
+              <button type="button" className="track-owner-toggle" onClick={toggleOwner}>
+                {owner ? 'Count this browser again' : "Don't count this browser"}
+              </button>
+            </p>
+          )}
         </div>
         <div className="track-filter" role="group" aria-label="Filter links">
           {FILTERS.map((f) => (
