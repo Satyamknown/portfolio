@@ -451,6 +451,40 @@ button, .btn, .af-submit, a{
 .fx-reel.is-driving{animation:none;will-change:width,height,transform,opacity}
 .fx-reel-media{width:100%;height:100%;object-fit:cover;display:block}
 
+/* Stat reel: the capsule's content until a real showreel exists. Each card is
+   one case study's headline number; they crossfade in place. Sizes use the
+   capsule's own width (cqw) so "106" fits at every breakpoint. */
+.stat-reel{
+  position:absolute;inset:0;display:block;container-type:inline-size;
+  background:var(--paper);color:var(--ink);text-decoration:none;
+}
+.stat-reel:focus-visible{outline:2px solid var(--green);outline-offset:-6px}
+.stat-reel-card{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:30% 11% 34%;text-align:center;
+  opacity:0;transform:translateY(12px);transition:opacity .7s ease,transform .7s ease;
+}
+.stat-reel-card[data-active="true"]{opacity:1;transform:none}
+.stat-reel-label{
+  font-family:var(--mono);font-size:max(9px,4.4cqw);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);max-width:80%;line-height:1.3;
+}
+.stat-reel-value{
+  margin-top:auto;font-family:var(--font);font-weight:700;font-size:40cqw;line-height:.86;
+  letter-spacing:-.07em;font-variant-numeric:tabular-nums;
+}
+.stat-reel-rule{width:46%;height:3px;margin:9% 0 7%;background:var(--green)}
+.stat-reel-line{font-size:max(12px,6.2cqw);font-weight:600;line-height:1.2;letter-spacing:-.02em;max-width:86%}
+.stat-reel-project{
+  margin-top:auto;font-family:var(--font);font-weight:700;font-size:max(13px,7.6cqw);letter-spacing:-.04em;
+}
+.stat-reel-dots{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);display:flex;gap:6px}
+.stat-reel-dots i{
+  display:block;width:6px;height:6px;border-radius:3px;background:var(--line-hover);
+  transition:width .4s ease,background .4s ease;
+}
+.stat-reel-dots i[data-active="true"]{width:18px;background:var(--green)}
+
 /* Scroll distance the expand → hold → exit sequence plays out over.
    JS sets the real height so no-JS and mobile keep a flush layout. */
 .fx-reel-track{height:0}
