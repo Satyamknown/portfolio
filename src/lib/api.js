@@ -40,6 +40,13 @@ export const api = {
   unlockAccess: (password) => request('/access', { method: 'POST', body: { password } }),
   lockAccess: () => request('/access', { method: 'DELETE' }),
 
+  requestLoginLink: (email) => request('/auth/magic-link', { method: 'POST', body: { email } }),
+  verifyLoginLink: async (token) => {
+    const data = await request('/auth/magic-link/verify', { method: 'POST', body: { token } });
+    auth.setToken(data.token);
+    return data;
+  },
+
   login: async (email, password) => {
     const data = await request('/auth/login', { method: 'POST', body: { email, password } });
     auth.setToken(data.token);

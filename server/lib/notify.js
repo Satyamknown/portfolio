@@ -6,7 +6,7 @@ import { notificationEmail, autoReplyEmail } from './emails.js';
 
 const FROM_FALLBACK = 'Portfolio <onboarding@resend.dev>';
 
-async function send({ to, replyTo, subject, html, text }) {
+export async function send({ to, replyTo, subject, html, text }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || !to) return { sent: false, reason: 'not configured' };
 
