@@ -112,7 +112,9 @@ function markBursts(events) {
 
 router.get('/stats', async (req, res, next) => {
   try {
-    const events = await AccessLinkEvent.find({}, { link: 1, at: 1, to: 1, bot: 1, owner: 1 }).sort({ at: 1 }).lean();
+    const events = await AccessLinkEvent.find({}, { link: 1, at: 1, to: 1, bot: 1, owner: 1, device: 1, country: 1 })
+      .sort({ at: 1 })
+      .lean();
     const byLink = new Map();
     for (const e of events) {
       const key = String(e.link);
@@ -123,6 +125,14 @@ router.get('/stats', async (req, res, next) => {
     const stats = {};
     for (const [key, list] of byLink) {
       const entry = { pages: {}, opens: 0, lastOpenedAt: null, bots: 0, lastBotAt: null, scans: 0, mine: 0 };
+      // The last few hits with their kind, so a suspicious count can be checked by hand.
+      entry.recent = list.slice(-12).map((e) => ({
+        at: e.at,
+        to: e.to,
+        device: e.device,
+        country: e.country,
+        kind: e.owner ? 'mine' : e.bot ? 'bot' : 'person'
+      }));
       const people = list.filter((e) => !e.bot && !e.owner);
       const burst = markBursts(people);
       people.forEach((e, i) => {
