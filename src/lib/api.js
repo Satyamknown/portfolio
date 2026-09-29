@@ -74,6 +74,8 @@ export const api = {
   setOwner: (on) => request('/access-links/owner', { method: on ? 'POST' : 'DELETE' }),
   createAccessLink: (label) => request('/access-links', { method: 'POST', body: { label } }),
   setAccessLinkActive: (id, active) => request(`/access-links/${id}`, { method: 'PATCH', body: { active } }),
+  setAccessLinkHitOwner: (id, eventId, owner) =>
+    request(`/access-links/${id}/events/${eventId}`, { method: 'PATCH', body: { owner } }),
   deleteAccessLink: (id) => request(`/access-links/${id}`, { method: 'DELETE' }),
 
   submitAppointment: (payload) => request('/appointments', { method: 'POST', body: payload })

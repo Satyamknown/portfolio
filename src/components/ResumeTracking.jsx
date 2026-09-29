@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api.js';
 
 // Landing pages worth a column. Anything else a link reached is summed under "Other".
@@ -9,6 +9,16 @@ const PAGES = [
   { to: '/work/skooltag', label: 'Skooltag' }
 ];
 const KNOWN = new Set(PAGES.map((p) => p.to));
+
+const PAGE_LABEL = Object.fromEntries(PAGES.map((p) => [p.to, p.label]));
+
+// What each logged hit counted as, for the per-company hit list.
+const KIND = {
+  person: 'Counted as an open',
+  mine: 'Yours, not counted',
+  bot: 'Bot, not counted',
+  scan: 'Scanner burst, not counted'
+};
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -55,6 +65,18 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
     Promise.resolve(onRefresh()).finally(() => setRefreshing(false));
   };
   const [filter, setFilter] = useState('all');
+  const [hitsFor, setHitsFor] = useState(null);
+  const [busyHit, setBusyHit] = useState(null);
+  const [hitError, setHitError] = useState('');
+  const markHit = (linkId, hitId, mine) => {
+    setBusyHit(hitId);
+    setHitError('');
+    api
+      .setAccessLinkHitOwner(linkId, hitId, mine)
+      .then(() => onRefresh && onRefresh())
+      .catch((e) => setHitError(e.message))
+      .finally(() => setBusyHit(null));
+  };
   // Any browser where the owner opens this dashboard stops counting its own share-link clicks.
   const [owner, setOwner] = useState(null);
   useEffect(() => {
@@ -76,6 +98,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
           pages: s.pages,
           other,
           opens: s.opens || 0,
+          recent: s.recent || [],
           bots: (s.bots || 0) + (s.scans || 0),
           lastBotAt: s.lastBotAt ? new Date(s.lastBotAt) : null,
           last: s.lastOpenedAt ? new Date(s.lastOpenedAt) : null
@@ -89,6 +112,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
     filter === 'opened' ? r.opens > 0 : filter === 'unopened' ? !(r.opens > 0) : true
   );
   const showOther = rows.some((r) => r.other > 0);
+  const columns = PAGES.length + (showOther ? 5 : 4);
 
   return (
     <div className="track">
@@ -100,10 +124,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
           </p>
           {updatedAt && (
             <p className="track-updated">
-              Live: updated {timeFormat.format(updatedAt)}, refreshes every minute.{' '}
-              <button type="button" className="link-button" onClick={refreshNow} disabled={refreshing}>
-                {refreshing ? 'Refreshing…' : 'Refresh now'}
-              </button>
+              Updated {timeFormat.format(updatedAt)} IST. New opens load by themselves every minute.
             </p>
           )}
           {owner !== null && (
@@ -117,18 +138,25 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
             </p>
           )}
         </div>
-        <div className="track-filter" role="group" aria-label="Filter links">
-          {FILTERS.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              className={`btn btn-sm ${filter === f.id ? 'btn-primary' : 'btn-ghost'}`}
-              aria-pressed={filter === f.id}
-              onClick={() => setFilter(f.id)}
-            >
-              {f.label}
+        <div className="track-actions">
+          {onRefresh && (
+            <button type="button" className="btn btn-sm btn-ghost" onClick={refreshNow} disabled={refreshing}>
+              {refreshing ? 'Refreshing…' : 'Refresh'}
             </button>
-          ))}
+          )}
+          <div className="track-filter" role="group" aria-label="Filter links">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={`btn btn-sm ${filter === f.id ? 'btn-primary' : 'btn-ghost'}`}
+                aria-pressed={filter === f.id}
+                onClick={() => setFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -151,54 +179,99 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
           <tbody>
             {shown.length === 0 ? (
               <tr>
-                <td className="track-empty" colSpan={PAGES.length + (showOther ? 5 : 4)}>
+                <td className="track-empty" colSpan={columns}>
                   {filter === 'opened' ? 'Nobody has opened a link yet.' : 'Every link has been opened.'}
                 </td>
               </tr>
             ) : (
-              shown.map(({ link, opens, pages, other, bots, lastBotAt, last }) => (
-                <tr key={link._id} className={opens > 0 ? 'is-opened' : ''}>
-                  <th scope="row" className="track-company">
-                    <span className="track-label">{link.label}</span>
-                    {(link.appliedAt || link.jobUrl) && (
-                      <span className="track-applied">
-                        {link.appliedAt ? `Applied ${appliedFormat.format(new Date(link.appliedAt))}` : 'Not applied'}
-                        {link.jobUrl && (
-                          <>
-                            {' · '}
-                            <a href={link.jobUrl} target="_blank" rel="noopener noreferrer">
-                              {link.role || 'Job posting'} ↗
-                            </a>
-                          </>
-                        )}
+              shown.map(({ link, opens, recent, pages, other, bots, lastBotAt, last }) => (
+                <Fragment key={link._id}>
+                  <tr className={opens > 0 ? 'is-opened' : ''}>
+                    <th scope="row" className="track-company">
+                      <span className="track-label">{link.label}</span>
+                      {(link.appliedAt || link.jobUrl) && (
+                        <span className="track-applied">
+                          {link.appliedAt ? `Applied ${appliedFormat.format(new Date(link.appliedAt))}` : 'Not applied'}
+                          {link.jobUrl && (
+                            <>
+                              {' · '}
+                              <a href={link.jobUrl} target="_blank" rel="noopener noreferrer">
+                                {link.role || 'Job posting'} ↗
+                              </a>
+                            </>
+                          )}
+                        </span>
+                      )}
+                      <span className="track-token">
+                        {link.token}
+                        {!link.active && <span className="status-tag draft">Paused</span>}
                       </span>
-                    )}
-                    <span className="track-token">
-                      {link.token}
-                      {!link.active && <span className="status-tag draft">Paused</span>}
-                    </span>
-                  </th>
-                  <td className="num">
-                    <span className={`track-opens ${opens ? '' : 'is-zero'}`}>{opens}</span>
-                  </td>
-                  <td>
-                    {last ? (
-                      <>
-                        <span className="track-rel">{relative(last, now)}</span>
-                        <span className="track-abs">{istFormat.format(last)}</span>
-                      </>
-                    ) : (
-                      <span className="track-never">Never</span>
-                    )}
-                  </td>
-                  {PAGES.map((p) => (
-                    <td key={p.to} className="num"><Count value={pages[p.to]} /></td>
-                  ))}
-                  {showOther && <td className="num"><Count value={other} /></td>}
-                  <td className="num" title={lastBotAt ? `Last bot hit ${istFormat.format(lastBotAt)} IST` : undefined}>
-                    <Count value={bots} muted />
-                  </td>
-                </tr>
+                      {recent.length > 0 && (
+                        <button
+                          type="button"
+                          className="track-owner-toggle track-hits-toggle"
+                          aria-expanded={hitsFor === link._id}
+                          onClick={() => setHitsFor(hitsFor === link._id ? null : link._id)}
+                        >
+                          {hitsFor === link._id ? 'Hide hits' : 'See hits'}
+                        </button>
+                      )}
+                    </th>
+                    <td className="num">
+                      <span className={`track-opens ${opens ? '' : 'is-zero'}`}>{opens}</span>
+                    </td>
+                    <td>
+                      {last ? (
+                        <>
+                          <span className="track-rel">{relative(last, now)}</span>
+                          <span className="track-abs">{istFormat.format(last)}</span>
+                        </>
+                      ) : (
+                        <span className="track-never">Never</span>
+                      )}
+                    </td>
+                    {PAGES.map((p) => (
+                      <td key={p.to} className="num"><Count value={pages[p.to]} /></td>
+                    ))}
+                    {showOther && <td className="num"><Count value={other} /></td>}
+                    <td className="num" title={lastBotAt ? `Last bot hit ${istFormat.format(lastBotAt)} IST` : undefined}>
+                      <Count value={bots} muted />
+                    </td>
+                  </tr>
+                  {hitsFor === link._id && (
+                    <tr className="track-hits-row">
+                      <td colSpan={columns}>
+                        <p className="track-hits-note">
+                          Latest {recent.length} {recent.length === 1 ? 'hit' : 'hits'}, newest first. If you opened this link yourself from a browser that was not marked, press That was me.
+                        </p>
+                        <ul className="track-hits">
+                          {[...recent].reverse().map((h) => (
+                            <li key={h.id} className={`is-${h.kind}`}>
+                              <span className="track-hit-when">{istFormat.format(new Date(h.at))}</span>
+                              <span className="track-hit-page">{PAGE_LABEL[h.to] || h.to}</span>
+                              <span className="track-hit-device">
+                                {h.device}
+                                {h.country ? `, ${h.country}` : ''}
+                              </span>
+                              <span className="track-hit-kind">{KIND[h.kind] || h.kind}</span>
+                              {(h.kind === 'person' || h.kind === 'mine') && (
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-ghost"
+                                  disabled={busyHit === h.id}
+                                  onClick={() => markHit(link._id, h.id, h.kind === 'person')}
+                                >
+                                  {busyHit === h.id ? 'Saving…' : h.kind === 'person' ? 'That was me' : 'Count it again'}
+                                </button>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        {hitError && <p className="track-hits-error">{hitError}</p>}
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))
             )}
           </tbody>

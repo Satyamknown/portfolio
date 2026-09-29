@@ -133,16 +133,19 @@ router.get('/stats', async (req, res, next) => {
     const stats = {};
     for (const [key, list] of byLink) {
       const entry = { pages: {}, opens: 0, lastOpenedAt: null, bots: 0, lastBotAt: null, scans: 0, mine: 0 };
-      // The last few hits with their kind, so a suspicious count can be checked by hand.
+      const people = list.filter((e) => !e.bot && !e.owner);
+      const burst = markBursts(people);
+      const scanned = new Set([...burst].map((i) => people[i]));
+      // The last few hits with their kind, so a suspicious count can be checked by hand
+      // and a test open from an unmarked browser can be moved to "mine".
       entry.recent = list.slice(-12).map((e) => ({
+        id: String(e._id),
         at: e.at,
         to: e.to,
         device: e.device,
         country: e.country,
-        kind: e.owner ? 'mine' : e.bot ? 'bot' : 'person'
+        kind: e.owner ? 'mine' : e.bot ? 'bot' : scanned.has(e) ? 'scan' : 'person'
       }));
-      const people = list.filter((e) => !e.bot && !e.owner);
-      const burst = markBursts(people);
       people.forEach((e, i) => {
         if (burst.has(i)) {
           entry.scans += 1;
@@ -164,6 +167,43 @@ router.get('/stats', async (req, res, next) => {
     }
     res.json(stats);
   } catch (err) {
+    next(err);
+  }
+});
+
+// "That was me": moves one logged hit into or out of the owner's own clicks, for a test
+// open from a browser that was not marked yet (a phone, say). Bot hits stay bots.
+router.patch('/:id/events/:eventId', async (req, res, next) => {
+  try {
+    const { owner } = req.body || {};
+    if (typeof owner !== 'boolean') {
+      return res.status(400).json({ error: 'Send owner as true or false.' });
+    }
+
+    const event = await AccessLinkEvent.findOneAndUpdate(
+      { _id: req.params.eventId, link: req.params.id, bot: false, owner: !owner },
+      { $set: { owner } },
+      { returnDocument: 'after' }
+    );
+    if (!event) return res.status(404).json({ error: 'Hit not found.' });
+
+    // Keep the running total on the link in step, since Manage links shows it.
+    const link = await AccessLink.findById(event.link);
+    if (link) {
+      link.opens = Math.max(0, (link.opens || 0) + (owner ? -1 : 1));
+      if (owner && link.lastOpenedAt?.getTime() === event.at.getTime()) {
+        const previous = await AccessLinkEvent.findOne({ link: link._id, bot: false, owner: false }, { at: 1 })
+          .sort({ at: -1 })
+          .lean();
+        link.lastOpenedAt = previous ? previous.at : undefined;
+      } else if (!owner && (!link.lastOpenedAt || event.at > link.lastOpenedAt)) {
+        link.lastOpenedAt = event.at;
+      }
+      await link.save();
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    if (err.name === 'CastError') return res.status(404).json({ error: 'Hit not found.' });
     next(err);
   }
 });

@@ -965,6 +965,7 @@ a.section-note:hover{color:var(--ink)}
 .track-owner{font-family:var(--mono);font-size:12px;color:var(--green-text);margin-top:6px;max-width:72ch}
 .track-owner-toggle{background:none;border:0;padding:0;font:inherit;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .track-owner-toggle:hover{color:var(--ink)}
+.track-actions{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 .track-filter{display:flex;gap:6px;flex-wrap:wrap}
 .track-scroll{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
 .track-table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}
@@ -978,7 +979,6 @@ a.section-note:hover{color:var(--ink)}
 .track-company{font-weight:400}
 .track-label{display:block;font-weight:600;font-size:15px;letter-spacing:-.01em;color:var(--ink)}
 .track-updated{margin:6px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)}
-.track-updated .link-button{font:inherit}
 .track-applied{display:block;margin-top:3px;font-size:12.5px;color:var(--ink-soft)}
 .track-applied a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .track-applied a:hover{color:var(--ink)}
@@ -992,6 +992,17 @@ a.section-note:hover{color:var(--ink)}
 .track-table .is-bot,.track-num.is-bot{color:var(--ink-ghost)}
 .track-table th.is-bot{border-left:1px dashed var(--line-input)}
 .track-table td:last-child{border-left:1px dashed var(--line-input)}
+.track-hits-toggle{display:block;margin-top:6px;font-family:var(--mono);font-size:11.5px}
+.track-table tbody tr.track-hits-row:hover{background:transparent}
+.track-hits-row td{border-top:0;padding-top:0;background:var(--paper)}
+.track-hits-row td:last-child{border-left:0}
+.track-hits-note{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:4px 0 10px}
+.track-hits{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.track-hits li{display:grid;grid-template-columns:minmax(150px,auto) minmax(80px,auto) minmax(90px,auto) 1fr auto;gap:14px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+.track-hits li.is-person .track-hit-kind{color:var(--green-text)}
+.track-hits li.is-bot,.track-hits li.is-scan{color:var(--ink-ghost)}
+.track-hit-when{color:var(--ink)}
+.track-hits-error{margin:8px 0 0;font-family:var(--mono);font-size:12px;color:var(--danger)}
 .track-empty{text-align:center;color:var(--ink-faint);font-family:var(--mono);font-size:12px;padding:32px 14px}
 
 .empty{text-align:center;padding:56px 24px;border:1px dashed var(--line-input);color:var(--ink-soft)}
