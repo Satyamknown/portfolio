@@ -141,17 +141,23 @@ export default function Home() {
                 <div className="prog-name">{item.name}</div>
                 <div className="prog-detail">{item.detail}</div>
               </div>
-              <div
-                className="prog-track"
-                role="progressbar"
-                aria-valuenow={item.percent}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label={item.name}
-              >
-                <div className="prog-fill" style={{ width: `${item.percent}%` }} />
-              </div>
-              <span className="prog-pct">{item.percent}%</span>
+              {/* Ongoing work gets a status word, not a bar; the empty cell keeps
+                  the grid columns aligned with the rows that do have one. */}
+              {item.status ? (
+                <span className="prog-track is-status" aria-hidden="true" />
+              ) : (
+                <div
+                  className="prog-track"
+                  role="progressbar"
+                  aria-valuenow={item.percent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={item.name}
+                >
+                  <div className="prog-fill" style={{ width: `${item.percent}%` }} />
+                </div>
+              )}
+              <span className="prog-pct">{item.status ?? `${item.percent}%`}</span>
             </div>
           ))}
         </div>

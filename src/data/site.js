@@ -29,7 +29,7 @@ export const home = {
       ' for four years — shipping the parts of the product most PMs only spec. Now making the product work explicit.'
   },
   availability: 'Open to opportunities — 2026',
-  progressIntro: 'Three things built between July and October 2026, in public.',
+  progressIntro: 'What I’m working on now.',
   aboutStatement:
     "For four years I've been the de facto product owner on work that never had a PM assigned to it.",
   aboutPara:
@@ -73,25 +73,28 @@ export const requirements = [
   }
 ];
 
+// Each item shows either `percent` (a project with a finish line) or `status`
+// (ongoing work, where a bar would be a made-up number).
 export const inProgress = {
-  intro: 'Three things I’m building between July and October 2026, in public.',
+  intro: 'What I’m working on now.',
   items: [
     {
-      name: 'Discovery Doc',
-      percent: 70,
+      name: 'Design Lead at Rsquare Web Studio',
+      status: 'Ongoing',
       detail:
-        'A full product discovery write-up, run the way a PM would run their first ninety days on an unfamiliar product.'
+        'Product work for clients in India, Canada, and the UK since January 2022; right now that’s Stratalite, a construction project and vendor platform, where I build user-flow boards for every role and QA the live product end to end.'
     },
     {
       name: 'RoofSpark AI Audit Tool',
       percent: 40,
       detail:
-        'A scoped, shippable AI-powered marketing audit for a live roofing client. The interesting constraint: RoofSpark’s whole positioning is “Real people. Not software.” — so the tool has to do the diagnosis without pretending to do the work a human does.'
+        'A scoped, shippable AI-powered marketing audit for a live roofing client. The interesting constraint: RoofSpark’s whole positioning is “Real people. Not software.” So the tool has to do the diagnosis without pretending to do the work a human does.'
     },
     {
-      name: 'This portfolio',
-      percent: 95,
-      detail: 'Spec’d, designed, and shipped as its own small product. You’re looking at it.'
+      name: 'flowmap',
+      status: 'Ongoing',
+      detail:
+        'A Chrome extension and Figma plugin I built that captures a live web app’s user flows into FigJam boards.'
     }
   ]
 };

@@ -624,6 +624,7 @@ button, .btn, .af-submit, a{
 .prog-detail{margin-top:4px;font-size:13px;font-weight:300;color:var(--ink-faint);max-width:60ch}
 .prog-track{height:2px;background:var(--line);position:relative}
 .prog-fill{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+.prog-track.is-status{background:none}
 .prog-pct{font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-align:right}
 @media(max-width:700px){
   .prog-row{grid-template-columns:40px 1fr 60px;gap:14px}
