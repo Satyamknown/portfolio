@@ -33,7 +33,7 @@ export const home = {
   aboutStatement:
     "For four years I've been the de facto product owner on work that never had a PM assigned to it.",
   aboutPara:
-    'Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi — the brief arrived as "make this look better," and the job turned out to be figuring out what to build and why. Now I\'m making that explicit: an 84-day sprint, three things built in public.',
+    'Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi. The brief arrived as "make this look better," and the job turned out to be figuring out what to build and why. Now I\'m making that the job: moving into product management.',
   contactHand: '話しましょう'
 };
 
@@ -110,9 +110,9 @@ export const bio = {
   medium:
     'Abhishek Manjhi is a Design Lead in Mumbai moving into product management. Over four years he’s owned funnels, design systems, and internal tools for clients in Canada, the UK, and India — usually as the only person in the room thinking about the product. He ships his own tools, too.',
   long: [
-    'I’m a Design Lead based in Mumbai, and for four years I’ve been the de facto product owner on work that never had a PM assigned to it. Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi — in each case the brief arrived as “make this look better,” and the actual job turned out to be figuring out what to build and why.',
+    'I’m a Design Lead based in Mumbai, and for four years I’ve been the de facto product owner on work that never had a PM assigned to it. Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi. In each case the brief arrived as “make this look better,” and the actual job turned out to be figuring out what to build and why.',
     'That gap is what pushed me toward product management. I already do discovery, prioritization, and stakeholder work; I just do it under a design title, without the vocabulary or the frameworks to make it legible to anyone outside the project.',
-    'So I’m making it explicit. Over an 84-day sprint I’m building three things in public — a discovery doc, an AI audit tool for a live client, and this site — and writing down what I learn along the way.'
+    'So I’m making it explicit: I’m moving into product management, and writing down what I learn along the way.'
   ]
 };
 
