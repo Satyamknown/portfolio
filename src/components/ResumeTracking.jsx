@@ -16,6 +16,8 @@ const FILTERS = [
   { id: 'unopened', label: 'Not opened' }
 ];
 
+const timeFormat = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
 const appliedFormat = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' });
 
 const istFormat = new Intl.DateTimeFormat('en-IN', {
@@ -45,7 +47,13 @@ function Count({ value, muted }) {
   return <span className={`track-num ${value ? '' : 'is-zero'} ${muted ? 'is-bot' : ''}`}>{value || 0}</span>;
 }
 
-export default function ResumeTracking({ links, stats }) {
+export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshNow = () => {
+    if (!onRefresh) return;
+    setRefreshing(true);
+    Promise.resolve(onRefresh()).finally(() => setRefreshing(false));
+  };
   const [filter, setFilter] = useState('all');
   // Any browser where the owner opens this dashboard stops counting its own share-link clicks.
   const [owner, setOwner] = useState(null);
@@ -90,6 +98,14 @@ export default function ResumeTracking({ links, stats }) {
           <p className="track-summary">
             {opened} of {rows.length} links opened by a person. Page counts and bot hits cover the last 180 days.
           </p>
+          {updatedAt && (
+            <p className="track-updated">
+              Live: updated {timeFormat.format(updatedAt)}, refreshes every minute.{' '}
+              <button type="button" className="link-button" onClick={refreshNow} disabled={refreshing}>
+                {refreshing ? 'Refreshing…' : 'Refresh now'}
+              </button>
+            </p>
+          )}
           {owner !== null && (
             <p className="track-owner">
               {owner

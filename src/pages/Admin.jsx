@@ -36,6 +36,7 @@ export default function Admin() {
   const [homeSettings, setHomeSettings] = useState({ videoUrl: '', videoPoster: '' });
   const [links, setLinks] = useState([]);
   const [linkStats, setLinkStats] = useState({});
+  const [statsAt, setStatsAt] = useState(null);
   const [linkLabel, setLinkLabel] = useState('');
   const [creatingLink, setCreatingLink] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
@@ -63,6 +64,7 @@ export default function Admin() {
       setHomeSettings(settings);
       setLinks(ls);
       setLinkStats(stats);
+      setStatsAt(new Date());
     } catch (e) {
       if (e.message.toLowerCase().includes('sign in') || e.message.includes('expired')) {
         navigate('/login');
@@ -73,6 +75,34 @@ export default function Admin() {
       setLoaded(true);
     }
   }
+
+  // Only the share links and their stats; used by the live refresh on the Share links tab.
+  async function refreshLinks() {
+    try {
+      const [ls, stats] = await Promise.all([api.listAccessLinks(), api.accessLinkStats()]);
+      setLinks(ls);
+      setLinkStats(stats);
+      setStatsAt(new Date());
+    } catch {
+      // A failed background refresh keeps the last good numbers on screen.
+    }
+  }
+
+  // While the Share links tab is open and visible, pull fresh opens every minute, and at
+  // once when the tab comes back into view, so a company opening a resume shows up without
+  // a manual reload.
+  useEffect(() => {
+    if (tab !== 'links') return undefined;
+    const tick = () => {
+      if (document.visibilityState === 'visible') refreshLinks();
+    };
+    const id = window.setInterval(tick, 60 * 1000);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [tab]);
 
   function signOut() {
     auth.clear();
@@ -442,7 +472,7 @@ export default function Admin() {
         </div>
       ) : tab === 'links' ? (
         <>
-          {links.length > 0 && <ResumeTracking links={links} stats={linkStats} />}
+          {links.length > 0 && <ResumeTracking links={links} stats={linkStats} updatedAt={statsAt} onRefresh={refreshLinks} />}
 
           <h3 className="track-title track-manage">Manage links</h3>
           <form className="panel share-form" onSubmit={createLink}>
