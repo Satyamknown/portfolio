@@ -403,5 +403,17 @@
     "jobUrl": "https://www.naukri.com/job-listings-release-and-program-manager-ptc-pune-2-to-5-years-280926000887",
     "role": "Release and Program Manager",
     "appliedAt": "2026-09-30"
+  },
+  {
+    "label": "Rubiscape",
+    "token": "r-rubiscape-d4f1",
+    "jobUrl": "https://careers.rubiscape.com/jobs/Careers/145722000001054184",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "QAD",
+    "token": "r-qad-xu9v",
+    "jobUrl": "https://www.naukri.com/job-listings-program-manager-value-creation-qad-india-pvt-ltd-pune-2-to-5-years-290926502980",
+    "role": "Program Manager, Value Creation"
   }
 ]
