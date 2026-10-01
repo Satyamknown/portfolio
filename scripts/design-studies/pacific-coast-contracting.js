@@ -4,7 +4,7 @@ const img = (name) => `/design/pacific-coast-contracting/${name}.webp`;
 
 export default {
   slug: 'pacific-coast-contracting',
-  version: 'v1.3',
+  version: 'v1.4',
   order: 2,
   published: true,
   title: 'Pacific Coast Contracting',
@@ -20,6 +20,16 @@ export default {
   heroAlt: 'The recommendation slide: one umbrella brand, PCC, and three trade brands, PCC Renovations, PCC Roofing and PCC Decking',
   impact: [
     {
+      value: '~12',
+      label: 'leads a month now come from local search',
+      note: 'Client-reported by the owner, October 2026'
+    },
+    {
+      value: '31,625',
+      label: 'organic Google impressions and 102 clicks for pccroofing.ca in 90 days',
+      note: 'Search Console, 14 Jun to 11 Sep 2026. One site only.'
+    },
+    {
       value: '1 → 4',
       label: 'brands, from my recommendation to split the business',
       note: 'Accepted by the client within the first three months'
@@ -28,16 +38,6 @@ export default {
       value: '88',
       label: 'web pages shipped across 4 sites with the dev team',
       note: '36 city pages and 30 project pages'
-    },
-    {
-      value: '37',
-      label: 'pages of real scope found when I checked the roofing plan against the live site',
-      note: '64 planned: 27 live, 17 folded into a hub, 20 missing'
-    },
-    {
-      value: '163 → 27',
-      label: 'items the client thought were pending, reconciled to what was really open',
-      note: '136 of them, 83%, were already done. From one 258-item tracker.'
     }
   ],
   sections: [
@@ -88,7 +88,7 @@ In local search, trade-specific brands were winning, because the name, the searc
 
 For PCC Roofing the plan grew from **33 pages to 64**, each with a primary keyword and a note on how it would beat the named competitors.
 
-Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,625 organic Google impressions and 102 clicks. That is the site's result, built by the dev team, not mine alone.`,
+What that did for search is at the end of this page.`,
       images: [
         {
           src: img('sitemap-ia'),
@@ -130,25 +130,6 @@ Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,
       ]
     },
     {
-      type: 'gallery',
-      label: 'The live roofing site',
-      heading: 'PCC Roofing, live',
-      body: 'The roofing site the plan was checked against. I designed it; the dev team built it.',
-      layout: 'grid-2',
-      images: [
-        {
-          src: img('live-roofing-home'),
-          alt: 'PCC Roofing homepage, first screen: the headline Greater Vancouver\'s roof replacement experts, a 5.0 Google rating and a free assessment form in the hero',
-          caption: 'The live PCC Roofing homepage I designed, built by the dev team.'
-        },
-        {
-          src: img('live-roofing-residential'),
-          alt: 'PCC Roofing residential roof replacement page, first screen: headline, short intro, four trust points and a photo of a finished roof',
-          caption: 'Residential roof replacement, the main service page, live.'
-        }
-      ]
-    },
-    {
       type: 'text',
       label: 'Process',
       heading: 'Research, structure, plans, then the build',
@@ -156,15 +137,26 @@ Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,
 - **Brand structure:** one umbrella brand and three trade brands.
 - **Information architecture:** a sitemap per brand, every page tied to a keyword.
 - **Page plans and landing layouts,** handed to the dev team.
-- **QA:** 27 issues logged in 4 brand catalogs, and 4 lead-loss incidents documented and fixed with the team, each turned into a team rule.`
+- **QA:** 27 issues logged in 4 brand catalogs, and 4 lead-loss incidents documented and fixed with the team, each turned into a team rule.
+- **Reconciliation:** the client's 163 "pending" items checked against a 258-item tracker. 136 of them, 83%, were already done; 27 were really open.`
     },
     {
       type: 'gallery',
-      label: 'Final screens',
-      heading: 'The live sites',
-      body: 'Live pages: I designed them, and the dev team built them from my designs and site plans. Phone numbers blurred.',
+      label: 'Inside the sites',
+      heading: 'Service and project pages, live',
+      body: 'Inner pages across the brands: I designed them, and the dev team built them from my designs and site plans. Phone numbers blurred.',
       layout: 'grid-2',
       images: [
+        {
+          src: img('live-roofing-residential'),
+          alt: 'PCC Roofing residential roof replacement page, first screen: headline, short intro, four trust points and a photo of a finished roof',
+          caption: 'PCC Roofing: residential roof replacement, the main service page.'
+        },
+        {
+          src: img('live-decking-new-deck'),
+          alt: 'PCC Decking new deck installation page, first screen: centred headline Build the outdoor space you have always imagined, a booking button and a wide photo of a finished deck',
+          caption: 'PCC Decking: new deck installation.'
+        },
         {
           src: img('live-renovations-commercial'),
           alt: 'PCC Renovations commercial renovation page: hero, overview and service blocks',
@@ -194,6 +186,49 @@ Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,
       body: `- **Build the 37 remaining roofing pages and the 24 new renovation pages** already scoped.
 - **Run the two landing layouts against each other** once the paid campaign restarts.
 - **Set up a weekly check** that compares form submissions, contacts created and conversions recorded. It would have caught three of the four lead-loss incidents within days.`
+    },
+    {
+      type: 'text',
+      label: 'Results',
+      heading: 'Local search now brings in work',
+      body: `- **About 12 leads a month now come from local search** (client-reported by the owner, October 2026).
+- **31,625 organic Google impressions and 102 clicks for pccroofing.ca** over 90 days, 14 Jun to 11 Sep 2026, from Search Console. That is one site's search visibility, built by the dev team, not my result alone.
+- **88 pages live across the four sites,** including 36 city pages and 30 project pages, each planned around a search term.
+- **Room to grow:** at the August check, 27 of the 64 planned roofing pages were live, and 37 pages of scope were still to build.`
+    },
+    {
+      type: 'gallery',
+      label: 'The brands, live',
+      heading: 'Four sites, one system, live',
+      body: `I designed all four sites as one system: shared type, layout and form patterns, with a colour and a pattern for each trade. The dev team built them. Phone numbers blurred.
+
+- **Pacific Coast Contracting** (pacificcoastcontracting.ca): the umbrella brand. One contractor for the whole home, and the way into each trade.
+- **PCC Roofing** (pccroofing.ca): roof replacement, repair and urgent work, where searches skew urgent.
+- **PCC Renovations** (pccrenovations.ca): kitchens, bathrooms and full renovations, for clients who research before they hire.
+- **PCC Decking** (pccdecking.com): new decks, replacements and waterproofing, a seasonal trade with its own search terms.`,
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('live-umbrella-home'),
+          alt: 'Pacific Coast Contracting homepage, first screen: headline One trusted partner for every part of your home, an assessment form, and a kitchen photo with links to the three trade brands',
+          caption: 'Pacific Coast Contracting, the umbrella site.'
+        },
+        {
+          src: img('live-roofing-home'),
+          alt: 'PCC Roofing homepage, first screen: the headline Greater Vancouver\'s roof replacement experts, a 5.0 Google rating and a free assessment form in the hero',
+          caption: 'PCC Roofing.'
+        },
+        {
+          src: img('live-renovations-home'),
+          alt: 'PCC Renovations homepage, first screen: centred headline Expert property renovations across Greater Vancouver, a one-line consultation form and a row of project photos',
+          caption: 'PCC Renovations.'
+        },
+        {
+          src: img('live-decking-home'),
+          alt: 'PCC Decking homepage, first screen: headline Deck installation and replacement across the Lower Mainland, an assessment form, and a deck photo with a 5.0 rating and 120+ decks completed',
+          caption: 'PCC Decking.'
+        }
+      ]
     }
   ]
 };
