@@ -18,8 +18,9 @@ import stratalite from './design-studies/stratalite.js';
 import pcc from './design-studies/pacific-coast-contracting.js';
 import skooltag from './design-studies/skooltag.js';
 import roohconnect from './design-studies/roohconnect.js';
+import aiDesignWorkflow from './design-studies/ai-design-workflow.js';
 
-const studies = [stratalite, pcc, skooltag, roohconnect];
+const studies = [stratalite, pcc, skooltag, roohconnect, aiDesignWorkflow];
 const force = process.argv.includes('--force');
 
 let localServer = null;
