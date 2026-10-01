@@ -7,7 +7,7 @@
     "dev": "concurrently -n API,WEB -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node server/dev.js",
     "dev:web": "vite",
-    "build": "vite build && node scripts/publish-case-studies.js",
+    "build": "vite build && node scripts/publish-case-studies.js && node scripts/seed-design.js --deploy",
     "preview": "vite preview",
     "lint": "oxlint",
     "hash": "node scripts/hash.js",

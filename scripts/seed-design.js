@@ -3,6 +3,8 @@
 //
 //   node scripts/seed-design.js           write studies whose version changed
 //   node scripts/seed-design.js --force   rewrite every study
+//   node scripts/seed-design.js --deploy  run by `npm run build`: production Vercel builds only,
+//                                         never fails the build, never opens .localdb
 //
 // - Idempotent by slug: running it twice changes nothing the second time.
 // - Before overwriting a study, the old document is copied to `design_study_backups`.
@@ -22,6 +24,18 @@ import aiDesignWorkflow from './design-studies/ai-design-workflow.js';
 
 const studies = [stratalite, pcc, skooltag, roohconnect, aiDesignWorkflow];
 const force = process.argv.includes('--force');
+const deploy = process.argv.includes('--deploy');
+
+// On deploy, same rules as publish-case-studies.js: preview builds share the production
+// database, so only production builds write, and a local `npm run build` writes nothing.
+if (deploy && !process.env.MONGODB_URI) {
+  console.log('[seed-design] MONGODB_URI not set, skipping.');
+  process.exit(0);
+}
+if (deploy && process.env.VERCEL && process.env.VERCEL_ENV !== 'production') {
+  console.log(`[seed-design] ${process.env.VERCEL_ENV} build, skipping.`);
+  process.exit(0);
+}
 
 let localServer = null;
 if (!process.env.MONGODB_URI) {
@@ -62,4 +76,5 @@ try {
   await mongoose.disconnect();
   if (localServer) await localServer.stop();
 }
-process.exit(failed ? 1 : 0);
+// A database hiccup during a deploy must not block the site from shipping.
+process.exit(failed && !deploy ? 1 : 0);
