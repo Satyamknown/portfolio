@@ -4,13 +4,13 @@ const img = (name) => `/design/stratalite/${name}.webp`;
 
 export default {
   slug: 'stratalite',
-  version: 'v1.1',
+  version: 'v1.2',
   order: 1,
   published: true,
   title: 'Stratalite',
   tagline: 'One project workflow for five roles that each see a different product.',
   summary:
-    'A Vancouver B2B SaaS that runs property maintenance and renovation projects, from vendor interest to payment. I owned the UX and UI from the first whiteboard session to the screens now live in beta, and designed the access model the whole product rests on.',
+    'A Vancouver B2B marketplace where property companies post work to vendors, and vendors complete it under the guidance of the company\'s managers. I owned the UX and UI from the first whiteboard session to the screens now live in beta, and designed the access model the whole product rests on.',
   role: 'Design Lead, Rsquare Web Studio',
   client: 'Stratalite, Vancouver',
   timeline: 'About 8 months, 2026. Live in beta.',
@@ -47,7 +47,7 @@ export default {
       heading: 'Five roles, one project, and no shared view of it',
       body: `Property management companies ran projects over WhatsApp, email threads and phone calls. Quotes sat in inboxes, nobody could show what had been agreed, and a director could not see spend across properties.
 
-Stratalite set out to put the whole pipeline in one place: vendor onboarding, projects, shortlisting, site visits, quotes, milestones and payment.
+Stratalite is a marketplace where property companies post work to vendors, and vendors complete it under the guidance of the company's managers. It puts the whole pipeline in one place: vendor onboarding, projects, shortlisting, site visits, quotes, milestones and payment.
 
 The design problem was not the screens. It was that **five roles** (platform admins, company admins, company managers, independent managers and vendors) plus an accounts payable contact with no login all touch the same project, and each needs a different view of it.
 
@@ -89,9 +89,9 @@ The design problem was not the screens. It was that **five roles** (platform adm
 - **Company managers** need to run projects, but only on the properties their company assigned them.
 - **Independent managers** look like company managers, but they own their properties and have nobody above them.
 - **Company admins** need oversight of every property and every manager.
-- **Platform admins** run Stratalite itself, but running the platform should not mean seeing a client's pricing.
+- **Platform admins** run Stratalite itself and step in when a project goes wrong, but they should not start a client's work or bill for it.
 
-So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at three levels: full, conditional or none. The design lives in the conditional cells. "Assigned property only", "submitted to them", "if shared to them", "own only": each one is a rule a screen has to show, hide or explain.`
+So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at three levels: full, conditional or none. The design lives in the conditional cells. "Assigned property only", "submitted to them", "brief until shortlisted", "own only": each one is a rule a screen has to show, hide or explain.`
     },
     {
       type: 'matrix',
@@ -104,12 +104,21 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
           {
             name: 'Property and project',
             rows: [
-              { action: 'Create property', cells: ['full', 'full', 'none', 'full', 'none'] },
+              { action: 'Create property', cells: ['none', 'full', 'none', 'full', 'none'] },
               {
                 action: 'Create project',
-                cells: ['full', 'full', { v: 'cond', note: 'assigned property only' }, 'full', 'none']
+                cells: ['none', 'full', { v: 'cond', note: 'assigned property only' }, 'full', 'none']
               },
-              { action: 'View project', cells: ['full', 'full', 'full', 'full', 'full'] }
+              {
+                action: 'View project',
+                cells: [
+                  'full',
+                  'full',
+                  { v: 'cond', note: 'assigned property only' },
+                  'full',
+                  { v: 'cond', note: 'brief until shortlisted' }
+                ]
+              }
             ]
           },
           {
@@ -126,27 +135,33 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
               {
                 action: 'View quotation',
                 cells: [
-                  'none',
+                  { v: 'cond', note: 'inside a project record' },
                   'full',
                   { v: 'cond', note: 'submitted to them' },
                   { v: 'cond', note: 'submitted to them' },
                   { v: 'cond', note: 'own only' }
                 ]
               },
-              { action: 'Accept quotation', cells: ['none', 'full', 'full', 'full', 'none'] }
+              {
+                action: 'Accept quotation',
+                cells: [{ v: 'full', note: 'on behalf of others' }, 'full', 'full', 'full', 'none']
+              }
             ]
           },
           {
             name: 'Invoices',
             rows: [
-              { action: 'Create invoice', cells: ['full', 'none', 'none', 'full', 'full'] },
+              {
+                action: 'Create invoice',
+                cells: ['none', 'none', 'none', 'none', { v: 'full', note: 'inside "Mark as complete"' }]
+              },
               {
                 action: 'View invoice',
                 cells: [
-                  'none',
+                  { v: 'cond', note: 'inside a project record' },
                   'full',
-                  { v: 'cond', note: 'if shared to them' },
-                  { v: 'cond', note: 'if shared to them' },
+                  { v: 'cond', note: 'submitted to them' },
+                  { v: 'cond', note: 'submitted to them' },
                   { v: 'cond', note: 'own only' }
                 ]
               }
@@ -156,7 +171,10 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
             name: 'Platform and admin',
             rows: [
               { action: 'User management', cells: ['full', 'full', 'none', 'none', 'none'] },
-              { action: 'Create reports', cells: ['full', 'full', 'none', 'full', 'none'] },
+              {
+                action: 'Create reports',
+                cells: ['none', 'full', { v: 'cond', note: 'own projects' }, 'full', 'none']
+              },
               {
                 action: 'Put project on dispute',
                 cells: [{ v: 'full', note: 'on behalf of others' }, 'full', 'full', 'full', 'none']
@@ -173,10 +191,10 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
       body: `Each role gets its own sidebar and its own view of the same project. The matrix decided what goes in each one:
 
 - **Company admin:** the portfolio. Spend across properties, every manager, and the power to assign or remove a manager from a project.
-- **Company manager:** only the properties assigned to them, with the quotes submitted to them and the invoices shared with them.
+- **Company manager:** only the properties assigned to them, with the quotes and invoices submitted to them.
 - **Independent manager:** a full owner. Creates their own properties and projects, with no company above them.
-- **Vendor:** briefs, and only their own quotes and invoices. The property details and the manager's contact unlock after shortlisting.
-- **Platform admin:** runs the platform and steps into disputes, but never sees a client's quotes or invoices.`,
+- **Vendor:** briefs, and only their own quotes and invoices. The property details and the manager's contact unlock after shortlisting. The vendor is the only role that creates an invoice, inside "Mark as complete".
+- **Platform admin:** runs the platform and can step into any project, its quote and its invoice included, but never creates a property, a project or an invoice.`,
       layout: 'grid-3',
       images: [
         {
@@ -200,7 +218,7 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
       type: 'decision',
       label: 'Decision 02',
       heading: 'Split "manager" into two roles at sign-up',
-      body: `We first treated every manager as one type. The personas showed they were not: independent managers create their own properties, company managers work only on properties an admin assigns.
+      body: `We first treated every manager as one type. Writing the personas from the client team's requirements showed they were not: independent managers create their own properties, company managers work only on properties an admin assigns.
 
 **Decision:** two roles, chosen when the account is created, so permissions are set from the first login instead of toggled later.
 
@@ -303,7 +321,7 @@ For managers, a "Next step" column turns each status into a plain action:
       label: 'Process',
       heading: 'Map the system, then design inside it',
       body: `- **Stakeholder map:** 4 rings and 5 direct users, to decide what the platform owns and what it only connects to.
-- **Personas and journeys:** 4 personas and 11 journey-map boards. The transactions board found a party with no account at all: accounts payable, who pays on a shared link.
+- **Personas and journeys:** 4 personas and 11 journey-map boards. The personas were working assumptions built from the client team's requirements, not interviews. The transactions board found a party with no account at all: accounts payable, who pays on a shared link.
 - **Information architecture:** 13 sections, 22 groups and 118 screens, mapped before design.
 - **Flows as the spec:** three flow boards with decision points, business rules, and open questions written on the board for the client.
 - **Design vs build:** about 200 captures of the live app beside the designs. 2 flows approved as built, 3 flagged for structural differences.`,

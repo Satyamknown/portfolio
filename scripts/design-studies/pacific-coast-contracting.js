@@ -4,7 +4,7 @@ const img = (name) => `/design/pacific-coast-contracting/${name}.webp`;
 
 export default {
   slug: 'pacific-coast-contracting',
-  version: 'v1.1',
+  version: 'v1.2',
   order: 2,
   published: true,
   title: 'Pacific Coast Contracting',
@@ -14,7 +14,7 @@ export default {
   role: 'Design Lead, Rsquare Web Studio',
   client: 'Pacific Coast Contracting, Vancouver',
   timeline: 'September 2025 to now',
-  team: 'Me on brand structure, IA and page plans. The dev team built the sites; a colleague co-owned the roofing sitemap.',
+  team: 'Me on brand structure, IA, page plans and the visual design of the pages. The dev team built the sites from my designs; a colleague co-owned the roofing sitemap.',
   tools: ['Figma', 'Google Sheets', 'GA4', 'Google Tag Manager', 'Google Ads', 'HubSpot', 'Microsoft Clarity'],
   heroImage: img('hero'),
   heroAlt: 'The recommendation slide: one umbrella brand, PCC, and three trade brands, PCC Renovations, PCC Roofing and PCC Decking',
@@ -55,7 +55,7 @@ In local search, trade-specific brands were winning, because the name, the searc
       type: 'text',
       label: 'My role',
       heading: 'Design Lead, from brand structure to the live sites',
-      body: `- **Owned:** the brand-structure recommendation, competitor research, sitemaps and page plans, the landing-page layouts, and checking each live site against its plan.
+      body: `- **Owned:** the brand-structure recommendation, competitor research, sitemaps and page plans, the landing-page layouts, the visual design of the pages, and checking each live site against its plan.
 - **Worked with:** the dev team, who built and deployed the sites, and a colleague who co-owned the roofing sitemap.
 - **Also ran** the delivery tracker and QA, so every plan made it to a live page.`
     },
@@ -143,7 +143,7 @@ Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,
       type: 'gallery',
       label: 'Final screens',
       heading: 'The live sites',
-      body: 'Live pages, built by the dev team from the site plans. Phone numbers blurred.',
+      body: 'Live pages: I designed them, and the dev team built them from my designs and site plans. Phone numbers blurred.',
       layout: 'grid-2',
       images: [
         {
