@@ -25,6 +25,8 @@ export default function Layout({ children }) {
   const { pathname } = useLocation();
   const time = useIstClock();
   const onHome = pathname === '/';
+  // The /design pages must read well on a phone: no desktop nudge, no music widget there.
+  const onDesign = pathname === '/design' || pathname.startsWith('/design/');
   // The admin editor needs more room than the reading column allows.
   const wide = pathname.startsWith('/admin');
   // Homepage sections span the full viewport; inner pages keep a reading column.
@@ -67,7 +69,7 @@ export default function Layout({ children }) {
       <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
-      <StatusSidebar />
+      {!onDesign && <StatusSidebar />}
 
       {!cookiesAccepted && (
         <div className="cookie-banner" role="dialog" aria-live="polite">
@@ -81,7 +83,7 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      {showMobilePrompt && (
+      {showMobilePrompt && !onDesign && (
         <div className="mobile-prompt-banner" role="status" aria-live="polite">
           <span>Please view this site on desktop for the best experience.</span>
           <button type="button" className="mobile-prompt-close" onClick={dismissMobilePrompt}>

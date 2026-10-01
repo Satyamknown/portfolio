@@ -4,7 +4,7 @@ const img = (name) => `/design/skooltag/${name}.webp`;
 
 export default {
   slug: 'skooltag',
-  version: 'v1.0',
+  version: 'v1.1',
   order: 3,
   published: true,
   title: 'Skooltag',
@@ -90,12 +90,7 @@ Online, the same parent met a generic store: search for the school, scroll dozen
 **Why:** sizing, more than price, was the worry that stops parents buying uniforms online.
 
 After the order mattered as much: tracking, item-level cancellation, invoice download, and a replacement flow that will not accept the same size again.`,
-      layout: 'grid-2',
       images: [
-        {
-          placeholder: true,
-          alt: 'Size chart, important-item warning and the checkout checklist, from the "Web App" handoff page'
-        },
         {
           src: img('replacement-flow'),
           alt: 'The replacement flow: item selection, reason codes, size re-selection and confirmation',
@@ -111,12 +106,7 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
 - **5 named iterations** with the client, with reference ordering flows studied along the way.
 - **Website IA:** 45 nodes for the parent site and the school-partnership side.
 - **Back office:** 3 journey maps and 272 steps of flows for admin, store and delivery roles, plus a 15-page SRS, because the app was only half the product.`,
-      layout: 'grid-2',
       images: [
-        {
-          placeholder: true,
-          alt: 'Iteration strip: one onboarding or home screen from iterations 3, 4 and 5'
-        },
         {
           src: img('backend-flow-store-view'),
           alt: "Back-office flow for the admin's store view, with open questions to the client beside it",
@@ -128,18 +118,7 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
       type: 'text',
       label: 'Design system',
       heading: 'A brand and a component library, from zero',
-      body: `There was no brand or design system to inherit, and a developer was already shipping. I built the brand (logo, colours, asset kit) and the component library: buttons and inputs, product cards, the profile switch, headers, chips, a colour palette with status colours (yellow arriving, green delivered, red cancelled), a type scale in two fonts, elevation levels and spacing tokens.`,
-      layout: 'grid-2',
-      images: [
-        {
-          placeholder: true,
-          alt: '"Style Guide & Component" page and the "All Component library" frame'
-        },
-        {
-          placeholder: true,
-          alt: 'Colour and typography pages ("Colors", "Typography | Mobile")'
-        }
-      ]
+      body: `There was no brand or design system to inherit, and a developer was already shipping. I built the brand (logo, colours, asset kit) and the component library: buttons and inputs, product cards, the profile switch, headers, chips, a colour palette with status colours (yellow arriving, green delivered, red cancelled), a type scale in two fonts, elevation levels and spacing tokens.`
     },
     {
       type: 'gallery',

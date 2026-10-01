@@ -44,6 +44,8 @@
 }
 .dz-intro{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px;align-items:end;margin-top:8px}
 .dz-intro .dz-summary{margin-top:28px}
+.dz-tools{margin-top:12px;max-width:62ch;font-size:14px;font-weight:300;line-height:1.6;color:var(--ink-soft)}
+.dz-tools a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 
 /* ---------- Hero ---------- */
 .dz-hero .dz-hero-shot .dz-shot-frame{background:var(--ink)}

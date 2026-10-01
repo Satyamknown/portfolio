@@ -4,7 +4,7 @@ const img = (name) => `/design/pacific-coast-contracting/${name}.webp`;
 
 export default {
   slug: 'pacific-coast-contracting',
-  version: 'v1.0',
+  version: 'v1.1',
   order: 2,
   published: true,
   title: 'Pacific Coast Contracting',
@@ -26,18 +26,18 @@ export default {
     },
     {
       value: '88',
-      label: 'web pages shipped across 4 sites',
-      note: 'With the dev team: 36 city pages and 30 project pages'
+      label: 'web pages shipped across 4 sites with the dev team',
+      note: '36 city pages and 30 project pages'
     },
     {
-      value: '31,625',
-      label: 'organic Google impressions for the roofing site in 90 days',
-      note: 'pccroofing.ca, 14 Jun to 11 Sep 2026, 102 clicks. Its 64-page plan was scoped by me and a colleague; the dev team built it.'
+      value: '37',
+      label: 'pages of real scope found when I checked the roofing plan against the live site',
+      note: '64 planned: 27 live, 17 folded into a hub, 20 missing'
     },
     {
-      value: 'CA$43.22',
-      label: 'cost per conversion after I switched the ad bidding, against CA$105 for the campaign',
-      note: 'Kitchen-renovation search ads, 6 to 17 Apr 2026. A colleague also changed settings in that window.'
+      value: '163 → 27',
+      label: 'items the client thought were pending, reconciled to what was really open',
+      note: '136 of them, 83%, were already done. From one 258-item tracker.'
     }
   ],
   sections: [
@@ -86,7 +86,9 @@ In local search, trade-specific brands were winning, because the name, the searc
 
 **Why:** it kept four sites from turning into four copies of the same site, and gave every page a reason to exist.
 
-For PCC Roofing the plan grew from **33 pages to 64**, each with a primary keyword and a note on how it would beat the named competitors.`,
+For PCC Roofing the plan grew from **33 pages to 64**, each with a primary keyword and a note on how it would beat the named competitors.
+
+Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,625 organic Google impressions and 102 clicks. That is the site's result, built by the dev team, not mine alone.`,
       images: [
         {
           src: img('sitemap-ia'),

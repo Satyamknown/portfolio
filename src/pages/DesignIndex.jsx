@@ -42,11 +42,25 @@ export default function DesignIndex() {
               I design web and B2B SaaS products where the hard part is the rules: who can do what, in what
               order, and what happens when something goes wrong.
             </p>
-            <p className="dz-summary">
-              I start with the people and the roles, map the flows and the structure, then design the screens and
-              stay with them until the live build matches. 4+ years. Products for clients in India, Canada and the
-              UK. Looking for a senior product designer role.
-            </p>
+            <div>
+              <p className="dz-summary">
+                I start with the people and the roles, map the flows and the structure, then design the screens and
+                stay with them until the live build matches. 4+ years. Products for clients in India, Canada and the
+                UK. Looking for a senior product designer role.
+              </p>
+              <p className="dz-tools">
+                Tools I built:{' '}
+                <a
+                  href="https://www.figma.com/community/plugin/1633059296781307442/exportkit"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  ExportKit
+                </a>
+                , a Figma plugin for batch asset export, and flowmap, a browser extension that captures a live
+                product's flows into FigJam.
+              </p>
+            </div>
           </div>
         </div>
       </header>
