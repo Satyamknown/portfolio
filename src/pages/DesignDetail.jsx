@@ -6,6 +6,7 @@ import Shot from '../components/design/Shot.jsx';
 import ImpactStrip from '../components/design/ImpactStrip.jsx';
 import Section from '../components/design/Section.jsx';
 import useDesignHead from '../components/design/useDesignHead.js';
+import DesignContact from '../components/design/DesignContact.jsx';
 import '../design.css';
 
 export default function DesignDetail() {
@@ -111,6 +112,8 @@ export default function DesignDetail() {
           </div>
         </Link>
       )}
+
+      <DesignContact />
     </article>
   );
 }

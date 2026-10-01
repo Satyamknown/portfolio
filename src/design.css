@@ -294,6 +294,15 @@
 .dz-ai-strip-link{align-self:end;font-family:var(--mono);font-size:12px;color:var(--ink);white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
 .dz-ai-strip-link:hover{color:var(--green-text)}
 
+/* ---------- Contact (the cat form from Home, framed for /design) ---------- */
+.dz-contact{padding:96px 0 112px;border-top:1px solid var(--line)}
+.dz-next + .dz-contact{border-top:0}
+.dz-contact-grid{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:start}
+.dz-contact .contact-title{max-width:14ch}
+.dz-contact .contact-para{font-size:16px;max-width:40ch}
+.dz-contact-form{min-width:0}
+.dz-contact .cat-form{max-width:560px}
+
 /* ---------- Responsive ---------- */
 @media(max-width:960px){
   .dz-intro{grid-template-columns:1fr;gap:0}
@@ -308,6 +317,8 @@
   .dz-next-in{grid-template-columns:1fr}
   .dz-ai-strip{grid-template-columns:1fr;gap:16px}
   .dz-ai-strip-link{justify-self:start}
+  .dz-contact-grid{grid-template-columns:1fr;gap:24px}
+  .dz-contact .cat-form{margin-top:16px}
 }
 @media(max-width:700px){
   .dz-in{padding:0 16px}
@@ -325,6 +336,7 @@
   .dz-ai-strip{padding:18px 16px 20px}
   .dz-next{margin-top:64px}
   .dz-next-in{padding-top:40px;padding-bottom:40px;gap:24px}
+  .dz-contact{padding:64px 0 80px}
 }
 
 @media (prefers-reduced-motion:reduce){

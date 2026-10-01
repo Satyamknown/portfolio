@@ -4,6 +4,7 @@ import { designApi } from '../lib/designApi.js';
 import Loading from '../components/Loading.jsx';
 import Shot from '../components/design/Shot.jsx';
 import useDesignHead from '../components/design/useDesignHead.js';
+import DesignContact from '../components/design/DesignContact.jsx';
 import '../design.css';
 
 // Shown as a small strip under the project cards, not as a card of its own.
@@ -135,6 +136,8 @@ export default function DesignIndex() {
           )}
         </div>
       </section>
+
+      <DesignContact />
     </div>
   );
 }
