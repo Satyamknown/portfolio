@@ -4,7 +4,7 @@ const img = (name) => `/design/skooltag/${name}.webp`;
 
 export default {
   slug: 'skooltag',
-  version: 'v1.1',
+  version: 'v1.2',
   order: 3,
   published: true,
   title: 'Skooltag',
@@ -111,14 +111,33 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
           src: img('backend-flow-store-view'),
           alt: "Back-office flow for the admin's store view, with open questions to the client beside it",
           caption: 'Back-office flow: the admin\'s store view, with client questions pinned beside each step.'
+        },
+        {
+          src: img('journey-map-admin'),
+          alt: 'Admin journey map for the back office',
+          caption: 'Admin journey map, one of three for the back office.'
         }
-      ]
+      ],
+      layout: 'grid-2'
     },
     {
       type: 'text',
       label: 'Design system',
       heading: 'A brand and a component library, from zero',
-      body: `There was no brand or design system to inherit, and a developer was already shipping. I built the brand (logo, colours, asset kit) and the component library: buttons and inputs, product cards, the profile switch, headers, chips, a colour palette with status colours (yellow arriving, green delivered, red cancelled), a type scale in two fonts, elevation levels and spacing tokens.`
+      body: `There was no brand or design system to inherit, and a developer was already shipping. I built the brand (logo, colours, asset kit) and the component library: buttons and inputs, product cards, the profile switch, headers, chips, a colour palette with status colours (yellow arriving, green delivered, red cancelled), a type scale in two fonts, elevation levels and spacing tokens.`,
+      layout: 'pair',
+      images: [
+        {
+          src: img('component-library'),
+          alt: 'Skooltag component sheet: product card states, cart buttons, primary buttons and input fields',
+          caption: 'Components: product card states, cart and primary buttons, input fields with error states.'
+        },
+        {
+          src: img('colour-palette'),
+          alt: 'Skooltag colour palette with primary yellow, greys and status colours',
+          caption: 'Colour palette, with the status colours.'
+        }
+      ]
     },
     {
       type: 'gallery',
@@ -138,17 +157,12 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
       label: 'Outcome',
       heading: 'The brand is on the shop',
       body: `The brand now runs on Skooltag's shop sign and the posters out front. The app design, website assets, prototype and back-office specs went to the three developers. The build was theirs, so I have no launch numbers to report.`,
-      layout: 'grid-2',
+      layout: 'narrow',
       images: [
         {
           src: img('storefront'),
           alt: 'The Skooltag shop front with the new sign',
           caption: 'The Skooltag sign on the shop.'
-        },
-        {
-          src: img('journey-map-admin'),
-          alt: 'Admin journey map for the back office',
-          caption: 'Admin journey map, one of three for the back office.'
         }
       ]
     },
