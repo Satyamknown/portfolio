@@ -463,14 +463,16 @@
     "token": "r-d-greenlight-49im",
     "jobUrl": "https://jobs.lever.co/greenlight/4ef92aa4-f43b-4b57-9e6f-4ce4573df706",
     "role": "Senior Product Designer",
-    "track": "design"
+    "track": "design",
+    "appliedAt": "2026-10-02"
   },
   {
     "label": "CrashPlan",
     "token": "r-d-crashplan-v5z3",
     "jobUrl": "https://job-boards.greenhouse.io/crashplan/jobs/4429455009",
     "role": "Senior UX Designer",
-    "track": "design"
+    "track": "design",
+    "appliedAt": "2026-10-02"
   },
   {
     "label": "Amazon (Prime Video, MX Player)",
