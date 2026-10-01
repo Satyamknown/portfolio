@@ -55,7 +55,7 @@ export async function openAccessLink(req, res, next) {
     }
 
     // ?to= lets a link land on one case study. Only same-site /work/<slug> paths, so it cannot redirect off-site.
-    const to = typeof req.query.to === 'string' && WORK_PATH.test(req.query.to) ? req.query.to : '/';
+    const to = typeof req.query.to === 'string' && (WORK_PATH.test(req.query.to) || /^\/design(\/[a-z0-9-]{1,80})?$/.test(req.query.to)) ? req.query.to : '/';
 
     if (link) {
       // Awaited so a serverless freeze cannot drop it; a failed write must not block the visitor.

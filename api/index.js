@@ -10,6 +10,7 @@ import postRoutes from '../server/routes/posts.js';
 import appointmentRoutes from '../server/routes/appointments.js';
 import homeSettingsRoutes from '../server/routes/homeSettings.js';
 import trackerRoutes from '../server/routes/tracker.js';
+import designStudyRoutes from '../server/routes/designStudies.js';
 import accessLinkRoutes, { openAccessLink } from '../server/routes/accessLinks.js';
 import { requireSiteAccess } from '../server/lib/access.js';
 
@@ -22,6 +23,7 @@ app.use('/api/access', accessRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.use(['/api/projects', '/api/posts', '/api/appointments', '/api/home-settings', '/api/tracker'], requireSiteAccess);
+app.use('/api/design-studies', requireSiteAccess);
 
 // Open the database connection before any route touches it
 app.use(async (req, res, next) => {
@@ -41,6 +43,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/home-settings', homeSettingsRoutes);
 app.use('/api/tracker', trackerRoutes);
+app.use('/api/design-studies', designStudyRoutes);
 app.use('/api/access-links', accessLinkRoutes);
 
 // Magic links sit outside requireSiteAccess: they are how a visitor gets the cookie in the first place.

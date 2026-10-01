@@ -1,0 +1,359 @@
+// Design case study: Stratalite. Numbers come from the "Outcomes evidence" list in
+// second-mind/Team/Design track.md. Change a number there first, then here.
+const img = (name) => `/design/stratalite/${name}.webp`;
+
+export default {
+  slug: 'stratalite',
+  version: 'v1.0',
+  order: 1,
+  published: true,
+  title: 'Stratalite',
+  tagline: 'One project workflow for five roles that each see a different product.',
+  summary:
+    'A Vancouver B2B SaaS that runs property maintenance and renovation projects, from vendor interest to payment. I owned the UX and UI from the first whiteboard session to the screens now live in beta, and designed the access model the whole product rests on.',
+  role: 'Design Lead, Rsquare Web Studio',
+  client: 'Stratalite, Vancouver',
+  timeline: 'About 8 months, 2026. Live in beta.',
+  team: "Me on UX and UI, with the client's team and the developers who built it",
+  tools: ['Figma', 'FigJam', 'Google Sheets', 'AI browser agents for testing'],
+  heroImage: img('hero-mockup'),
+  heroAlt: 'The PMC Admin dashboard on a laptop: total spend by property and a list of all properties',
+  impact: [
+    {
+      value: '5 × 13',
+      label: 'roles by actions in the access matrix I designed',
+      note: 'With conditional rules such as "assigned property only"'
+    },
+    {
+      value: '106',
+      label: 'UAT test cases across 3 passes',
+      note: 'Vendor, manager and PMC admin accounts, 18 to 20 Aug 2026'
+    },
+    {
+      value: '15',
+      label: 'distinct issues found before rollout, 6 of them high priority',
+      note: 'Each logged with a priority and an owner action'
+    },
+    {
+      value: '237',
+      label: 'user flows mapped across 5 roles',
+      note: 'Plus 73 scripted lifecycle tests, AI-assisted. I approved every test that changed data.'
+    }
+  ],
+  sections: [
+    {
+      type: 'text',
+      label: 'The problem',
+      heading: 'Five roles, one project, and no shared view of it',
+      body: `Property management companies ran projects over WhatsApp, email threads and phone calls. Quotes sat in inboxes, nobody could show what had been agreed, and a director could not see spend across properties.
+
+Stratalite set out to put the whole pipeline in one place: vendor onboarding, projects, shortlisting, site visits, quotes, milestones and payment.
+
+The design problem was not the screens. It was that **five roles** (platform admins, company admins, company managers, independent managers and vendors) plus an accounts payable contact with no login all touch the same project, and each needs a different view of it.
+
+> Get the access model wrong and every screen after it is wrong.`
+    },
+    {
+      type: 'text',
+      label: 'My role',
+      heading: 'Design Lead, from the whiteboard to UAT',
+      body: `- **Owned:** stakeholder map, personas, journey maps, information architecture, flows, about 210 designed screens, the access model, the design-vs-build review and UAT.
+- **Worked with:** the client's team at Stratalite on priorities and KPIs, and the developers who built the product.
+- **Joined** before any screen existed, and stayed until the live build matched the design.`
+    },
+    {
+      type: 'decision',
+      label: 'Decision 01',
+      heading: 'Design the permissions before the screens',
+      body: `Every role wanted something that clashed with another role:
+
+- **Vendors** want the full brief before they commit. Managers don't want every vendor seeing a client's property.
+- **Company managers** need to run projects, but only on the properties their company assigned them.
+- **Independent managers** look like company managers, but they own their properties and have nobody above them.
+- **Company admins** need oversight of every property and every manager.
+- **Platform admins** run Stratalite itself, but running the platform should not mean seeing a client's pricing.
+
+So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at three levels: full, conditional or none. The design lives in the conditional cells. "Assigned property only", "submitted to them", "if shared to them", "own only": each one is a rule a screen has to show, hide or explain.`
+    },
+    {
+      type: 'matrix',
+      label: 'The matrix',
+      heading: '5 roles × 13 actions',
+      body: `Rebuilt from my role-based access matrix. Read across a row to see who can do one thing; read down a column to see one role's product.`,
+      data: {
+        roles: ['Platform admin', 'PMC admin', 'PMC manager', 'Independent manager', 'Vendor'],
+        groups: [
+          {
+            name: 'Property and project',
+            rows: [
+              { action: 'Create property', cells: ['full', 'full', 'none', 'full', 'none'] },
+              {
+                action: 'Create project',
+                cells: ['full', 'full', { v: 'cond', note: 'assigned property only' }, 'full', 'none']
+              },
+              { action: 'View project', cells: ['full', 'full', 'full', 'full', 'full'] }
+            ]
+          },
+          {
+            name: 'Vendor management',
+            rows: [
+              { action: 'Shortlist vendor', cells: ['full', 'full', 'full', 'full', 'none'] },
+              { action: 'Remove PMC manager from project', cells: ['none', 'full', 'none', 'none', 'none'] }
+            ]
+          },
+          {
+            name: 'Quotations',
+            rows: [
+              { action: 'Create quotation', cells: ['none', 'none', 'none', 'none', 'full'] },
+              {
+                action: 'View quotation',
+                cells: [
+                  'none',
+                  'full',
+                  { v: 'cond', note: 'submitted to them' },
+                  { v: 'cond', note: 'submitted to them' },
+                  { v: 'cond', note: 'own only' }
+                ]
+              },
+              { action: 'Accept quotation', cells: ['none', 'full', 'full', 'full', 'none'] }
+            ]
+          },
+          {
+            name: 'Invoices',
+            rows: [
+              { action: 'Create invoice', cells: ['full', 'none', 'none', 'full', 'full'] },
+              {
+                action: 'View invoice',
+                cells: [
+                  'none',
+                  'full',
+                  { v: 'cond', note: 'if shared to them' },
+                  { v: 'cond', note: 'if shared to them' },
+                  { v: 'cond', note: 'own only' }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Platform and admin',
+            rows: [
+              { action: 'User management', cells: ['full', 'full', 'none', 'none', 'none'] },
+              { action: 'Create reports', cells: ['full', 'full', 'none', 'full', 'none'] },
+              {
+                action: 'Put project on dispute',
+                cells: [{ v: 'full', note: 'on behalf of others' }, 'full', 'full', 'full', 'none']
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      type: 'text',
+      label: 'What each role sees',
+      heading: 'The matrix became the navigation',
+      body: `Each role gets its own sidebar and its own view of the same project. The matrix decided what goes in each one:
+
+- **Company admin:** the portfolio. Spend across properties, every manager, and the power to assign or remove a manager from a project.
+- **Company manager:** only the properties assigned to them, with the quotes submitted to them and the invoices shared with them.
+- **Independent manager:** a full owner. Creates their own properties and projects, with no company above them.
+- **Vendor:** briefs, and only their own quotes and invoices. The property details and the manager's contact unlock after shortlisting.
+- **Platform admin:** runs the platform and steps into disputes, but never sees a client's quotes or invoices.`,
+      layout: 'grid-3',
+      images: [
+        {
+          src: img('role-pmc-admin'),
+          alt: 'Company admin dashboard: all properties, assigned properties, verified and unverified managers',
+          caption: 'Company admin: the whole portfolio and every manager.'
+        },
+        {
+          src: img('role-manager'),
+          alt: 'Manager dashboard: current projects, site visits, messages and final bids',
+          caption: 'Manager: their own projects, site visits and bids.'
+        },
+        {
+          src: img('role-vendor-interest'),
+          alt: "Vendor project view with a prompt to follow up with the manager after submitting interest",
+          caption: 'Vendor: a brief to act on, with the details still locked.'
+        }
+      ]
+    },
+    {
+      type: 'decision',
+      label: 'Decision 02',
+      heading: 'Split "manager" into two roles at sign-up',
+      body: `We first treated every manager as one type. The personas showed they were not: independent managers create their own properties, company managers work only on properties an admin assigns.
+
+**Decision:** two roles, chosen when the account is created, so permissions are set from the first login instead of toggled later.
+
+**Trade-off:** two onboarding paths and two permission sets to design and test. Shared steps, such as running a project and paying for it, were designed once for both.
+
+**Why it was worth it:** a cleaner IA and no permission surprises halfway through a flow.`
+    },
+    {
+      type: 'text',
+      label: 'Validation',
+      heading: 'Tested across roles, not one screen at a time',
+      body: `A permission model is only right if every role sees the right thing at the same moment. So I tested it the way it is used: **vendor and manager accounts working the same test project side by side**, so each hand-off from interest to payment was checked from both ends.
+
+| Pass | Date | Test cases | Passed | Flagged |
+|---|---|---|---|---|
+| Vendor side | 18 Aug | 43 | 31 | 6 |
+| Manager side | 18 Aug | 21 | 17 | 2 |
+| Manager and PMC admin | 20 Aug | 42 | 38 | 4 |
+| **Total** | | **106** | **86** | **12** |
+
+That gave **15 distinct issues, 6 of them high priority**, each with a priority and an owner action. The clearest: inviting a manager showed "Invitation sent!", but no email arrived, so the new manager could never log in. The screen said success while the outcome failed.
+
+Later I mapped the live product one role at a time: **237 flows** and **73 scripted lifecycle tests**, with every role signed in to its own browser on the same records. An earlier single-role walk had claimed three serious bugs. Opening the same projects as the manager who owned them showed the controls were there, just locked for that role: the matrix doing its job.`
+    },
+    {
+      type: 'decision',
+      label: 'Decision 03',
+      heading: 'Vendors earn the brief',
+      body: `Showing full details to every vendor created noise, and unqualified vendors applied to everything.
+
+**Decision:** vendors submit interest first. Property details and the manager's contact unlock only after shortlisting.
+
+**Trade-off:** vendors commit on less information, so the public brief still had to be enough to decide on.
+
+**Why:** managers only deal with vendors who opted in and were picked.`,
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('screen-interested'),
+          alt: 'Manager project view listing interested vendors with their ratings and a Shortlist button',
+          caption: 'Manager side: interested vendors, ready to shortlist.'
+        },
+        {
+          src: img('screen-shortlist'),
+          alt: 'Manager project view after shortlisting, with the vendor listed under site visits',
+          caption: 'After shortlisting: the vendor moves into site visits, before the quote deadline.'
+        }
+      ]
+    },
+    {
+      type: 'decision',
+      label: 'Decision 04',
+      heading: 'Put the invoice inside "Mark as complete"',
+      body: `Completion and payment were two flows. Managers approved the work, then chased the invoice.
+
+**Decision:** invoice number, file, amount and billing method moved into the completion step. One action closes the work and starts payment.
+
+**Trade-off:** a heavier last step. A vendor can't mark a job done until the invoice is ready.
+
+**Why:** payment data is captured once, at the right moment. That one amount later fed 6 of the 10 company-admin dashboard numbers.`,
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('screen-completed'),
+          alt: 'Project marked complete, with the invoice ready to review and confirm',
+          caption: 'The manager sees the completed project with its invoice attached.'
+        },
+        {
+          src: img('screen-payment'),
+          alt: 'Payment completed view with payment, invoice and quotation details in one place',
+          caption: 'Payment closes on the same record: payment, invoice and quote together.'
+        }
+      ]
+    },
+    {
+      type: 'decision',
+      label: 'Decision 05',
+      heading: 'Design the dashboards from the data, not the other way round',
+      body: `Before any dashboard, I listed **35 input fields across 6 forms**, traced each one to **18 dashboard outputs**, and agreed the priority numbers with the client. Every one of the 10 KPIs has a source field and a reason.
+
+For managers, a "Next step" column turns each status into a plain action:
+
+> Status tells you where you are. Next step tells you what to do.`,
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('kpi-pmc-annotated'),
+          alt: 'Company admin dashboard annotated with the source field behind each number',
+          caption: 'Company admin dashboard, annotated: every number traced to its source.'
+        },
+        {
+          src: img('kpi-field-matrix'),
+          alt: 'Field matrix mapping form inputs to dashboard outputs',
+          caption: 'The field matrix: one field, the invoice amount, feeds 6 of 10 outputs.'
+        }
+      ]
+    },
+    {
+      type: 'text',
+      label: 'Process',
+      heading: 'Map the system, then design inside it',
+      body: `- **Stakeholder map:** 4 rings and 5 direct users, to decide what the platform owns and what it only connects to.
+- **Personas and journeys:** 4 personas and 11 journey-map boards. The transactions board found a party with no account at all: accounts payable, who pays on a shared link.
+- **Information architecture:** 13 sections, 22 groups and 118 screens, mapped before design.
+- **Flows as the spec:** three flow boards with decision points, business rules, and open questions written on the board for the client.
+- **Design vs build:** about 200 captures of the live app beside the designs. 2 flows approved as built, 3 flagged for structural differences.`,
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('stakeholder-map'),
+          alt: 'Stakeholder map in four rings around the platform',
+          caption: 'Stakeholder map: drawn before any screen.'
+        },
+        {
+          src: img('information-architecture'),
+          alt: 'Part of the information architecture tree',
+          caption: 'Information architecture: 13 sections, 118 screens.'
+        },
+        {
+          src: img('completion-to-payment-flow'),
+          alt: 'Manager flow from project assignment to cheque payment',
+          caption: 'Flow board: from assignment to payment, including the dispute loop.'
+        },
+        {
+          src: img('kpi-manager-annotated'),
+          alt: 'Manager dashboard annotated with data sources',
+          caption: 'Manager dashboard, annotated before build.'
+        }
+      ]
+    },
+    {
+      type: 'gallery',
+      label: 'Final screens',
+      heading: 'The product, as designed',
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('screen-project-detail'),
+          alt: 'Project detail with scope of work, location map, site visit booking and photos',
+          caption: 'Project detail: scope, location and site visits on one page.'
+        },
+        {
+          src: img('screen-quote-drawer'),
+          alt: 'Shortlisted vendor card with visit status, budget and quote number',
+          caption: 'Shortlisted vendor: visit status, budget and quote on one card.'
+        },
+        {
+          src: img('screen-quotes'),
+          alt: 'Vendor quotation drawer with the quote, other quotations and an Accept Quote and Assign Project button',
+          caption: 'Quote review: compare bids and accept without leaving the project.'
+        },
+        {
+          src: img('screen-spend'),
+          alt: 'Company admin dashboard with total spend by property and the list of all properties',
+          caption: 'Company admin dashboard: spend across the portfolio, fed by the invoice amount.'
+        }
+      ]
+    },
+    {
+      type: 'text',
+      label: 'Design system',
+      heading: 'The honest part',
+      body: `There was no formal design system. We put shipping screens ahead of foundations, and components grew sprint by sprint. That caused visual drift between screens and friction at handoff. It is the first thing I would change.`
+    },
+    {
+      type: 'text',
+      label: "What I'd do next",
+      heading: 'Next time',
+      body: `- **Start a component library and shared tokens in sprint 1.**
+- **Write acceptance criteria for what happens after the screen,** such as "the invite email arrives". The worst issues were on screens that looked right.
+- **Agree how to measure each decision before beta,** such as time from completion to payment, so the beta can prove or disprove it.`
+    }
+  ]
+};
