@@ -480,5 +480,26 @@
     "jobUrl": "https://www.amazon.jobs/en/jobs/10565933/ux-product-designer-mx-player",
     "role": "UX Product Designer, MX Player",
     "track": "design"
+  },
+  {
+    "label": "Bjak",
+    "token": "r-d-bjak-iy28",
+    "jobUrl": "https://jobs.ashbyhq.com/bjakcareer/5fec0d01-c1bf-47b3-880d-640d0fbbf216",
+    "role": "Product Designer (UI/UX)",
+    "track": "design"
+  },
+  {
+    "label": "Frep",
+    "token": "r-d-frep-w4h5",
+    "jobUrl": "https://www.frep.ai/careers/ui-ux-designer",
+    "role": "UI/UX Designer",
+    "track": "design"
+  },
+  {
+    "label": "Clueso (via BeingUser)",
+    "token": "r-d-clueso-nl6s",
+    "jobUrl": "https://jobs.beinguser.com/o/clueso-senior-product-designer",
+    "role": "Senior Product Designer",
+    "track": "design"
   }
 ]
