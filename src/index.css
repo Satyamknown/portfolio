@@ -979,6 +979,7 @@ a.section-note:hover{color:var(--ink)}
 .track-table tbody tr:hover{background:var(--paper)}
 .track-company{font-weight:400}
 .track-label{display:block;font-weight:600;font-size:15px;letter-spacing:-.01em;color:var(--ink)}
+.track-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;border:1px solid var(--ink);font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;vertical-align:2px}
 .track-updated{margin:6px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)}
 .track-applied{display:block;margin-top:3px;font-size:12.5px;color:var(--ink-soft)}
 .track-applied a{color:inherit;text-decoration:underline;text-underline-offset:2px}

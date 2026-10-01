@@ -8,9 +8,21 @@ const PAGES = [
   { to: '/work/stratalite', label: 'Stratalite' },
   { to: '/work/skooltag', label: 'Skooltag' }
 ];
+// The design resume lands on the /design case studies instead.
+const DESIGN_PAGES = [
+  { to: '/design', label: 'Design home' },
+  { to: '/design/stratalite', label: 'Stratalite' },
+  { to: '/design/pacific-coast-contracting', label: 'PCC' },
+  { to: '/design/skooltag', label: 'Skooltag' },
+  { to: '/design/ai-design-workflow', label: 'AI' }
+];
+const isDesignPage = (to) => to === '/design' || to.startsWith('/design/');
 const KNOWN = new Set(PAGES.map((p) => p.to));
 
-const PAGE_LABEL = Object.fromEntries(PAGES.map((p) => [p.to, p.label]));
+const PAGE_LABEL = Object.fromEntries([
+  ...PAGES.map((p) => [p.to, p.label]),
+  ...DESIGN_PAGES.map((p) => [p.to, p.to === '/design' ? 'Design home' : `Design: ${p.label}`])
+]);
 
 // What each logged hit counted as, for the per-company hit list.
 const KIND = {
@@ -19,6 +31,14 @@ const KIND = {
   bot: 'Bot, not counted',
   scan: 'Scanner burst, not counted'
 };
+
+// Which resume a link was printed on. Links from before the tag existed count as PM.
+const TRACKS = [
+  { id: 'all', label: 'All resumes' },
+  { id: 'pm', label: 'PM' },
+  { id: 'design', label: 'Design' }
+];
+const trackOf = (link) => link.track || 'pm';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -65,6 +85,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
     Promise.resolve(onRefresh()).finally(() => setRefreshing(false));
   };
   const [filter, setFilter] = useState('all');
+  const [track, setTrack] = useState('all');
   const [hitsFor, setHitsFor] = useState(null);
   const [busyHit, setBusyHit] = useState(null);
   const [hitError, setHitError] = useState('');
@@ -91,12 +112,16 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
         // Opens come from the event log (people only, scanner bursts removed), not the raw counter.
         const s = stats[link._id] || { pages: {}, opens: 0, lastOpenedAt: null, bots: 0, scans: 0, lastBotAt: null };
         const other = Object.entries(s.pages)
-          .filter(([to]) => !KNOWN.has(to))
+          .filter(([to]) => !KNOWN.has(to) && !isDesignPage(to))
+          .reduce((sum, [, n]) => sum + n, 0);
+        const design = Object.entries(s.pages)
+          .filter(([to]) => isDesignPage(to))
           .reduce((sum, [, n]) => sum + n, 0);
         return {
           link,
           pages: s.pages,
           other,
+          design,
           opens: s.opens || 0,
           recent: s.recent || [],
           bots: (s.bots || 0) + (s.scans || 0),
@@ -107,12 +132,16 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
       .sort((a, b) => (b.last?.getTime() || 0) - (a.last?.getTime() || 0) || a.link.label.localeCompare(b.link.label));
   }, [links, stats]);
 
-  const opened = rows.filter((r) => r.opens > 0).length;
-  const shown = rows.filter((r) =>
+  const inTrack = rows.filter((r) => track === 'all' || trackOf(r.link) === track);
+  const opened = inTrack.filter((r) => r.opens > 0).length;
+  const shown = inTrack.filter((r) =>
     filter === 'opened' ? r.opens > 0 : filter === 'unopened' ? !(r.opens > 0) : true
   );
-  const showOther = rows.some((r) => r.other > 0);
-  const columns = PAGES.length + (showOther ? 5 : 4);
+  // Design links get the /design pages as columns; the other views keep the PM pages and sum /design under one column.
+  const pageCols = track === 'design' ? DESIGN_PAGES : PAGES;
+  const showDesign = track === 'all' && rows.some((r) => r.design > 0 || trackOf(r.link) === 'design');
+  const showOther = track !== 'design' && inTrack.some((r) => r.other > 0);
+  const columns = pageCols.length + 4 + (showOther ? 1 : 0) + (showDesign ? 1 : 0);
 
   return (
     <div className="track">
@@ -120,7 +149,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
         <div>
           <h3 className="track-title">Resume tracking</h3>
           <p className="track-summary">
-            {opened} of {rows.length} links opened by a person. Page counts and bot hits cover the last 180 days.
+            {opened} of {inTrack.length} {track === 'design' ? 'design ' : track === 'pm' ? 'PM ' : ''}links opened by a person. Page counts and bot hits cover the last 180 days.
           </p>
           {updatedAt && (
             <p className="track-updated">
@@ -144,6 +173,19 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
               {refreshing ? 'Refreshing…' : 'Refresh'}
             </button>
           )}
+          <div className="track-filter" role="group" aria-label="Resume type">
+            {TRACKS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`btn btn-sm ${track === t.id ? 'btn-primary' : 'btn-ghost'}`}
+                aria-pressed={track === t.id}
+                onClick={() => setTrack(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           <div className="track-filter" role="group" aria-label="Filter links">
             {FILTERS.map((f) => (
               <button
@@ -167,9 +209,10 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
               <th scope="col">Company</th>
               <th scope="col" className="num">Opens</th>
               <th scope="col">Last opened (IST)</th>
-              {PAGES.map((p) => (
+              {pageCols.map((p) => (
                 <th key={p.to} scope="col" className="num">{p.label}</th>
               ))}
+              {showDesign && <th scope="col" className="num" title="Opens of any /design page">Design</th>}
               {showOther && <th scope="col" className="num">Other</th>}
               <th scope="col" className="num is-bot" title="Link previews, crawlers, mail scanners and systems that fetch every link in a resume at once. Not counted as opens.">
                 Bots
@@ -184,11 +227,14 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
                 </td>
               </tr>
             ) : (
-              shown.map(({ link, opens, recent, pages, other, bots, lastBotAt, last }) => (
+              shown.map(({ link, opens, recent, pages, other, design, bots, lastBotAt, last }) => (
                 <Fragment key={link._id}>
                   <tr className={opens > 0 ? 'is-opened' : ''}>
                     <th scope="row" className="track-company">
-                      <span className="track-label">{link.label}</span>
+                      <span className="track-label">
+                        {link.label}
+                        {trackOf(link) === 'design' && <span className="track-tag">Design</span>}
+                      </span>
                       {(link.appliedAt || link.jobUrl) && (
                         <span className="track-applied">
                           {link.appliedAt ? `Applied ${appliedFormat.format(new Date(link.appliedAt))}` : 'Not applied'}
@@ -230,9 +276,10 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
                         <span className="track-never">Never</span>
                       )}
                     </td>
-                    {PAGES.map((p) => (
+                    {pageCols.map((p) => (
                       <td key={p.to} className="num"><Count value={pages[p.to]} /></td>
                     ))}
+                    {showDesign && <td className="num"><Count value={design} /></td>}
                     {showOther && <td className="num"><Count value={other} /></td>}
                     <td className="num" title={lastBotAt ? `Last bot hit ${istFormat.format(lastBotAt)} IST` : undefined}>
                       <Count value={bots} muted />

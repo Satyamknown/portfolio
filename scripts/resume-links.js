@@ -10,12 +10,12 @@ const links = JSON.parse(readFileSync(new URL('./resume-links.json', import.meta
 
 // Create what is missing. Existing links keep opens, lastOpenedAt, a pause set from /admin
 // and the label; only the application details (role, job posting, applied date), which
-// live in the JSON and nowhere else, are refreshed on every deploy.
+// and the track (PM or design resume), which live in the JSON and nowhere else, are refreshed on every deploy.
 export async function ensureResumeLinks(log = console.log) {
   let created = 0;
-  for (const { label, token, role, jobUrl, appliedAt } of links) {
+  for (const { label, token, role, jobUrl, appliedAt, track } of links) {
     if (!TOKEN_PATTERN.test(token)) throw new Error(`Bad token in resume-links.json: ${token}`);
-    const details = { role, jobUrl, appliedAt: appliedAt ? new Date(`${appliedAt}T00:00:00+05:30`) : undefined };
+    const details = { role, jobUrl, track: track || 'pm', appliedAt: appliedAt ? new Date(`${appliedAt}T00:00:00+05:30`) : undefined };
     for (const key of Object.keys(details)) if (details[key] === undefined) delete details[key];
     const result = await AccessLink.updateOne(
       { token },

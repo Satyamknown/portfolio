@@ -10,7 +10,9 @@ const AccessLinkSchema = new mongoose.Schema(
     // Resume links only, synced from scripts/resume-links.json on deploy.
     role: String,
     jobUrl: String,
-    appliedAt: Date
+    appliedAt: Date,
+    // Which resume the link was printed on: the PM resume or the design resume.
+    track: { type: String, enum: ['pm', 'design'], default: 'pm' }
   },
   { timestamps: true }
 );

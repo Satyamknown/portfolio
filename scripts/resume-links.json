@@ -448,30 +448,35 @@
     "label": "Qualys",
     "token": "r-d-qualys-qo2f",
     "jobUrl": "https://qualys.wd5.myworkdayjobs.com/Careers/job/Pune/Senior-Product-Designer_R0005127",
-    "role": "Senior Product Designer"
+    "role": "Senior Product Designer",
+    "track": "design"
   },
   {
     "label": "Priceline",
     "token": "r-d-priceline-xt3p",
     "jobUrl": "https://priceline.wd1.myworkdayjobs.com/Priceline/job/Mumbai/Senior-UX-Designer_R5853",
-    "role": "Senior UX Designer"
+    "role": "Senior UX Designer",
+    "track": "design"
   },
   {
     "label": "Greenlight",
     "token": "r-d-greenlight-49im",
     "jobUrl": "https://jobs.lever.co/greenlight/4ef92aa4-f43b-4b57-9e6f-4ce4573df706",
-    "role": "Senior Product Designer"
+    "role": "Senior Product Designer",
+    "track": "design"
   },
   {
     "label": "CrashPlan",
     "token": "r-d-crashplan-v5z3",
     "jobUrl": "https://job-boards.greenhouse.io/crashplan/jobs/4429455009",
-    "role": "Senior UX Designer"
+    "role": "Senior UX Designer",
+    "track": "design"
   },
   {
     "label": "Amazon (Prime Video, MX Player)",
     "token": "r-d-amazon-mx-vsiz",
     "jobUrl": "https://www.amazon.jobs/en/jobs/10565933/ux-product-designer-mx-player",
-    "role": "UX Product Designer, MX Player"
+    "role": "UX Product Designer, MX Player",
+    "track": "design"
   }
 ]
