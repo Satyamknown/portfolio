@@ -4,7 +4,7 @@ const img = (name) => `/design/stratalite/${name}.webp`;
 
 export default {
   slug: 'stratalite',
-  version: 'v1.5',
+  version: 'v1.6',
   order: 1,
   published: true,
   title: 'Stratalite',
@@ -281,6 +281,11 @@ Later I mapped the live product one role at a time: **237 flows** across 5 roles
 **Why:** payment data is captured once, at the right moment. That one amount later fed 6 of the 10 company-admin dashboard numbers.`,
       layout: 'grid-2',
       images: [
+        {
+          src: img('mark-complete'),
+          alt: "Vendor's project page with the Mark project as complete button and a note to use it only after all tasks are finished",
+          caption: 'Design mockup with sample data: the vendor\'s "Mark project as complete", with a note to use it only once every task is done.'
+        },
         {
           src: img('proceed-with-invoice'),
           alt: 'All tasks ticked, and a Proceed with Invoice card on the vendor project page',
