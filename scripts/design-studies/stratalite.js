@@ -4,7 +4,7 @@ const img = (name) => `/design/stratalite/${name}.webp`;
 
 export default {
   slug: 'stratalite',
-  version: 'v1.3',
+  version: 'v1.4',
   order: 1,
   published: true,
   title: 'Stratalite',
@@ -15,7 +15,7 @@ export default {
   client: 'Stratalite, Vancouver',
   timeline: 'About 8 months, 2026. Live in beta.',
   team: "Me on UX and UI, with the client's team and the developers who built it",
-  tools: ['Figma', 'FigJam', 'Google Sheets', 'AI browser agents for testing'],
+  tools: ['Figma', 'FigJam', 'Google Sheets'],
   heroImage: img('screen-project-detail'),
   heroAlt: 'Manager view of a project: scope of work, location map, site visit booking and photos',
   impact: [
@@ -26,8 +26,8 @@ export default {
     },
     {
       value: '~210',
-      label: 'screens designed across 5 role views, now live in beta',
-      note: 'IA of 13 sections and 118 screens mapped before design'
+      label: 'frames designed across 5 role views, now live in beta',
+      note: 'The IA has 13 sections and 118 screens; the frame count adds the dialogs and states drawn as full screens'
     },
     {
       value: '87',
@@ -36,7 +36,7 @@ export default {
     },
     {
       value: '106',
-      label: 'UAT cases across 3 passes, finding 15 issues before rollout',
+      label: 'user acceptance testing (UAT) cases across 3 passes, finding 15 distinct issues before rollout',
       note: '6 of them high priority. Vendor, manager and company admin accounts, 18 to 20 Aug 2026'
     }
   ],
@@ -56,8 +56,8 @@ The design problem was not the screens. It was that **five roles** (platform adm
     {
       type: 'text',
       label: 'My role',
-      heading: 'Design Lead, from the whiteboard to UAT',
-      body: `- **Owned:** stakeholder map, personas, journey maps, information architecture, flows, about 210 designed screens, the access model, the design-vs-build review and UAT.
+      heading: 'Design Lead, from the whiteboard to acceptance testing',
+      body: `- **Owned:** stakeholder map, personas, journey maps, information architecture, flows, about 210 designed frames, the access model, the design-vs-build review and user acceptance testing (UAT).
 - **Worked with:** the client's team at Stratalite on priorities and KPIs, and the developers who built the product.
 - **Joined** before any screen existed, and stayed until the live build matched the design.`
     },
@@ -232,14 +232,14 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
       heading: 'Tested across roles, not one screen at a time',
       body: `A permission model is only right if every role sees the right thing at the same moment. So I tested it the way it is used: **vendor and manager accounts working the same test project side by side**, so each hand-off from interest to payment was checked from both ends.
 
-| Pass | Date | Test cases | Passed | Flagged |
-|---|---|---|---|---|
-| Vendor side | 18 Aug | 43 | 31 | 6 |
-| Manager side | 18 Aug | 21 | 17 | 2 |
-| Manager and company admin | 20 Aug | 42 | 38 | 4 |
-| **Total** | | **106** | **86** | **12** |
+| Pass | Date | Test cases | Passed | Flagged | Needed a retest |
+|---|---|---|---|---|---|
+| Vendor side | 18 Aug | 43 | 31 | 6 | 6 |
+| Manager side | 18 Aug | 21 | 17 | 2 | 2 |
+| Manager and company admin | 20 Aug | 42 | 38 | 4 | 0 |
+| **Total** | | **106** | **86** | **12** | **8** |
 
-That gave **15 distinct issues, 6 of them high priority**, each with a priority and an owner action. The clearest: inviting a manager showed "Invitation sent!", but no email arrived, so the new manager could never log in. The screen said success while the outcome failed.
+"Needed a retest" means the result was inconclusive, so those 8 cases count as neither passed nor flagged. Issues were logged on flagged cases and on some that passed: 20 in all, and **15 distinct** once repeats across passes were merged, **6 of them high priority**, each with a priority and an owner action. The clearest: inviting a manager showed "Invitation sent!", but no email arrived, so the new manager could never log in. The screen said success while the outcome failed.
 
 Later I mapped the live product one role at a time: **237 flows** across 5 roles and **73 scripted lifecycle tests**, with each role signed in to its own browser on the same records. That walk produced **30 corrections** to the flow boards, 29 of them applied, and **87 business questions** I took back to the client.`
     },
@@ -282,11 +282,6 @@ Later I mapped the live product one role at a time: **237 flows** across 5 roles
       layout: 'grid-2',
       images: [
         {
-          src: img('mark-complete'),
-          alt: "Vendor's project page with the Mark project as complete button and a note to use it only after all tasks are finished",
-          caption: 'The vendor side: "Mark project as complete", with a note to use it only once every task is done.'
-        },
-        {
           src: img('proceed-with-invoice'),
           alt: 'All tasks ticked, and a Proceed with Invoice card on the vendor project page',
           caption: 'With every task ticked, the same page asks the vendor to proceed with the invoice.'
@@ -299,7 +294,7 @@ Later I mapped the live product one role at a time: **237 flows** across 5 roles
         {
           src: img('screen-payment'),
           alt: 'Payment completed view with payment, invoice and quotation details in one place',
-          caption: 'Payment closes on the same record: payment, invoice and quote together.'
+          caption: 'Design mockup with sample data: payment, invoice and quote close on the same record.'
         }
       ]
     },
@@ -346,11 +341,6 @@ For managers, a "Next step" column turns each status into a plain action:
           src: img('information-architecture'),
           alt: 'Part of the information architecture tree',
           caption: 'Information architecture: 13 sections, 118 screens.'
-        },
-        {
-          src: img('completion-to-payment-flow'),
-          alt: 'Manager flow from project assignment to cheque payment',
-          caption: 'Flow board: from assignment to payment, including the dispute loop.'
         },
         {
           src: img('kpi-manager-annotated'),

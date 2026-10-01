@@ -4,7 +4,7 @@ const img = (name) => `/design/skooltag/${name}.webp`;
 
 export default {
   slug: 'skooltag',
-  version: 'v1.2',
+  version: 'v1.3',
   order: 3,
   published: true,
   title: 'Skooltag',
@@ -17,7 +17,7 @@ export default {
   team: 'Two designers (me and one other) and three developers. No product manager, so I also coordinated the graphic designer, the motion designer and the developers.',
   tools: ['Figma'],
   heroImage: img('hero'),
-  heroAlt: 'Skooltag app home screens on a yellow background: uniform categories, packages and recommended items',
+  heroAlt: 'The Skooltag logo above three app home screens on a yellow background: the child switcher, uniform categories and a package offer',
   impact: [
     { value: '5', label: 'design iterations with the client to settle the parent app' },
     { value: '85', label: 'screens handed off in 14 flows, from login to cancellation' },
@@ -28,7 +28,7 @@ export default {
     },
     {
       value: '15',
-      label: 'page SRS for the back office',
+      label: 'page software requirements specification (SRS) for the back office',
       note: 'Admin, store, delivery and school roles, in 3 phases'
     }
   ],
@@ -105,7 +105,7 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
       body: `- **Early flows:** 7 flows, ending in a final flow for the app.
 - **5 named iterations** with the client, with reference ordering flows studied along the way.
 - **Website IA:** 45 nodes for the parent site and the school-partnership side.
-- **Back office:** 3 journey maps and 272 steps of flows for admin, store and delivery roles, plus a 15-page SRS, because the app was only half the product.`,
+- **Back office:** 3 journey maps and 272 steps of flows for admin, store and delivery roles, plus a 15-page software requirements specification (SRS), because the app was only half the product.`,
       images: [
         {
           src: img('backend-flow-store-view'),
@@ -134,8 +134,8 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
         },
         {
           src: img('colour-palette'),
-          alt: 'Skooltag colour palette with primary yellow, greys and status colours',
-          caption: 'Colour palette, with the status colours.'
+          alt: 'Skooltag colour palette: primary yellow and its button states, ink and grey shades, and the warning, error and success colours',
+          caption: 'Colour palette, swatches and names only. The hex labels in this export were wrong, so they are removed.'
         }
       ]
     },
