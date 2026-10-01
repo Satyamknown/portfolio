@@ -5,6 +5,7 @@ import Loading from '../components/Loading.jsx';
 import Shot from '../components/design/Shot.jsx';
 import ImpactStrip from '../components/design/ImpactStrip.jsx';
 import Section from '../components/design/Section.jsx';
+import useDesignHead from '../components/design/useDesignHead.js';
 import '../design.css';
 
 export default function DesignDetail() {
@@ -13,13 +14,7 @@ export default function DesignDetail() {
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    // Restore the site title on the way out: no other page sets one.
-    const previous = document.title;
-    return () => {
-      document.title = previous;
-    };
-  }, []);
+  useDesignHead(study ? `${study.title} · Design · Abhishek Manjhi` : 'Design work · Abhishek Manjhi, Design Lead');
 
   useEffect(() => {
     setLoaded(false);
@@ -28,7 +23,6 @@ export default function DesignDetail() {
       .get(slug)
       .then((s) => {
         setStudy(s);
-        document.title = `${s.title} · Design · Abhishek Manjhi`;
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoaded(true));
@@ -75,7 +69,12 @@ export default function DesignDetail() {
 
       <div className="dz-hero">
         <div className="dz-in">
-          <Shot image={{ src: study.heroImage, alt: study.heroAlt || study.title }} eager className="dz-hero-shot" />
+          <Shot
+            image={{ src: study.heroImage, alt: study.heroAlt || study.title }}
+            eager
+            zoomable
+            className="dz-hero-shot"
+          />
         </div>
       </div>
 

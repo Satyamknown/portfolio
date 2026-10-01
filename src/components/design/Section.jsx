@@ -7,7 +7,7 @@ function Images({ images, layout }) {
   return (
     <div className={`dz-media dz-media-${layout || 'full'}`}>
       {images.map((img, i) => (
-        <Shot key={img.src || img.alt || i} image={img} />
+        <Shot key={img.src || img.alt || i} image={img} zoomable />
       ))}
     </div>
   );

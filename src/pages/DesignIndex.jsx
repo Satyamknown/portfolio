@@ -3,21 +3,18 @@ import { Link } from 'react-router-dom';
 import { designApi } from '../lib/designApi.js';
 import Loading from '../components/Loading.jsx';
 import Shot from '../components/design/Shot.jsx';
+import useDesignHead from '../components/design/useDesignHead.js';
 import '../design.css';
+
+// Shown as a small strip under the project cards, not as a card of its own.
+const AI_SLUG = 'ai-design-workflow';
 
 export default function DesignIndex() {
   const [studies, setStudies] = useState([]);
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    // Restore the site title on the way out: no other page sets one.
-    const previous = document.title;
-    document.title = 'Design work · Abhishek Manjhi';
-    return () => {
-      document.title = previous;
-    };
-  }, []);
+  useDesignHead('Design work · Abhishek Manjhi, Design Lead');
 
   useEffect(() => {
     designApi
@@ -27,15 +24,18 @@ export default function DesignIndex() {
       .finally(() => setLoaded(true));
   }, []);
 
+  const projects = studies.filter((s) => s.slug !== AI_SLUG);
+  const aiStudy = studies.find((s) => s.slug === AI_SLUG);
+
   return (
     <div className="dz dz-index">
       <header className="dz-head dz-index-head">
         <div className="dz-in">
-          <div className="dz-kicker">Design work</div>
+          <div className="dz-kicker">Design work · Design Lead, Rsquare Web Studio</div>
           <h1 className="dz-title">
             Abhishek Manjhi.
             <br />
-            Design Lead.
+            Product designer for complex B2B workflows.
           </h1>
           <div className="dz-intro">
             <p className="dz-tagline">
@@ -45,7 +45,7 @@ export default function DesignIndex() {
             <div>
               <p className="dz-summary">
                 I start with the people and the roles, map the flows and the structure, then design the screens and
-                stay with them until the live build matches. 4+ years. Products for clients in India, Canada and the
+                stay with them until the live build matches. Nearly 5 years. Products for clients in India, Canada and the
                 UK. Looking for a senior product designer role.
               </p>
               <p className="dz-tools">
@@ -70,16 +70,16 @@ export default function DesignIndex() {
           <div className="dz-cards-head">
             <span className="dz-kicker">Selected projects</span>
             <span className="dz-cards-note">
-              Each one with the result first, then the problem, my part, the decisions and the screens.
+              Each one: the problem, my part, the decisions and the screens.
             </span>
           </div>
 
           {!loaded && <Loading />}
           {loaded && error && <p className="dz-empty">Couldn't load the projects. {error}</p>}
-          {loaded && !error && studies.length === 0 && <p className="dz-empty">No design case studies yet.</p>}
+          {loaded && !error && projects.length === 0 && <p className="dz-empty">No design case studies yet.</p>}
 
           <div className="dz-cards">
-            {studies.map((s, i) => (
+            {projects.map((s, i) => (
               <Link key={s.slug} to={`/design/${s.slug}`} className={`dz-card ${i === 0 ? 'is-lead' : ''}`}>
                 <Shot image={{ src: s.heroImage, alt: s.heroAlt || s.title }} eager={i < 2} className="dz-card-shot" />
                 <div className="dz-card-body">
@@ -104,6 +104,35 @@ export default function DesignIndex() {
               </Link>
             ))}
           </div>
+
+          {aiStudy && (
+            <aside className="dz-ai-strip" aria-labelledby="dz-ai-strip-title">
+              <div className="dz-ai-strip-text">
+                <span className="dz-kicker" id="dz-ai-strip-title">
+                  How I use AI in design
+                </span>
+                <p>
+                  On Stratalite, AI browser agents did the clicking: they mapped every screen of the live product, role
+                  by role. I kept the design calls: how the boards read, what counted as a problem, and every action
+                  that changed data.
+                </p>
+              </div>
+              <ul className="dz-ai-strip-points">
+                <li>
+                  <b>5 flow boards,</b> one per role, laid out by the sidebar that role sees
+                </li>
+                <li>
+                  <b>87 business questions</b> sent to the client, not fixes I had already picked
+                </li>
+                <li>
+                  <b>flowmap,</b> a tool I built that turns captured screens into FigJam flow boards
+                </li>
+              </ul>
+              <Link to={`/design/${AI_SLUG}`} className="dz-ai-strip-link">
+                How I work with AI →
+              </Link>
+            </aside>
+          )}
         </div>
       </section>
     </div>

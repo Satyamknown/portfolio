@@ -1,9 +1,9 @@
 export default function ImpactStrip({ items }) {
   if (!items?.length) return null;
   return (
-    <section className="dz-impact" aria-label="Impact">
+    <section className="dz-impact" aria-label="In numbers">
       <div className="dz-in">
-        <div className="dz-kicker">Impact</div>
+        <div className="dz-kicker">In numbers</div>
         <ul className={`dz-impact-grid n${Math.min(items.length, 4)}`}>
           {items.map((m, i) => (
             <li key={i}>

@@ -146,6 +146,19 @@
   display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .dz-shot-frame img{display:block;width:100%;height:auto}
+/* Tap or click an image to open the full-size file in its own tab, where it can be zoomed. */
+.dz-shot-open{position:relative;display:block;width:100%;cursor:zoom-in;color:inherit}
+.dz-shot-hint{
+  position:absolute;right:8px;bottom:8px;padding:3px 7px;
+  font-family:var(--mono);font-size:11px;line-height:1.4;
+  color:#fff;background:rgba(17,17,17,.72);
+  opacity:0;transition:opacity .2s;
+}
+.dz-shot-open:hover .dz-shot-hint,.dz-shot-open:focus-visible .dz-shot-hint{opacity:1}
+@media (hover:none){.dz-shot-hint{opacity:1}}
+.dz-shot-open:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* An odd last image in a two-up grid takes the full row instead of leaving a hole. */
+.dz-media-grid-2 > .dz-shot:last-child:nth-child(odd){grid-column:1/-1}
 .dz-shot figcaption{
   margin-top:10px;max-width:70ch;
   font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--ink-faint);
@@ -268,6 +281,19 @@
 .dz-card.is-lead .dz-card-body{padding:32px 30px}
 .dz-card.is-lead .dz-card-title{font-size:clamp(2rem,4vw,3.2rem)}
 
+/* "How I use AI in design": a small strip under the cards, not a card of its own. */
+.dz-ai-strip{
+  display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:28px;align-items:start;
+  margin-top:28px;padding:22px 22px 24px;
+  border:1px solid var(--line);border-left:3px solid var(--ink);background:var(--surface);
+}
+.dz-ai-strip-text p{margin-top:10px;font-size:15px;font-weight:300;line-height:1.6;color:var(--ink-soft);max-width:56ch}
+.dz-ai-strip-points{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.dz-ai-strip-points li{font-size:13.5px;line-height:1.45;color:var(--ink-soft);padding-left:12px;border-left:1px solid var(--line)}
+.dz-ai-strip-points b{color:var(--ink);font-weight:600}
+.dz-ai-strip-link{align-self:end;font-family:var(--mono);font-size:12px;color:var(--ink);white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
+.dz-ai-strip-link:hover{color:var(--green-text)}
+
 /* ---------- Responsive ---------- */
 @media(max-width:960px){
   .dz-intro{grid-template-columns:1fr;gap:0}
@@ -280,6 +306,8 @@
   .dz-card.is-lead .dz-shot-frame{border-right:0;border-bottom:1px solid var(--line);min-height:0;aspect-ratio:16/10}
   .dz-card.is-lead .dz-ph{border-right:0;border-bottom:1px solid var(--line)}
   .dz-next-in{grid-template-columns:1fr}
+  .dz-ai-strip{grid-template-columns:1fr;gap:16px}
+  .dz-ai-strip-link{justify-self:start}
 }
 @media(max-width:700px){
   .dz-in{padding:0 16px}
@@ -294,6 +322,7 @@
   .dz-cards{grid-template-columns:1fr;gap:20px}
   .dz-card-body,.dz-card.is-lead .dz-card-body{padding:18px 16px 20px}
   .dz-card-impact{grid-template-columns:1fr 1fr 1fr}
+  .dz-ai-strip{padding:18px 16px 20px}
   .dz-next{margin-top:64px}
   .dz-next-in{padding-top:40px;padding-bottom:40px;gap:24px}
 }

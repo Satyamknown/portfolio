@@ -2,6 +2,8 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/go/(.*)", "destination": "/api" },
+    { "source": "/design", "destination": "/design.html" },
+    { "source": "/design/(.*)", "destination": "/design.html" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ]
 }

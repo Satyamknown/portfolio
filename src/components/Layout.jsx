@@ -100,7 +100,15 @@ export default function Layout({ children }) {
             <a href={profile.linkedin} target="_blank" rel="noreferrer">
               LinkedIn
             </a>
-            <a href={profile.resume} download="Abhishek-Manjhi-Resume.pdf">Resume</a>
+            {onDesign ? (
+              <a href="/design/resume.pdf" download="Abhishek-Manjhi-Resume-Design.pdf">
+                Resume
+              </a>
+            ) : (
+              <a href={profile.resume} download="Abhishek-Manjhi-Resume.pdf">
+                Resume
+              </a>
+            )}
           </div>
           <span>Mumbai — {time}</span>
         </div>

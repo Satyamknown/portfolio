@@ -7,50 +7,45 @@ const img = (name) => `/design/ai-design-workflow/${name}.webp`;
 
 export default {
   slug: 'ai-design-workflow',
-  version: 'v1.0',
+  version: 'v1.1',
   order: 5,
   published: true,
   title: 'AI in my design workflow',
-  tagline: 'Directing AI agents to map and check a live five-role product, and building the tool that turns screens into flow boards.',
+  tagline: 'AI agents did the clicking on a live five-role product. I kept the design calls, and the flow boards became what the team reviewed.',
   summary:
-    'On Stratalite I used AI browser agents to map every flow of the live product and test whole project lifecycles across roles. I set the rules the agents worked to, kept the judgement calls and the risky actions for myself, and built flowmap, a tool that captures a live web app and lays each screen out as a FigJam flow board.',
+    'On Stratalite, AI browser agents mapped every screen of the live product, one role at a time. I decided how the boards read, what counted as a problem and which gaps went to the client as questions, and I approved every action that changed data. The boards then became the place the team reviewed flows, instead of screenshots pasted into documents. I also built flowmap, the tool that turns captured screens into FigJam flow boards.',
   role: 'Design Lead, Rsquare Web Studio',
   client: 'Stratalite, Vancouver',
-  timeline: 'September 2026, alongside the Stratalite beta',
+  timeline: 'August to September 2026, alongside the Stratalite beta',
   team: 'Me, directing AI browser agents (Claude, and Codex for one August test pass). The client\'s product owner answered the open questions.',
   tools: ['FigJam', 'Figma plugin API', 'Claude Code', 'AI browser agents', 'Playwright', 'Chrome extension (flowmap)'],
   heroImage: img('hero'),
-  heroAlt: 'The flowmap canvas: captured screens of the vendor flow laid out as cards in labelled groups, joined by arrows',
+  heroAlt: 'The flowmap canvas: captured screens of the vendor flow laid out as cards in labelled groups, joined by labelled arrows',
   impact: [
     {
-      value: '237',
-      label: 'flows mapped on 5 FigJam boards, one board per role',
-      note: '43 + 58 + 56 + 52 + 28, each board organised by that role\'s sidebar'
+      value: '5',
+      label: 'flow boards, one per role, each laid out by the sidebar that role sees',
+      note: '237 flows in all, mapped by AI agents to rules I set'
     },
     {
-      value: '73',
-      label: 'scripted lifecycle tests, run with AI browser agents across 3 roles',
-      note: 'I approved every test that changed or deleted data'
+      value: '4',
+      label: 'questions I asked of every screen, comparing it with the roles already mapped',
+      note: '30 corrections to an earlier board came out of it; 29 applied'
     },
     {
-      value: '30',
-      label: 'corrections to an earlier flow board, found by comparing roles on the same record',
-      note: '29 applied'
-    },
-    {
-      value: '340 → 106',
-      label: 'notes on the company admin board after I set the voice rules',
-      note: 'Short notes about the product, not about how the board was made'
+      value: '87',
+      label: 'business questions sent to the client, instead of fixes I had already picked',
+      note: 'The design calls stayed mine; the business calls went to the client'
     }
   ],
   sections: [
     {
       type: 'text',
       label: 'The problem',
-      heading: 'Five products in one, and documents that disagreed',
+      heading: 'Five products in one, and a build that had moved on',
       body: `Stratalite is live in beta, and each of its five roles sees a different product: platform admins, company admins, company managers, independent managers and vendors each get their own sidebar, rules and view of the same project.
 
-The documents describing it were written one role at a time. They did not always agree with each other, or with the live build. A flow board that does not match the product is worse than no board, because the team designs and builds against it.
+I designed the screens, and the developers built them sprint by sprint. My design-vs-build review flagged 3 flows that were built differently from the design, and the documents written one role at a time did not always agree with each other. A flow board that does not match the product is worse than no board, because the team designs and builds against it.
 
 The old way to fix that was slow: screenshot every screen by hand, copy the field labels into a document, then build the FigJam board box by box. For five roles that was weeks of clicking before any design thinking happened.
 
@@ -60,7 +55,7 @@ The old way to fix that was slow: screenshot every screen by hand, copy the fiel
       type: 'text',
       label: 'My role',
       heading: 'Design Lead, setting the rules the agents worked to',
-      body: `- **I owned:** the scope, the shape and voice of every board, what counted as a problem, every risky action, and the review of what the agents produced.
+      body: `- **I owned:** the scope, the shape and voice of every board, what counted as a problem, the product rules, every risky action, and the review of what the agents produced.
 - **The agents did:** the clicking, a log of every click, field and system response, and first drafts of the boards from content files I could audit.
 - **I built:** flowmap, the capture tool, including its canvas and its Figma plugin.
 - **Judged by harm:** a problem was something that could hurt someone's work, money or records. A slightly odd button was not.`
@@ -99,7 +94,7 @@ These rules became audits in the board generators. The platform admin generator 
 
 **Trade-off:** setting up the audits took time before the first board appeared.
 
-**Why:** a rule the agent can check is a rule it keeps. On the company admin board, notes dropped from 340 to 106.`,
+**Why:** a rule the agent can check is a rule it keeps, and five boards that follow one grammar read as one product.`,
       layout: 'grid-2',
       images: [
         {
@@ -118,11 +113,9 @@ These rules became audits in the board generators. The platform admin generator 
       type: 'decision',
       label: 'Decision 03',
       heading: 'Compare the same record from every role',
-      body: `An earlier board, built from walking one role, claimed three serious problems, including that finished projects had no edit lock. I had an agent reopen the same projects as the manager who owned them and compare every control, button by button.
+      body: `In an access model, "this button is missing" can mean two things: missing from the product, or hidden from this role on purpose. Walking one role at a time cannot tell them apart. An early board, built from one role's walk, reported three serious problems, including that finished projects had no edit lock. Reopened as the manager who owned them, the controls were there, locked for that role, as designed.
 
-All three claims were wrong. The controls existed, locked for that role. A single-role walk cannot tell "missing from the product" from "missing for this role", and that difference is the whole access design.
-
-**Decision:** every screen is now checked against the roles already documented, with four questions, and corrections go back to the older boards.
+**Decision:** every screen is checked against the roles already mapped, with four questions, on the same shared record. Corrections go back to the older boards.
 
 **Result:** 30 corrections to that board, 29 applied, and one real gap the single-role walk had missed.`,
       layout: 'grid-2',
@@ -143,11 +136,12 @@ All three claims were wrong. The controls existed, locked for that role. A singl
       type: 'decision',
       label: 'Decision 04',
       heading: 'Keep the judgement calls human',
-      body: `Each role had its own signed-in browser on shared test records, so one action could be checked from every side. The agents ran 73 lifecycle tests, from posting a job to paying for it. What stayed with me:
+      body: `Each role had its own signed-in browser on shared test records, so one action could be checked from every side. The agents ran whole project lifecycles, from posting a job to paying for it. What stayed with me:
 
 - **Risky actions.** Agents paused and asked before anything that changed or deleted data or sent an email. I approved suspensions, deletes of throwaway paid projects, and the email-sending steps.
 - **Sign-in.** I typed the passwords myself.
 - **Business calls.** Gaps that needed one went to the client as 87 questions, not as fixes I had already picked.
+- **Product rules.** In the board reviews I set rules the agents could not: the invoice, not the quote, is the source of truth; changing an email and changing a password are separate forms; disputes belong to the completion flow.
 - **UX judgement.** The agents found that the screens approving completion and sending an invoice never show the amount. Whether that matters, and how much, was my call.
 
 **Trade-off:** slower runs. An agent waiting on my approval is an agent not clicking.
@@ -170,20 +164,30 @@ All three claims were wrong. The controls existed, locked for that role. A singl
       images: [
         {
           src: img('canvas-overview'),
-          alt: 'The whole flowmap canvas for the vendor flow, with grouped screen cards and the tool bar: Select, Hand, Screen, If/else, Connect',
-          caption: 'The whole canvas, with the tool bar: Select, Hand, Screen, If/else, Connect.'
+          alt: 'The flowmap canvas for the vendor flow: screen cards grouped by vendor profile, my projects, all projects and the project tab, joined by arrows',
+          caption: 'The vendor flow on the canvas: captured screens in labelled groups, linked by the arrows I drew.'
         }
       ]
+    },
+    {
+      type: 'text',
+      label: 'Handoff',
+      heading: 'The board became the review',
+      body: `Before, a flow meant screenshots taken by hand and field labels copied into documents, one role at a time. Now each role has one board that reads the same way: screens in boxes, clicks on arrows, a reason on every hand-off, and the open questions written next to the flow they belong to.
+
+- **The team reviewed on the board,** commenting on the flow itself, and I applied each comment in place.
+- **Defects stayed off it.** Edge cases and problems went into separate registers, so the board shows how the product works today.
+- **The questions went to the client** as decisions to make, with the flow beside them.`
     },
     {
       type: 'text',
       label: 'Process',
       heading: 'Map, draft, test, compare, correct',
       body: `- **Sidebar maps first,** one per role: every option, screen, control and dialog.
-- **Boards from content files,** run through a layout engine and the house-style audits before anything reached FigJam. On one board, 16 agents pulled content, 16 checked it and 3 critiqued it.
+- **Boards from content files,** run through a layout engine and the house-style audits before anything reached FigJam.
 - **Lifecycle tests on the development site,** each role in its own browser, on dated test records, with a click log as the ground truth.
 - **Cross-role checks** on every screen, with corrections sent back to older boards.
-- **Review comments** from the team applied in place, never by redrawing a board from scratch.
+- **Review on the board.** The team commented on the boards directly, and I applied each comment in place, never by redrawing a board from scratch.
 - **Outside Stratalite,** I built and published ExportKit, a Figma Community plugin that exports WebP and AVIF with vector detection, using AI-assisted development.`
     },
     {
