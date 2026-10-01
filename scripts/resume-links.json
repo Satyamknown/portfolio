@@ -415,5 +415,33 @@
     "token": "r-qad-xu9v",
     "jobUrl": "https://www.naukri.com/job-listings-program-manager-value-creation-qad-india-pvt-ltd-pune-2-to-5-years-290926502980",
     "role": "Program Manager, Value Creation"
+  },
+  {
+    "label": "IDfy (Baldor Technologies)",
+    "token": "r-idfy-apm-t2bq",
+    "jobUrl": "https://www.naukri.com/job-listings-associate-product-manager-baldor-technologies-mumbai-2-to-4-years-011026013374",
+    "role": "Associate Product Manager",
+    "appliedAt": "2026-10-02"
+  },
+  {
+    "label": "GoML",
+    "token": "r-goml-zs3z",
+    "jobUrl": "https://neuralgo.keka.com/careers/jobdetails/138818",
+    "role": "Program Manager",
+    "appliedAt": "2026-10-02"
+  },
+  {
+    "label": "WebMD",
+    "token": "r-webmd-zsmu",
+    "jobUrl": "https://www.naukri.com/job-listings-011026033086",
+    "role": "Global Associate Product Operations Manager",
+    "appliedAt": "2026-10-02"
+  },
+  {
+    "label": "Hurix Digital",
+    "token": "r-hurix-axqj",
+    "jobUrl": "https://www.naukri.com/job-listings-290926013053",
+    "role": "Product Executive",
+    "appliedAt": "2026-10-02"
   }
 ]
