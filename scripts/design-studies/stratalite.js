@@ -4,7 +4,7 @@ const img = (name) => `/design/stratalite/${name}.webp`;
 
 export default {
   slug: 'stratalite',
-  version: 'v1.4',
+  version: 'v1.5',
   order: 1,
   published: true,
   title: 'Stratalite',
@@ -35,9 +35,9 @@ export default {
       note: 'Plus 30 corrections to the flow boards from cross-role checks, 29 applied'
     },
     {
-      value: '106',
-      label: 'user acceptance testing (UAT) cases across 3 passes, finding 15 distinct issues before rollout',
-      note: '6 of them high priority. Vendor, manager and company admin accounts, 18 to 20 Aug 2026'
+      value: '35 → 18',
+      label: 'input fields traced to dashboard outputs before any dashboard was drawn',
+      note: '10 KPIs agreed with the client; the invoice amount alone feeds 6 of the 10 company-admin numbers'
     }
   ],
   sections: [
@@ -56,8 +56,8 @@ The design problem was not the screens. It was that **five roles** (platform adm
     {
       type: 'text',
       label: 'My role',
-      heading: 'Design Lead, from the whiteboard to acceptance testing',
-      body: `- **Owned:** stakeholder map, personas, journey maps, information architecture, flows, about 210 designed frames, the access model, the design-vs-build review and user acceptance testing (UAT).
+      heading: 'Design Lead, from the whiteboard to the live build',
+      body: `- **Owned:** stakeholder map, personas, journey maps, information architecture, flows, about 210 designed frames, the access model, the design-vs-build review, and the acceptance testing before rollout.
 - **Worked with:** the client's team at Stratalite on priorities and KPIs, and the developers who built the product.
 - **Joined** before any screen existed, and stayed until the live build matched the design.`
     },
@@ -230,7 +230,7 @@ So before any screen, I mapped **13 actions against 5 roles**, in 5 domains, at 
       type: 'text',
       label: 'Testing the build',
       heading: 'Tested across roles, not one screen at a time',
-      body: `A permission model is only right if every role sees the right thing at the same moment. So I tested it the way it is used: **vendor and manager accounts working the same test project side by side**, so each hand-off from interest to payment was checked from both ends.
+      body: `A permission model is only right if every role sees the right thing at the same moment. So before rollout I ran user acceptance testing (UAT) the way the product is used: **vendor and manager accounts working the same test project side by side**, so each hand-off from interest to payment was checked from both ends.
 
 | Pass | Date | Test cases | Passed | Flagged | Needed a retest |
 |---|---|---|---|---|---|
@@ -289,7 +289,7 @@ Later I mapped the live product one role at a time: **237 flows** across 5 roles
         {
           src: img('screen-completed'),
           alt: 'Project marked complete, with the invoice ready to review and confirm',
-          caption: 'The manager sees the completed project with its invoice attached.'
+          caption: 'Design mockup with sample data: the manager sees the completed project with its invoice attached.'
         },
         {
           src: img('screen-payment'),

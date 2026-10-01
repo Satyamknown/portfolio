@@ -4,7 +4,7 @@ const img = (name) => `/design/skooltag/${name}.webp`;
 
 export default {
   slug: 'skooltag',
-  version: 'v1.3',
+  version: 'v1.4',
   order: 3,
   published: true,
   title: 'Skooltag',
@@ -93,7 +93,7 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
       images: [
         {
           src: img('replacement-flow'),
-          alt: 'The replacement flow: item selection, reason codes, size re-selection and confirmation',
+          alt: 'The replacement flow: items to replace, the reason sheet, size re-selection with the old size blocked, the request screen and confirmation',
           caption: 'Replacement: a reason, a new size, and a block on re-picking the same one.'
         }
       ]
@@ -130,12 +130,12 @@ After the order mattered as much: tracking, item-level cancellation, invoice dow
         {
           src: img('component-library'),
           alt: 'Skooltag component sheet: product card states, cart buttons, primary buttons and input fields',
-          caption: 'Components: product card states, cart and primary buttons, input fields with error states.'
+          caption: 'Components: product card states, cart and primary buttons, input fields with error states. Labels are the placeholder text of the component sheet.'
         },
         {
           src: img('colour-palette'),
           alt: 'Skooltag colour palette: primary yellow and its button states, ink and grey shades, and the warning, error and success colours',
-          caption: 'Colour palette, swatches and names only. The hex labels in this export were wrong, so they are removed.'
+          caption: 'Colour palette: swatches and state names only. The hex codes in the original export were mislabelled, so they are left out.'
         }
       ]
     },

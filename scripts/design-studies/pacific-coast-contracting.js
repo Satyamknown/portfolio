@@ -4,7 +4,7 @@ const img = (name) => `/design/pacific-coast-contracting/${name}.webp`;
 
 export default {
   slug: 'pacific-coast-contracting',
-  version: 'v1.2',
+  version: 'v1.3',
   order: 2,
   published: true,
   title: 'Pacific Coast Contracting',
@@ -126,6 +126,25 @@ Over the 90 days from 14 Jun to 11 Sep 2026, the rebuilt roofing site earned 31,
           src: img('roofing-audit'),
           alt: 'Waffle chart of 64 planned roofing pages: 27 live, 17 live only as a section, 20 missing',
           caption: 'Plan vs live, August 2026.'
+        }
+      ]
+    },
+    {
+      type: 'gallery',
+      label: 'The live roofing site',
+      heading: 'PCC Roofing, live',
+      body: 'The roofing site the plan was checked against. I designed it; the dev team built it.',
+      layout: 'grid-2',
+      images: [
+        {
+          src: img('live-roofing-home'),
+          alt: 'PCC Roofing homepage, first screen: the headline Greater Vancouver\'s roof replacement experts, a 5.0 Google rating and a free assessment form in the hero',
+          caption: 'The live PCC Roofing homepage I designed, built by the dev team.'
+        },
+        {
+          src: img('live-roofing-residential'),
+          alt: 'PCC Roofing residential roof replacement page, first screen: headline, short intro, four trust points and a photo of a finished roof',
+          caption: 'Residential roof replacement, the main service page, live.'
         }
       ]
     },
