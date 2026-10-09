@@ -226,3 +226,12 @@ body.bn-skin .status-sidebar-line{font-family:var(--bn-font);letter-spacing:0}
 
 /* Legacy list hairlines pick up the new line colour */
 body.bn-skin .prose ul,body.bn-skin .prose ol,body.bn-skin .prose li{border-color:var(--bn-line)}
+
+/* Lists read as lists: bullets hang outside, wrapped lines align with the text,
+   no ruled lines between items (the legacy prose style ruled every <li>). */
+body.bn-skin .prose ul,
+body.bn-skin .prose ol{list-style-position:outside;padding-left:1.25em;margin:0 0 22px}
+body.bn-skin .prose li{border:0;padding:4px 0 4px 4px;margin:0}
+body.bn-skin .prose li + li{margin-top:6px}
+body.bn-skin .prose li::marker{color:var(--bn-ink-4)}
+body.bn-skin .prose h2{margin-top:48px}

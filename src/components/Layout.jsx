@@ -88,7 +88,7 @@ export default function Layout({ children }) {
       <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
-      {!onDesign && <StatusSidebar />}
+      {!onDesign && !pathname.startsWith('/work/') && <StatusSidebar />}
 
       {!cookiesAccepted && (
         <div className="cookie-banner" role="dialog" aria-live="polite">

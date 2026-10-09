@@ -143,7 +143,6 @@ export default function WorkDetail() {
       <section className="bn-case-body" id="story">
         <div className="bn-case-main">
           <h2 className="bn-section-title">The story</h2>
-          {project.summary && <p className="bn-case-summary">{project.summary}</p>}
           <Markdown>{project.body}</Markdown>
         </div>
 
