@@ -5,11 +5,11 @@
 export default {
   slug: 'pacific-coast-contracting',
   title: 'Pacific Coast Contracting',
-  version: 'v4.0',
-  tagline: "Deployed one lead management system across a contractor's four brands.",
+  version: 'v4.1',
+  tagline: 'One lead system for four brands, so no enquiry gets lost again.',
   summary:
-    'Pacific Coast Contracting runs four brands: PCC, PCC Roofing, PCC Decking and PCC Renovations. Leads were scattered across four sites, some were lost without anyone noticing, and nobody knew what a lead cost. I owned the lead management system end to end: tracking, one central CRM, instant alerts, WhatsApp follow-up, a monthly newsletter, and paid search on top.',
-  role: 'Design lead, product owner for the lead system',
+    'Pacific Coast Contracting has four brands and four websites. Leads were spread across all of them, some quietly disappeared, and nobody knew what a lead cost. I owned the fix: one system that catches every enquiry, tells the owner straight away, and shows what each lead costs.',
+  role: 'Design lead, acting product owner',
   client: 'Pacific Coast Contracting · Vancouver',
   year: '2025-26',
   tags: ['Lead management', 'CRM', 'Funnel design', 'Analytics', 'Paid search'],
@@ -22,95 +22,84 @@ export default {
   coverImage: '/case-studies/pacific-coast-contracting/cover.webp',
   order: 0,
   published: true,
-  body: `## TL;DR
+  body: `## The ask
 
-- **Goal:** deploy one lead management system for Pacific Coast Contracting and all three of its division brands.
-- **My role:** design lead at Rsquare Web Studio, acting as product owner for the lead system. I set the requirements and the order of work, and owned it from the first click to the follow-up.
-- **What we shipped:** tracking on all four sites, one central CRM, instant lead alerts, WhatsApp follow-up, a monthly newsletter, and paid search feeding it.
-- **Results:** 24-28 leads from two ad campaigns that the client turned into work, cost per conversion down from CA$105 to CA$43, and every enquiry from every brand now lands in one place.
+Pacific Coast Contracting is a contractor in Greater Vancouver. They run four brands, each with its own website: **PCC**, **PCC Roofing**, **PCC Decking** and **PCC Renovations**.
 
-## The problem
+They came to us asking for more leads. Fair enough. Every contractor wants more leads.
 
-Pacific Coast Contracting is a Greater Vancouver contractor with four brands, each with its own website: **PCC**, **PCC Roofing**, **PCC Decking** and **PCC Renovations**.
+But before buying any, I wanted to know a simpler thing: what happens to the leads they already get?
 
-Each site collected enquiries on its own, and nobody had the full picture:
+## What was actually broken
 
-1. **Leads were scattered.** Four sites, separate forms, no single view of who had asked for what.
-2. **Leads were being lost.** Forms showed a success message while submissions went nowhere. Nobody noticed, because nothing was checking.
-3. **Nobody was told.** A new enquiry could sit unseen, and in contracting the first company to call back usually wins the job.
-4. **Nobody knew what a lead cost.** Without conversion tracking, ad spend couldn't be judged.
+The honest answer was: nobody knew.
 
-> The client didn't need more traffic yet. They needed every lead from every brand caught, seen and answered.
+- **Four websites, four separate inboxes,** and no single place to see who had asked for what.
+- **Some leads were vanishing.** One form showed every visitor a cheerful "Thanks, we'll be in touch!" and then threw the message away. It did this 26 times out of 26 in a month.
+- **Nobody got told** when a new enquiry came in. In contracting, the first company to call back usually gets the job. The second one gets "sorry, we've already hired someone."
+- **Nobody knew what a lead cost,** so there was no way to tell whether ad money was working.
 
-## My role
+So the real problem wasn't "we need more leads". It was "we're losing the ones we have, and we can't see it." Buying more traffic would just mean losing more leads, faster.
 
-- **Owned:** the requirements for the lead system, the order of work, the tracking plan, CRM routing, alerts and follow-up flows, the newsletter, and the paid-search set-up.
-- **Worked with:** a dev team who wired the forms on each site, and a colleague who ran Google Ads changes alongside me.
-- **Did not own:** the ad budget, or the client's sales calls once a lead reached them.
+## What success looked like
 
-## Goals
+I kept it to four things we could check:
 
-| Goal | How we'd know |
-|---|---|
-| One view of every lead | All four sites feed one CRM, each lead tagged by brand and page |
-| Never lose a lead | Every submission becomes a contact, an alert and a recorded conversion |
-| Answer fast, stay remembered | The client is alerted instantly and can follow up the same day |
-| Make paid search pay | Leads per campaign and cost per conversion |
+1. Every lead from every brand lands in **one place**.
+2. **No lead gets lost** between the form and that place.
+3. The owner hears about a new lead **straight away** and can reply the same day.
+4. We know **what each lead costs** before spending more on ads.
 
-## Step 1: Measure every lead on every site
+## What I did, in order
 
-You can't manage leads you can't see, so tracking came first.
+The order mattered more than any single step. Each one only works if the one before it does.
 
-- **Google Tag Manager and GA4** on all four sites, with one clear signal per conversion so nothing is counted twice.
-- **Google Ads conversion tracking** for both form fills and phone taps, because many homeowners would rather call.
+### 1. Count before spending
 
-## Step 2: Route every brand into one CRM
+You can't fix what you can't measure. I set up tracking on all four sites (Google Tag Manager and GA4), so every form fill and every phone tap is counted once, and only once.
 
-- **One HubSpot account for the whole business:** every form on PCC, PCC Roofing, PCC Decking and PCC Renovations routes into it.
-- **Tagged at the source:** each lead arrives as a contact marked with the brand and page it came from, so the owner can see which division and which page is bringing in work.
-- **Trade-off:** one shared system means every site has to follow the same form and tagging rules, which took longer to set up than four separate inboxes.
-- **Why:** one view of every lead is the only way to know what's working across the business.
+### 2. One inbox for four brands
 
-## Step 3: Close the leaks before buying traffic
+Every form on all four websites now sends leads into one CRM (HubSpot). Each lead arrives labelled with the brand and the page it came from, so the owner can finally see which part of the business is bringing in work.
 
-Paying for clicks into a funnel that loses leads burns the budget, so the system was tested before any ads ran.
+This took longer than giving each site its own inbox, because all four sites had to follow the same rules. It was worth it: one view of every lead is the whole point.
 
-- **How:** send obviously fake enquiries through every form, then check the real CRM record, not the success message on screen.
-- **What it found:** four silent failures. One old form had rejected **26 of 26 submissions in 30 days** while telling every visitor it had worked; another created 0 contacts from 19 submissions. All four are fixed, and every form now routes through HubSpot.
-- **Trade-off:** ads started later than the client wanted.
-- **Why:** an ad is only worth paying for if the lead it brings in is caught.
+### 3. Find the leaks before buying traffic
 
-## Step 4: Answer fast, and stay remembered
+I sent deliberately fake enquiries through every form, then checked whether they actually arrived in the CRM, not just whether the website said "thank you."
 
-- **Instant alerts:** the client is notified the moment a lead arrives on any of the four sites.
-- **WhatsApp follow-up:** they can nudge a new lead on WhatsApp straight away, where homeowners actually reply.
-- **Monthly newsletter:** past enquiries and customers hear from PCC every month, so the next job comes back to them.
+That found four silent failures, including the form that had been binning every message. All four are fixed.
 
-All three are live and in use by the client.
+The cost: ads started later than the client wanted. But paying for clicks into a leaky funnel is just a slower way of losing money.
 
-## Step 5: Feed the system with paid search
+### 4. Reply first, stay remembered
 
-With every lead caught and answered, paid search could be judged on real results.
+- **Instant alerts:** the owner is told the moment a lead arrives on any of the four sites.
+- **WhatsApp follow-up:** they can message a new lead right away, which is where homeowners actually reply.
+- **Monthly newsletter:** past enquiries and customers hear from PCC every month, so when the next job comes up, they remember who to call.
 
-- **Two landing layouts for two kinds of visitor:** one puts the form beside the hero; the other adds a sticky call and WhatsApp bar for people who would rather phone.
-- **Bidding for conversions, not clicks:** on the kitchen-renovation campaign I switched from Maximize Clicks to Maximize Conversions once conversion tracking could be trusted.
+All three are live and used by the client every day.
 
-![Two layouts for the paid-ad landing page: Option A with hero and form side by side, Option B with a sticky call and WhatsApp bar and a call-back modal](/case-studies/pacific-coast-contracting/landing-ab.webp "Option A for people who fill in forms, Option B for people who call. Phone number blurred.")
+### 5. Only then, ads
 
-## Results
+With every lead caught and answered, paid search finally had something reliable to measure against.
 
-| Outcome | Result |
-|---|---|
-| Paid leads | **24-28 leads from two ad campaigns**, converted into work by the client |
-| Cost per conversion | **CA$43**, down from CA$105 (a colleague also adjusted the campaign in that window) |
-| One lead system | **4 brand sites, 1 CRM**: every enquiry becomes a tagged contact and an instant alert |
-| Lead loss | **4 of 4** silent failures found and fixed |
-| Follow-up | Instant alerts, WhatsApp follow-up and a monthly newsletter, all in use by the client |
+- **Two landing pages for two kinds of people:** one for people who like filling in forms, one with a big call and WhatsApp button for people who would rather just talk.
+- **Pay for leads, not clicks:** once the tracking could be trusted, I switched the campaign to optimise for conversions instead of clicks.
 
-Pacific Coast Contracting went from four sites quietly losing enquiries to one system where every lead from every brand is caught, seen within minutes, followed up, and measured.
+![Two layouts for the paid-ad landing page: Option A with hero and form side by side, Option B with a sticky call and WhatsApp bar and a call-back modal](/case-studies/pacific-coast-contracting/landing-ab.webp "Option A for form people, Option B for phone people. Phone number blurred.")
+
+## What happened
+
+- **24-28 leads from two ad campaigns,** which the client turned into paying work.
+- **Cost per lead dropped from CA$105 to CA$43.** A colleague also tweaked the campaign in that window, so I'll share the credit.
+- **Four websites, one CRM.** Every enquiry from every brand now becomes a labelled contact and an instant alert.
+- **Zero known leaks.** All four silent failures fixed.
+
+Pacific Coast went from four websites quietly dropping enquiries to one system where every lead is caught, seen within minutes, followed up and measured. Same business, same websites. Just no more leads falling through the floorboards.
 
 ## What I'd do differently
 
-- **Set baselines in week one.** Leads per month and cost per lead from day one would make the before and after sharper.
-- **Monitor the system from launch.** A weekly check comparing submissions, contacts and conversions would have caught the silent failures within days instead of weeks.`
+- **Write down the starting numbers on day one.** I can tell you where we ended up. I'd love to tell you more precisely where we started.
+- **Watch the system from the first day, not after a problem.** A simple weekly check of form fills against CRM contacts would have caught the silent failures in days instead of weeks.`
 };
