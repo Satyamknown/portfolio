@@ -51,11 +51,16 @@ export default function Home() {
             {[0, 1].map((run) => (
               <ul className="bn-marquee-run" key={run} aria-hidden={run === 1 || undefined}>
                 {companies.map((c) => (
-                  <li className="bn-co" key={c.name}>
-                    <span className="bn-co-mark">
-                      {c.logo ? <img src={c.logo} alt="" /> : monogram(c.name)}
-                    </span>
-                    <span className="bn-co-name">{c.name}</span>
+                  <li className={`bn-co${c.logo ? ' bn-co--logo' : ''}`} key={c.name}>
+                    {c.logo ? (
+                      // A real logo already carries the name, so it stands alone.
+                      <img className="bn-co-logo" src={c.logo} alt={c.name} loading="lazy" />
+                    ) : (
+                      <>
+                        <span className="bn-co-mark">{monogram(c.name)}</span>
+                        <span className="bn-co-name">{c.name}</span>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>

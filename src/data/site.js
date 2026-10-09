@@ -51,15 +51,20 @@ export const home = {
   featured: ['stratalite', 'pacific-coast-contracting']
 };
 
-// "Worked with" strip. Drop a logo into public/logos/ and set `logo` to its path
-// (e.g. '/logos/rsquare.svg'); without one, the tile shows a monogram.
+// "Worked with" strip. Clients delivered through Rsquare Web Studio; the logos
+// in public/logos/ come from the studio's "Projects Delivered" deck slide.
+// Without a `logo`, the strip shows a monogram + name instead.
 export const companies = [
-  { name: 'Rsquare Web Studio', place: 'Mumbai', logo: '' },
-  { name: 'Pacific Coast Contracting', place: 'Vancouver', logo: '' },
-  { name: 'RoohConnect', place: 'London', logo: '' },
-  { name: 'Stratalite', place: 'India', logo: '' },
-  { name: 'Skooltag', place: 'India', logo: '' },
-  { name: 'RoofSpark', place: 'Canada', logo: '' }
+  { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png' },
+  { name: 'Nautical Immigration', logo: '/logos/nautical-immigration.png' },
+  { name: 'Pearl Roofing', logo: '/logos/pearl-roofing.png' },
+  { name: 'nock.nock', logo: '/logos/nock-nock.png' },
+  { name: 'YOLOS', logo: '/logos/yolos.png' },
+  { name: 'ShoreCharge', logo: '/logos/shorecharge.png' },
+  { name: 'TAVI Bar & Indian Grill', logo: '/logos/tavi.png' },
+  { name: 'Stratalite', logo: '' },
+  { name: 'Skooltag', logo: '' },
+  { name: 'RoofSpark', logo: '' }
 ];
 
 export const positioning =

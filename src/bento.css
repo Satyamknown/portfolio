@@ -102,7 +102,7 @@ body:has(.bn) .top-glass{
 }
 .bn-marquee-track{display:flex;width:max-content;animation:bnMarquee 42s linear infinite}
 .bn-marquee-window:hover .bn-marquee-track{animation-play-state:paused}
-.bn-marquee-run{display:flex;gap:40px;margin:0;padding:0 40px 0 0;list-style:none}
+.bn-marquee-run{display:flex;align-items:center;gap:48px;margin:0;padding:0 48px 0 0;list-style:none}
 .bn-co{display:flex;align-items:center;gap:10px;white-space:nowrap;opacity:.55;filter:grayscale(1);transition:opacity .25s,filter .25s}
 .bn-co:hover{opacity:1;filter:none}
 .bn-co-mark{
@@ -111,6 +111,9 @@ body:has(.bn) .top-glass{
 }
 .bn-co-mark img{width:100%;height:100%;object-fit:contain;background:#fff}
 .bn-co-name{font-size:14px;font-weight:500;color:var(--bn-ink-2);letter-spacing:-.01em}
+/* Logos sit at one optical height, greyscale until hovered. */
+.bn-co-logo{height:26px;width:auto;display:block;object-fit:contain}
+.bn-co--logo{opacity:.6}
 @keyframes bnMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.bn-marquee-track{animation:none}}
 
