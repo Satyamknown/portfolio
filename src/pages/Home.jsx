@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
-import { initHomeEffects } from '../lib/effects.js';
 import Loading from '../components/Loading.jsx';
 import ProjectBento from '../components/ProjectBento.jsx';
 import { home, profile, companies, microcopy } from '../data/site.js';
@@ -29,8 +28,6 @@ export default function Home() {
       .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);
-
-  useEffect(() => initHomeEffects(rootRef.current), []);
 
   // Featured slugs (site.js) lead and take the large tiles; the rest keep CMS order.
   const ordered = useMemo(() => {
