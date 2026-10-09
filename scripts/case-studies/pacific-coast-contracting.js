@@ -5,7 +5,7 @@
 export default {
   slug: 'pacific-coast-contracting',
   title: 'Pacific Coast Contracting',
-  version: 'v4.1',
+  version: 'v4.2',
   tagline: 'One lead system for four brands, so no enquiry gets lost again.',
   summary:
     'Pacific Coast Contracting has four brands and four websites. Leads were spread across all of them, some quietly disappeared, and nobody knew what a lead cost. I owned the fix: one system that catches every enquiry, tells the owner straight away, and shows what each lead costs.',
@@ -14,9 +14,9 @@ export default {
   year: '2025-26',
   tags: ['Lead management', 'CRM', 'Funnel design', 'Analytics', 'Paid search'],
   metrics: [
-    { value: '24-28', label: 'leads from two ad campaigns' },
+    { value: '30', label: 'conversions from two ad campaigns' },
     { value: '4', label: 'brand sites on one CRM' },
-    { value: 'CA$43', label: 'per conversion, down from CA$105' },
+    { value: 'CA$43', label: 'per conversion, down from CA$80' },
     { value: '4/4', label: 'silent lead leaks found and fixed' }
   ],
   coverImage: '/case-studies/pacific-coast-contracting/cover.webp',
@@ -91,8 +91,8 @@ With every lead caught and answered, paid search finally had something reliable 
 
 ## What happened
 
-- **24-28 leads from two ad campaigns,** which the client turned into paying work.
-- **Cost per lead dropped from CA$105 to CA$43.** A colleague also tweaked the campaign in that window, so I'll share the credit.
+- **30 conversions from two ad campaigns,** which the client turned into paying work.
+- **Cost per conversion dropped from CA$80 to CA$43,** almost half. A colleague also tweaked the campaign in that window, so I'll share the credit.
 - **Four websites, one CRM.** Every enquiry from every brand now becomes a labelled contact and an instant alert.
 - **Zero known leaks.** All four silent failures fixed.
 
