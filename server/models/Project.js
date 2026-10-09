@@ -7,6 +7,10 @@ const ProjectSchema = new mongoose.Schema(
     title: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
     summary: String,
+    // One-line "what it is" under the title on the case-study page.
+    tagline: String,
+    // Optional live link; shows a "Visit site" button when set.
+    url: String,
     role: String,
     client: String,
     year: String,
