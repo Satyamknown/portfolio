@@ -31,7 +31,9 @@ export default function Layout({ children }) {
   // The admin editor needs more room than the reading column allows.
   const wide = pathname.startsWith('/admin');
   // Homepage sections span the full viewport; inner pages keep a reading column.
-  const wrap = onHome ? '' : wide ? 'wrap-wide' : 'wrap';
+  // The /work index uses the same full-width bento as the homepage.
+  const fullBleed = onHome || pathname === '/work';
+  const wrap = fullBleed ? '' : wide ? 'wrap-wide' : 'wrap';
 
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [showMobilePrompt, setShowMobilePrompt] = useState(false);

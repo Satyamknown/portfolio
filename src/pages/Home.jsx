@@ -3,19 +3,9 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { initHomeEffects } from '../lib/effects.js';
 import Loading from '../components/Loading.jsx';
+import ProjectBento from '../components/ProjectBento.jsx';
 import { home, profile, companies, microcopy } from '../data/site.js';
 import '../bento.css';
-
-// Placeholder shots until real screenshots land in each project's coverImage.
-// Same fallback chain as before the redesign: CMS coverImage → slug mock → cycle.
-const MOCKS = {
-  'pacific-coast-contracting': '/mocks/mock-pcc.png',
-  roohconnect: '/mocks/mock-rooh.png',
-  exportkit: '/mocks/mock-exportkit.png',
-  stratalite: '/mocks/mock-stratalite.png',
-  skooltag: '/mocks/mock-skooltag.png'
-};
-const MOCK_CYCLE = Object.values(MOCKS);
 
 const monogram = (name) =>
   name
@@ -25,38 +15,6 @@ const monogram = (name) =>
     .map((w) => w[0])
     .join('')
     .toUpperCase();
-
-// Project covers are 4:3 posters, so tiles show them whole rather than cropping.
-// Two equal columns; an odd one out spans the full row (image left, text right)
-// so the grid always ends flush whatever the count.
-function tileSizes(count) {
-  return Array.from({ length: count }, (_, i) => (count % 2 === 1 && i === count - 1 ? 'full' : 'half'));
-}
-
-function ProjectTile({ project, size }) {
-  const meta = [project.client, project.year].filter(Boolean).join(' · ');
-  return (
-    <Link
-      to={`/work/${project.slug}`}
-      className={`bn-tile bn-tile--${size}`}
-      data-cursor="open-folder"
-    >
-      <div className="bn-tile-shot">
-        <img src={project.image} alt="" loading="lazy" />
-      </div>
-      <div className="bn-tile-body">
-        <div className="bn-tile-text">
-          <h3 className="bn-tile-title">{project.title}</h3>
-          {project.summary && <p className="bn-tile-summary">{project.summary}</p>}
-          {meta && <span className="bn-meta">{meta}</span>}
-        </div>
-        <span className="bn-arrow" aria-hidden="true">
-          ↗
-        </span>
-      </div>
-    </Link>
-  );
-}
 
 export default function Home() {
   const rootRef = useRef(null);
@@ -76,17 +34,13 @@ export default function Home() {
 
   // Featured slugs (site.js) lead and take the large tiles; the rest keep CMS order.
   const ordered = useMemo(() => {
-    const withImages = projects.map((p, i) => ({
-      ...p,
-      image: p.coverImage || MOCKS[p.slug] || MOCK_CYCLE[i % MOCK_CYCLE.length]
-    }));
+    const withImages = projects;
     const lead = (home.featured || [])
       .map((slug) => withImages.find((p) => p.slug === slug))
       .filter(Boolean);
     return [...lead, ...withImages.filter((p) => !lead.includes(p))];
   }, [projects]);
 
-  const sizes = tileSizes(ordered.length);
   const intro = home.intro;
 
   return (
@@ -158,11 +112,7 @@ export default function Home() {
             <p>{microcopy.workEmpty}</p>
           </div>
         ) : (
-          <div className="bn-bento">
-            {ordered.map((p, i) => (
-              <ProjectTile key={p._id || p.slug} project={p} size={sizes[i]} />
-            ))}
-          </div>
+          <ProjectBento projects={ordered} />
         )}
       </section>
 

@@ -30,7 +30,10 @@ Keep that folder. If anything ever looked wrong after the redesign, the counts i
 | --- | --- |
 | `src/pages/Home.jsx` | Rewritten: scrolling "Worked with" logo strip, short intro + photo, every project in one bento grid, a one-line contact card. The form is no longer on the homepage; it lives on `/contact` (same component, same API). |
 | `src/components/Layout.jsx` | Header is now the signature mark plus two buttons: **Work** (scrolls to projects) and **Contact me** (opens `/contact`). |
-| `src/bento.css` | New stylesheet, every class prefixed `bn-`. Imported only by `Home.jsx` and `Layout.jsx`. |
+| `src/bento.css` | The design system: tokens (greys, one accent `--bn-accent`, radii, shadows, Inter type) and every `bn-` class. Imported by `Home.jsx`, `Work.jsx` and `Layout.jsx`. |
+| `src/components/ProjectBento.jsx` | Shared project grid for `/` and `/work`, with generated stat covers. |
+| `src/pages/Work.jsx` | Same data as before, shown in the bento grid instead of the list. |
+| `index.html` | Adds the Inter font to the existing Google Fonts link. |
 | `src/data/site.js` | Added `home.intro`, `home.featured`, and `companies`. Nothing existing was removed. |
 | `scripts/export-content.js`, `package.json`, `.gitignore` | The backup script above. |
 
@@ -48,7 +51,7 @@ every inner page render exactly as before.
 | Intro (name, headline, paragraph, status) | `home.intro`, `profile` | `src/data/site.js` |
 | Photo | `home.intro.photo` (defaults to `/mocks/mock-portrait.png`) | Replace the file, or change the path |
 | Project bento | `GET /api/projects` (published only). Slugs in `home.featured` go first and get the large tile; the rest follow CMS order. Tile sizes adapt to any count so rows always end flush. | `/admin` + `site.js` |
-| Cover images | `coverImage` from the CMS, then the existing `/mocks/*` fallbacks | `/admin` |
+| Stat covers | Generated from each project's **first metric** (big number + label), next two metrics on wide cards, and **first tag** as the eyebrow. Reorder metrics or tags in `/admin` to change a cover. `coverImage` is still stored and still used on the case-study page. | `/admin` |
 | Contact | Homepage shows a short card linking to `/contact`; the form there is the unchanged `AppointmentForm` → `POST /api/appointments` | unchanged |
 
 Publishing, unpublishing, reordering or editing a case study in `/admin` shows up
