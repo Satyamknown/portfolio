@@ -100,7 +100,7 @@ export const projectCovers = {
     eyebrow: 'Lead management · 4 brands',
     tone: 'light',
     background: 'radial-gradient(110% 80% at 15% 0%, #fffaf0 0%, #fbeec8 45%, #eccb73 100%)',
-    stat: '30 conversions from two ad campaigns'
+    stat: 'Replies in 30 min, not 4-8 hours, across 4 brands'
   },
   skooltag: {
     frame: 'phone',
