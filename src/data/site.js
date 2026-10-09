@@ -34,8 +34,33 @@ export const home = {
     "For four years I've been the de facto product owner on work that never had a PM assigned to it.",
   aboutPara:
     'Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi. The brief arrived as "make this look better," and the job turned out to be figuring out what to build and why. Now I\'m making that the job: moving into product management.',
-  contactHand: '話しましょう'
+  contactHand: '話しましょう',
+
+  // Bento homepage (redesign/bento). The intro card and photo tile.
+  intro: {
+    headline: 'Design Lead → Product Manager.',
+    body:
+      'Four years owning funnels, design systems and internal tools for clients in Canada, the UK and India.',
+    contactLine: 'Open to product roles at B2B SaaS companies. I reply within a day.',
+    photo: '/mocks/mock-portrait.png',
+    photoAlt: 'Portrait of Abhishek Manjhi'
+  },
+
+  // Slugs of the two big project cards. Missing or unpublished slugs fall back
+  // to the first projects in CMS order, so this can never empty the grid.
+  featured: ['stratalite', 'pacific-coast-contracting']
 };
+
+// "Worked with" strip. Drop a logo into public/logos/ and set `logo` to its path
+// (e.g. '/logos/rsquare.svg'); without one, the tile shows a monogram.
+export const companies = [
+  { name: 'Rsquare Web Studio', place: 'Mumbai', logo: '' },
+  { name: 'Pacific Coast Contracting', place: 'Vancouver', logo: '' },
+  { name: 'RoohConnect', place: 'London', logo: '' },
+  { name: 'Stratalite', place: 'India', logo: '' },
+  { name: 'Skooltag', place: 'India', logo: '' },
+  { name: 'RoofSpark', place: 'Canada', logo: '' }
+];
 
 export const positioning =
   'Four years of shipping the parts of the product most PMs only spec — landing pages, growth systems, onboarding flows, internal tools — for contracting, hospitality, and SaaS clients across three continents. Now formalizing the discovery and prioritization work I was already doing, with AI tooling built into the workflow from day one.';

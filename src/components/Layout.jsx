@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { profile } from '../data/site.js';
 import StatusSidebar from './StatusSidebar.jsx';
+import '../bento.css';
 
 function useIstClock() {
   const [time, setTime] = useState('');
@@ -57,14 +58,21 @@ export default function Layout({ children }) {
   return (
     <>
       <div className="ambient-bg" aria-hidden="true" />
-      <header className="site-head">
-        <a href={onHome ? '#work' : '/work'}>works</a>
+      {/* No nav bar: the signature goes home, and two buttons cover the rest. */}
+      <header className="site-head bn-head">
         <span className="site-name">
-          <Link to="/" aria-label="Abhishek Manjhi">
+          <Link to="/" aria-label="Abhishek Manjhi — home">
             <img src="/signature.png" alt="Abhishek Manjhi" className="nav-signature-img" />
           </Link>
         </span>
-        <a href={onHome ? '#contact' : '/contact'}>contact</a>
+        <div className="bn-head-actions">
+          <a className="bn-btn" href={onHome ? '#work' : '/work'}>
+            Work
+          </a>
+          <Link className="bn-btn bn-btn--dark" to="/contact">
+            Contact me
+          </Link>
+        </div>
       </header>
       <div className="top-glass" aria-hidden="true" />
 
