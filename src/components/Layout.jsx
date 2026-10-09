@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { profile } from '../data/site.js';
 import StatusSidebar from './StatusSidebar.jsx';
+import '../bento.css';
+import '../skin.css';
 
 function useIstClock() {
   const [time, setTime] = useState('');
@@ -30,7 +32,17 @@ export default function Layout({ children }) {
   // The admin editor needs more room than the reading column allows.
   const wide = pathname.startsWith('/admin');
   // Homepage sections span the full viewport; inner pages keep a reading column.
-  const wrap = onHome ? '' : wide ? 'wrap-wide' : 'wrap';
+  // /work and each case study use the same full-width bento as the homepage.
+  const fullBleed = onHome || pathname === '/work' || pathname.startsWith('/work/');
+  const wrap = fullBleed ? '' : wide ? 'wrap-wide' : 'wrap';
+
+  // Public reading pages wear the bento skin (skin.css). The CMS (/admin, /login)
+  // and the separate /design pages are left exactly as they were.
+  const skinned = !(pathname.startsWith('/admin') || pathname.startsWith('/login') || onDesign);
+  useEffect(() => {
+    document.body.classList.toggle('bn-skin', skinned);
+    return () => document.body.classList.remove('bn-skin');
+  }, [skinned]);
 
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [showMobilePrompt, setShowMobilePrompt] = useState(false);
@@ -57,14 +69,21 @@ export default function Layout({ children }) {
   return (
     <>
       <div className="ambient-bg" aria-hidden="true" />
-      <header className="site-head">
-        <a href={onHome ? '#work' : '/work'}>works</a>
+      {/* No nav bar: the signature goes home, and two buttons cover the rest. */}
+      <header className="site-head bn-head">
         <span className="site-name">
-          <Link to="/" aria-label="Abhishek Manjhi">
+          <Link to="/" aria-label="Abhishek Manjhi — home">
             <img src="/signature.png" alt="Abhishek Manjhi" className="nav-signature-img" />
           </Link>
         </span>
-        <a href={onHome ? '#contact' : '/contact'}>contact</a>
+        <div className="bn-head-actions">
+          <a className="bn-btn" href={onHome ? '#work' : '/work'}>
+            Work
+          </a>
+          <Link className="bn-btn bn-btn--dark" to="/contact">
+            Contact me
+          </Link>
+        </div>
       </header>
       <div className="top-glass" aria-hidden="true" />
 

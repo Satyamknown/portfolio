@@ -5,7 +5,7 @@ import Editor from '../components/Editor.jsx';
 import ResumeTracking from '../components/ResumeTracking.jsx';
 
 const EMPTY_PROJECT = {
-  title: '', slug: '', summary: '', role: '', client: '', year: '', version: '',
+  title: '', slug: '', summary: '', tagline: '', url: '', role: '', client: '', year: '', version: '',
   tags: '', metricsText: '', coverImage: '', body: '', published: false, order: 0
 };
 
@@ -155,6 +155,8 @@ export default function Admin() {
         title: data.title,
         slug: data.slug || slugify(data.title),
         summary: data.summary,
+        tagline: data.tagline || '',
+        url: data.url || '',
         role: data.role,
         client: data.client,
         year: data.year,
@@ -294,6 +296,28 @@ export default function Admin() {
 
           {isProject && (
             <>
+              <div className="field-row">
+                <div className="field">
+                  <label htmlFor="tagline">Tagline</label>
+                  <input
+                    id="tagline"
+                    value={data.tagline || ''}
+                    placeholder="Property-management SaaS, scoped and tested"
+                    onChange={(e) => set('tagline', e.target.value)}
+                  />
+                  <div className="field-hint">One short line under the title on the case-study page</div>
+                </div>
+                <div className="field">
+                  <label htmlFor="url">Website URL</label>
+                  <input
+                    id="url"
+                    value={data.url || ''}
+                    placeholder="https://…"
+                    onChange={(e) => set('url', e.target.value)}
+                  />
+                  <div className="field-hint">Optional. Adds a “Visit site” button</div>
+                </div>
+              </div>
               <div className="field-row">
                 <div className="field">
                   <label htmlFor="role">Role</label>

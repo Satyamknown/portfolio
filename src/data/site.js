@@ -12,7 +12,7 @@ export const profile = {
   role: 'Design Lead → Product Manager',
   status: 'Open to opportunities',
   email: 'abhishek.manjhi21@comp.sce.edu.in',
-  linkedin: 'https://www.linkedin.com/in/abhishekmanjhi/',
+  linkedin: 'https://www.linkedin.com/in/akmanjhi/',
   resume: '/resume.pdf'
 };
 
@@ -34,7 +34,58 @@ export const home = {
     "For four years I've been the de facto product owner on work that never had a PM assigned to it.",
   aboutPara:
     'Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi. The brief arrived as "make this look better," and the job turned out to be figuring out what to build and why. Now I\'m making that the job: moving into product management.',
-  contactHand: '話しましょう'
+  contactHand: '話しましょう',
+
+  // Bento homepage (redesign/bento). The intro card and photo tile.
+  intro: {
+    headline: 'Design Lead → Product Manager.',
+    body:
+      'Four years owning funnels, design systems and internal tools for clients in Canada, the UK and India.',
+    contactLine: 'Open to product roles at B2B SaaS companies. I reply within a day.',
+    photo: '/mocks/mock-portrait.png',
+    photoAlt: 'Portrait of Abhishek Manjhi'
+  },
+
+  // Slugs of the two big project cards. Missing or unpublished slugs fall back
+  // to the first projects in CMS order, so this can never empty the grid.
+  featured: ['stratalite', 'pacific-coast-contracting']
+};
+
+// "Worked with" strip: only brands that also appear in the case studies.
+// Logos (public/logos/) come from the Rsquare Figma "Logos" board, each kept on
+// its own brand background. Without a `logo`, the strip shows a monogram + name.
+export const companies = [
+  { name: 'Stratalite', logo: '/logos/stratalite.png', url: 'https://stratalite.ca/' },
+  { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png', url: 'https://pacificcoastcontracting.ca/' },
+  { name: 'Skooltag', logo: '/logos/skooltag.png', url: 'https://skooltag.com/' },
+  { name: 'PCC Roofing', logo: '/logos/pcc-roofing.png', url: 'https://pccroofing.ca/' },
+  { name: 'PCC Renovations', logo: '/logos/pcc-renovations.png', url: 'https://www.pccrenovations.ca/' },
+  { name: 'PCC Decking', logo: '/logos/pcc-decking.png', url: 'https://pccdecking.com/' }
+];
+
+// Live sites per client, matched by slug prefix like brandIcons. The first link
+// is the "Visit site" button; the rest show as extra links. A Website URL set
+// in /admin for a case study takes priority over the first entry here.
+export const projectLinks = {
+  'pacific-coast-contracting': [
+    { label: 'PCC', url: 'https://pacificcoastcontracting.ca/' },
+    { label: 'PCC Roofing', url: 'https://pccroofing.ca/' },
+    { label: 'PCC Decking', url: 'https://pccdecking.com/' },
+    { label: 'PCC Renovations', url: 'https://www.pccrenovations.ca/' }
+  ],
+  stratalite: [
+    { label: 'Stratalite', url: 'https://stratalite.ca/' },
+    { label: 'Beta app', url: 'https://dev-app.stratalite.ca/' }
+  ],
+  skooltag: [{ label: 'Skooltag', url: 'https://skooltag.com/' }]
+};
+
+// Square brand icon for each project card, matched by the start of the
+// project's slug (so "stratalite-platform-testing" also gets Stratalite's).
+export const brandIcons = {
+  stratalite: '/logos/stratalite-icon.png',
+  'pacific-coast-contracting': '/logos/pcc-icon.png',
+  skooltag: '/logos/skooltag-icon.png'
 };
 
 export const positioning =

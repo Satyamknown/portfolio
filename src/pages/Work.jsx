@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import Loading from '../components/Loading.jsx';
+import ProjectBento from '../components/ProjectBento.jsx';
 import { microcopy } from '../data/site.js';
+import '../bento.css';
 
+// Same data and order as before (published projects, CMS order); only the
+// presentation changed to the shared stat-cover bento.
 export default function Work() {
   const [projects, setProjects] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -12,14 +15,17 @@ export default function Work() {
     api
       .listProjects()
       .then(setProjects)
+      .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);
 
   return (
-    <section className="first">
-      <div className="eyebrow">Work</div>
-      <h1 className="about-title">Case studies</h1>
-      <p className="section-intro">{microcopy.workIntro}</p>
+    <div className="bn bn-page">
+      <header className="bn-page-head">
+        <span className="bn-eyebrow">Case studies · {String(projects.length).padStart(2, '0')}</span>
+        <h1 className="bn-page-title">Work</h1>
+        <p className="bn-page-intro">{microcopy.workIntro}</p>
+      </header>
 
       {!loaded ? (
         <Loading />
@@ -29,32 +35,8 @@ export default function Work() {
           <p>{microcopy.workEmpty}</p>
         </div>
       ) : (
-        <div className="index-list">
-          {projects.map((p) => (
-            <Link to={`/work/${p.slug}`} className="index-row" key={p._id} data-cursor="open-folder">
-              <div className="index-top">
-                {p.version && <span className="index-ver">{p.version}</span>}
-                <span className="index-title">{p.title}</span>
-              </div>
-              {p.summary && <div className="index-summary">{p.summary}</div>}
-              {[p.role, p.client, p.year].some(Boolean) && (
-                <div className="index-meta">
-                  {[p.role, p.client, p.year].filter(Boolean).join('  ·  ')}
-                </div>
-              )}
-              {p.metrics?.length > 0 && (
-                <div className="metrics">
-                  {p.metrics.map((m, i) => (
-                    <span className="metric" key={i}>
-                      {m.value} {m.label}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </Link>
-          ))}
-        </div>
+        <ProjectBento projects={projects} />
       )}
-    </section>
+    </div>
   );
 }
