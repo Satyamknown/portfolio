@@ -112,7 +112,8 @@ body:has(.bn) .top-glass{
 .bn-co-mark img{width:100%;height:100%;object-fit:contain;background:#fff}
 .bn-co-name{font-size:14px;font-weight:500;color:var(--bn-ink-2);letter-spacing:-.01em}
 /* Logos sit at one optical height, greyscale until hovered. */
-.bn-co-logo{height:26px;width:auto;display:block;object-fit:contain}
+/* Each logo keeps its own brand background, so it sits in a small rounded tile. */
+.bn-co-logo{height:34px;width:auto;display:block;border-radius:9px;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
 .bn-co--logo{opacity:.6}
 @keyframes bnMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.bn-marquee-track{animation:none}}
@@ -201,9 +202,11 @@ body:has(.bn) .top-glass{
 
 .bn-pcard-foot{display:flex;align-items:center;gap:12px;padding:16px 20px 18px}
 .bn-pcard-icon{
-  flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+  flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;overflow:hidden;
   background:var(--bn-ink);color:#fff;font-size:12px;font-weight:700;letter-spacing:-.01em;
+  box-shadow:0 0 0 1px rgba(0,0,0,.06);
 }
+.bn-pcard-icon img{width:100%;height:100%;object-fit:cover;display:block}
 .bn-pcard-text{display:flex;flex-direction:column;min-width:0;flex:1}
 .bn-pcard-title{
   font-size:15px;font-weight:600;letter-spacing:-.015em;line-height:1.3;

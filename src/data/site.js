@@ -51,21 +51,25 @@ export const home = {
   featured: ['stratalite', 'pacific-coast-contracting']
 };
 
-// "Worked with" strip. Clients delivered through Rsquare Web Studio; the logos
-// in public/logos/ come from the studio's "Projects Delivered" deck slide.
-// Without a `logo`, the strip shows a monogram + name instead.
+// "Worked with" strip: only brands that also appear in the case studies.
+// Logos (public/logos/) come from the Rsquare Figma "Logos" board, each kept on
+// its own brand background. Without a `logo`, the strip shows a monogram + name.
 export const companies = [
+  { name: 'Stratalite', logo: '/logos/stratalite.png' },
   { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png' },
-  { name: 'Nautical Immigration', logo: '/logos/nautical-immigration.png' },
-  { name: 'Pearl Roofing', logo: '/logos/pearl-roofing.png' },
-  { name: 'nock.nock', logo: '/logos/nock-nock.png' },
-  { name: 'YOLOS', logo: '/logos/yolos.png' },
-  { name: 'ShoreCharge', logo: '/logos/shorecharge.png' },
-  { name: 'TAVI Bar & Indian Grill', logo: '/logos/tavi.png' },
-  { name: 'Stratalite', logo: '' },
-  { name: 'Skooltag', logo: '' },
-  { name: 'RoofSpark', logo: '' }
+  { name: 'Skooltag', logo: '/logos/skooltag.png' },
+  { name: 'PCC Roofing', logo: '/logos/pcc-roofing.png' },
+  { name: 'PCC Renovations', logo: '/logos/pcc-renovations.png' },
+  { name: 'PCC Decking', logo: '/logos/pcc-decking.png' }
 ];
+
+// Square brand icon for each project card, matched by the start of the
+// project's slug (so "stratalite-platform-testing" also gets Stratalite's).
+export const brandIcons = {
+  stratalite: '/logos/stratalite-icon.png',
+  'pacific-coast-contracting': '/logos/pcc-icon.png',
+  skooltag: '/logos/skooltag-icon.png'
+};
 
 export const positioning =
   'Four years of shipping the parts of the product most PMs only spec — landing pages, growth systems, onboarding flows, internal tools — for contracting, hospitality, and SaaS clients across three continents. Now formalizing the discovery and prioritization work I was already doing, with AI tooling built into the workflow from day one.';

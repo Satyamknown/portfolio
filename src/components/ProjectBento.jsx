@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { brandIcons } from '../data/site.js';
 
 // Shared by the homepage and /work. Each project gets a generated stat cover
 // built from its own CMS data (first metric, first tag), so no cover image is
@@ -13,6 +14,11 @@ const monogram = (text = '') =>
     .map((w) => w[0])
     .join('')
     .toUpperCase();
+
+const brandIcon = (slug = '') => {
+  const key = Object.keys(brandIcons).find((k) => slug === k || slug.startsWith(`${k}-`));
+  return key ? brandIcons[key] : null;
+};
 
 // Rows of two on a 3-column grid, alternating wide/narrow so the bento has
 // rhythm: [wide narrow] [narrow wide] ... An odd last project spans the row.
@@ -77,7 +83,7 @@ function ProjectCard({ project, size = 'wide' }) {
       <StatCover project={project} size={size} />
       <div className="bn-pcard-foot">
         <span className="bn-pcard-icon" aria-hidden="true">
-          {monogram(project.title)}
+          {brandIcon(project.slug) ? <img src={brandIcon(project.slug)} alt="" /> : monogram(project.title)}
         </span>
         <span className="bn-pcard-text">
           <span className="bn-pcard-title">{project.title}</span>
