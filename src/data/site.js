@@ -42,7 +42,7 @@ export const home = {
     body:
       'Four years owning funnels, design systems and internal tools for clients in Canada, the UK and India.',
     contactLine: 'Open to product roles at B2B SaaS companies. I reply within a day.',
-    photo: '/mocks/mock-portrait.png',
+    photo: '/portrait.webp',
     photoAlt: 'Portrait of Abhishek Manjhi'
   },
 

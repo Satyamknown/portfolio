@@ -139,7 +139,9 @@ body:has(.bn) .top-glass{
   margin:0;min-height:320px;border-radius:var(--bn-r-lg);overflow:hidden;position:relative;
   background:var(--bn-well);box-shadow:var(--bn-shadow);border:0;
 }
-.bn-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;filter:grayscale(1)}
+.bn-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;filter:grayscale(1);transition:filter .5s ease}
+/* Black and white like the rest of the page; colour comes back on hover. */
+.bn-photo:hover img{filter:none}
 .bn-photo-fallback{
   position:absolute;inset:0;display:grid;place-items:center;
   font-size:64px;font-weight:600;letter-spacing:-.04em;color:var(--bn-ink-4);
