@@ -32,8 +32,8 @@ export default function Layout({ children }) {
   // The admin editor needs more room than the reading column allows.
   const wide = pathname.startsWith('/admin');
   // Homepage sections span the full viewport; inner pages keep a reading column.
-  // The /work index uses the same full-width bento as the homepage.
-  const fullBleed = onHome || pathname === '/work';
+  // /work and each case study use the same full-width bento as the homepage.
+  const fullBleed = onHome || pathname === '/work' || pathname.startsWith('/work/');
   const wrap = fullBleed ? '' : wide ? 'wrap-wide' : 'wrap';
 
   // Public reading pages wear the bento skin (skin.css). The CMS (/admin, /login)

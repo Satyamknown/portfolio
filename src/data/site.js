@@ -12,7 +12,7 @@ export const profile = {
   role: 'Design Lead → Product Manager',
   status: 'Open to opportunities',
   email: 'abhishek.manjhi21@comp.sce.edu.in',
-  linkedin: 'https://www.linkedin.com/in/abhishekmanjhi/',
+  linkedin: 'https://www.linkedin.com/in/akmanjhi/',
   resume: '/resume.pdf'
 };
 

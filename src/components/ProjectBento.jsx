@@ -1,25 +1,11 @@
 import { Link } from 'react-router-dom';
-import { brandIcons } from '../data/site.js';
+import { brandIcon, monogram } from '../lib/brand.js';
 import StatCover from './StatCover.jsx';
 
 // Shared by the homepage and /work. Each project gets a generated stat cover
 // built from its own CMS data (first metric, first tag), so no cover image is
 // needed and new projects get a cover automatically. Covers are greyscale; the
 // accent colour only marks the eyebrow and the rule under the number.
-
-const monogram = (text = '') =>
-  text
-    .split(/[\s:·]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase();
-
-const brandIcon = (slug = '') => {
-  const key = Object.keys(brandIcons).find((k) => slug === k || slug.startsWith(`${k}-`));
-  return key ? brandIcons[key] : null;
-};
 
 // Rows of two on a 3-column grid, alternating wide/narrow so the bento has
 // rhythm: [wide narrow] [narrow wide] ... An odd last project spans the row.
