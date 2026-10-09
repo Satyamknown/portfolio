@@ -5,7 +5,8 @@
 // "15-page" + "SRS" reads better on a cover as "15" + "page SRS": keep the big
 // figure numeric so it never wraps, and fold any word part into the label.
 function splitStat(metric) {
-  const match = /^([~<>]?[\d.,]+[%+kKmMx×]?)[\s-]*(.*)$/.exec(metric.value || '');
+  // Ranges like "24-28" stay whole; "15-page" still splits.
+  const match = /^([~<>]?[\d.,]+(?:[-–][\d.,]+)?[%+kKmMx×]?)[\s-]*(.*)$/.exec(metric.value || '');
   if (!match) return { value: metric.value, label: metric.label };
   const [, num, word] = match;
   return { value: num, label: [word, metric.label].filter(Boolean).join(' ') };
