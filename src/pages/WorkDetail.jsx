@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { api, formatDate } from '../lib/api.js';
 import Markdown from '../components/Markdown.jsx';
 import Loading from '../components/Loading.jsx';
+import StatCover from '../components/StatCover.jsx';
 
 export default function WorkDetail() {
   const { slug } = useParams();
@@ -65,7 +66,11 @@ export default function WorkDetail() {
         )}
       </div>
 
-      {project.coverImage && <img className="cover" src={project.coverImage} alt={project.title} />}
+      {/* Same generated stat cover as the project cards, for one consistent look.
+          coverImage stays in the CMS untouched; swap back here once new covers exist. */}
+      <div className="bn-detail-cover">
+        <StatCover project={project} size="wide" />
+      </div>
 
       <Markdown>{project.body}</Markdown>
 

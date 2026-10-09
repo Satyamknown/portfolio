@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { profile } from '../data/site.js';
 import StatusSidebar from './StatusSidebar.jsx';
 import '../bento.css';
+import '../skin.css';
 
 function useIstClock() {
   const [time, setTime] = useState('');
@@ -34,6 +35,14 @@ export default function Layout({ children }) {
   // The /work index uses the same full-width bento as the homepage.
   const fullBleed = onHome || pathname === '/work';
   const wrap = fullBleed ? '' : wide ? 'wrap-wide' : 'wrap';
+
+  // Public reading pages wear the bento skin (skin.css). The CMS (/admin, /login)
+  // and the separate /design pages are left exactly as they were.
+  const skinned = !(pathname.startsWith('/admin') || pathname.startsWith('/login') || onDesign);
+  useEffect(() => {
+    document.body.classList.toggle('bn-skin', skinned);
+    return () => document.body.classList.remove('bn-skin');
+  }, [skinned]);
 
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   const [showMobilePrompt, setShowMobilePrompt] = useState(false);

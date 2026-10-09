@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Inner-page skin (redesign/bento)
+   Brings the reading pages — case studies, writing, about, contact, 404 —
+   onto the bento design system without renaming a single legacy class.
+
+   Everything is scoped to body.bn-skin, which Layout sets on public pages
+   only. /admin, /login, /tracker and /design never get the class, so the CMS
+   and the design pages render exactly as before. Tokens come from bento.css.
+   ========================================================================== */
+
+body.bn-skin{
+  --bn-page:#f5f5f7; --bn-card:#fff; --bn-well:#f0f0f2; --bn-well-2:#e7e7ea;
+  --bn-line:#e5e5ea; --bn-line-strong:#d2d2d7;
+  --bn-ink:#1d1d1f; --bn-ink-2:#424245; --bn-ink-3:#6e6e73; --bn-ink-4:#a1a1a6;
+  --bn-accent:#0071e3; --bn-accent-soft:rgba(0,113,227,.08); --bn-live:#34c759;
+  --bn-font:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;
+  --bn-r-lg:28px; --bn-r-md:20px;
+  --bn-shadow:0 1px 2px rgba(0,0,0,.03),0 8px 24px -16px rgba(0,0,0,.12);
+
+  background:var(--bn-page);color:var(--bn-ink);
+  font-family:var(--bn-font);-webkit-font-smoothing:antialiased;font-feature-settings:'cv11','ss01';
+}
+body.bn-skin .ambient-bg{display:none}
+body.bn-skin .top-glass{background:linear-gradient(to bottom,rgba(245,245,247,.7),rgba(245,245,247,.2) 60%,transparent)}
+body.bn-skin ::selection{background:var(--bn-ink);color:#fff}
+body.bn-skin :focus-visible{outline-color:var(--bn-accent)}
+
+/* ---------- Reading column ---------- */
+body.bn-skin .wrap{max-width:760px;padding:0 28px}
+body.bn-skin section.first{padding-top:40px;padding-bottom:48px}
+body.bn-skin h1,body.bn-skin h2,body.bn-skin h3{font-family:var(--bn-font);font-stretch:100%}
+
+body.bn-skin .eyebrow{
+  font-family:var(--bn-font);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--bn-accent);background:var(--bn-accent-soft);display:inline-block;padding:5px 10px;border-radius:999px;
+  margin-bottom:16px;
+}
+body.bn-skin .about-title{font-size:clamp(34px,4.4vw,48px);font-weight:600;letter-spacing:-.04em;line-height:1.05;margin-bottom:10px}
+body.bn-skin .section-intro,
+body.bn-skin .contact-body{font-size:17px;line-height:1.55;color:var(--bn-ink-3);font-weight:400;max-width:56ch}
+
+/* ---------- Buttons ---------- */
+body.bn-skin .btn{
+  font-family:var(--bn-font);font-size:14px;font-weight:500;letter-spacing:-.005em;text-transform:none;
+  border-radius:999px;padding:10px 18px;border:0;box-shadow:inset 0 0 0 1px var(--bn-line);
+}
+body.bn-skin .btn-sm{padding:8px 15px;font-size:13px}
+body.bn-skin .btn-primary{background:var(--bn-ink);color:#fff;box-shadow:none}
+body.bn-skin .btn-primary:not(:disabled):hover{background:var(--bn-accent);color:#fff}
+body.bn-skin .btn-ghost{background:var(--bn-card);color:var(--bn-ink)}
+body.bn-skin .btn-ghost:not(:disabled):hover{box-shadow:inset 0 0 0 1px var(--bn-line-strong)}
+body.bn-skin .hero-actions{gap:8px}
+
+/* ---------- Case study / post header ---------- */
+body.bn-skin .article-head{padding:40px 0 8px}
+body.bn-skin .article-head h1{font-size:clamp(40px,6vw,64px);font-weight:600;letter-spacing:-.045em;line-height:1}
+body.bn-skin .article-meta{font-family:var(--bn-font);font-size:13.5px;color:var(--bn-ink-3);margin-top:18px;gap:6px}
+body.bn-skin .index-ver{
+  font-family:var(--bn-font);font-size:12px;font-weight:600;color:var(--bn-ink-2);
+  background:var(--bn-well);border:0;border-radius:999px;padding:3px 9px;
+}
+body.bn-skin .index-dot{color:var(--bn-ink-4)}
+body.bn-skin .metrics{gap:8px;margin-top:22px}
+body.bn-skin .metric{
+  font-family:var(--bn-font);font-size:13px;font-weight:500;color:var(--bn-ink-2);
+  background:var(--bn-card);border:0;border-radius:999px;padding:7px 13px;box-shadow:var(--bn-shadow);
+}
+/* Cover sits in a card that breaks slightly out of the reading column */
+body.bn-skin .cover{
+  width:calc(100% + 80px);max-width:calc(100vw - 32px);margin:36px 0 0 -40px;
+  border:0;border-radius:var(--bn-r-lg);box-shadow:var(--bn-shadow);background:var(--bn-card);
+}
+
+/* Stat-cover hero on case-study pages (StatCover from bento.css, in a card) */
+body.bn-skin .bn-detail-cover{
+  margin:36px -40px 0;background:var(--bn-card);border-radius:var(--bn-r-lg);box-shadow:var(--bn-shadow);
+  padding-bottom:8px;display:flex;min-height:380px;
+}
+body.bn-skin .bn-detail-cover .bn-cover{flex:1;margin:8px 8px 0}
+
+/* ---------- Long-form body ---------- */
+body.bn-skin .prose{padding:48px 0 64px}
+body.bn-skin .prose h2{
+  font-family:var(--bn-font);font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1.2;
+  margin:56px 0 14px;padding:0;border:0;text-transform:none;color:var(--bn-ink);
+}
+body.bn-skin .prose h3{font-size:18px;font-weight:600;letter-spacing:-.015em;margin:32px 0 10px}
+body.bn-skin .prose p,
+body.bn-skin .prose li{font-size:17px;line-height:1.65;color:var(--bn-ink-2);font-weight:400}
+body.bn-skin .prose li::marker{color:var(--bn-ink-4)}
+body.bn-skin .prose strong{color:var(--bn-ink);font-weight:600}
+body.bn-skin .prose a{color:var(--bn-accent);text-decoration:none}
+body.bn-skin .prose a:hover{text-decoration:underline}
+body.bn-skin .prose hr{border-top-color:var(--bn-line)}
+body.bn-skin .prose blockquote{
+  border:0;margin:32px 0;padding:24px 28px;border-radius:var(--bn-r-md);
+  background:var(--bn-card);box-shadow:var(--bn-shadow);
+  font-size:21px;line-height:1.4;font-weight:500;letter-spacing:-.02em;color:var(--bn-ink);
+}
+body.bn-skin .prose blockquote p{font-size:inherit;line-height:inherit;font-weight:inherit;color:inherit}
+body.bn-skin .prose code{font-size:.88em;background:var(--bn-well);border-radius:6px}
+body.bn-skin .prose pre{border-radius:var(--bn-r-md)}
+body.bn-skin .prose figure{margin:36px -40px}
+body.bn-skin .prose figure img{border:0;border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);background:var(--bn-card)}
+body.bn-skin .prose figcaption{font-family:var(--bn-font);font-size:13px;color:var(--bn-ink-3);margin-top:12px;padding:0 40px}
+/* Tables become a white card with hairline rows */
+body.bn-skin .prose table{
+  background:var(--bn-card);border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);
+  border-collapse:separate;border-spacing:0;overflow:auto;font-size:14.5px;margin:12px 0 32px;
+}
+body.bn-skin .prose th,
+body.bn-skin .prose td{border:0;border-bottom:1px solid var(--bn-line);padding:11px 14px;color:var(--bn-ink-2);font-weight:400}
+body.bn-skin .prose tr:last-child td{border-bottom:0}
+body.bn-skin .prose th{background:var(--bn-well);color:var(--bn-ink);font-weight:600;font-size:13px}
+
+/* ---------- Writing index ---------- */
+body.bn-skin .index-list{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+body.bn-skin .index-row,
+body.bn-skin .index-row:first-child{
+  border:0;padding:22px 24px;border-radius:var(--bn-r-md);background:var(--bn-card);box-shadow:var(--bn-shadow);
+  transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s;
+}
+body.bn-skin .index-row:hover{transform:translateY(-2px);box-shadow:0 2px 6px rgba(0,0,0,.04),0 24px 40px -28px rgba(0,0,0,.28)}
+body.bn-skin .index-row:hover .index-title{color:var(--bn-ink)}
+body.bn-skin .index-title{font-size:19px;font-weight:600;letter-spacing:-.02em}
+body.bn-skin .index-summary{font-size:15px;color:var(--bn-ink-3);font-weight:400}
+body.bn-skin .index-date,
+body.bn-skin .index-meta{font-family:var(--bn-font);font-size:12.5px;color:var(--bn-ink-3)}
+body.bn-skin .empty{
+  background:var(--bn-card);border:0;border-radius:var(--bn-r-lg);box-shadow:var(--bn-shadow);padding:40px;
+}
+
+/* ---------- About ---------- */
+body.bn-skin main.wrap > section:not(.first){padding:28px 0 36px}
+body.bn-skin main.wrap > section:last-child{padding-bottom:72px}
+body.bn-skin .about-body p{font-size:17px;line-height:1.65;color:var(--bn-ink-2);font-weight:400}
+body.bn-skin .contact-fields{
+  background:var(--bn-card);border:0;border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);padding:6px 22px;
+}
+body.bn-skin .contact-fields > div{border-color:var(--bn-line)}
+body.bn-skin .contact-fields dt{font-family:var(--bn-font);font-size:13px;color:var(--bn-ink-3);text-transform:none;letter-spacing:0}
+body.bn-skin .contact-fields dd{font-size:15px;color:var(--bn-ink)}
+body.bn-skin .status-tag{
+  font-family:var(--bn-font);font-size:12.5px;font-weight:500;color:var(--bn-ink-2);
+  background:var(--bn-well);border:0;border-radius:999px;padding:4px 10px;
+}
+body.bn-skin .section-label{
+  font-family:var(--bn-font);font-size:22px;font-weight:600;letter-spacing:-.025em;text-transform:none;color:var(--bn-ink);
+  border:0;margin-bottom:16px;display:flex;align-items:center;gap:10px;
+}
+body.bn-skin .section-num{
+  font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--bn-accent);
+  background:var(--bn-accent-soft);border:0;border-radius:999px;padding:4px 9px;
+}
+body.bn-skin .objection{border-left:2px solid var(--bn-accent);padding-left:22px}
+body.bn-skin .objection p{font-size:17px;line-height:1.65;color:var(--bn-ink-2);font-weight:400}
+body.bn-skin .req-grid{gap:12px;border:0}
+body.bn-skin .req-card{
+  background:var(--bn-card);border:0;border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);padding:22px;
+}
+body.bn-skin .req-competency{
+  font-family:var(--bn-font);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--bn-accent);
+}
+body.bn-skin .req-claim{font-size:18px;font-weight:600;letter-spacing:-.02em}
+body.bn-skin .req-evidence{font-size:14.5px;line-height:1.6;color:var(--bn-ink-3);font-weight:400}
+
+/* ---------- Contact form (same component, same API) ---------- */
+body.bn-skin .cat-form{
+  background:var(--bn-card);border-radius:var(--bn-r-lg);box-shadow:var(--bn-shadow);padding:8px 28px 28px;margin-top:32px;
+}
+body.bn-skin .af label{font-family:var(--bn-font);font-size:13px;font-weight:500;color:var(--bn-ink-2);text-transform:none;letter-spacing:0}
+body.bn-skin .af input,
+body.bn-skin .af textarea{
+  font-family:var(--bn-font);font-size:15px;color:var(--bn-ink);
+  background:var(--bn-well);border:1px solid transparent;border-radius:12px;padding:12px 14px;
+  transition:border-color .2s,background .2s;
+}
+body.bn-skin .af input:focus,
+body.bn-skin .af textarea:focus{background:#fff;border-color:var(--bn-accent);outline:none}
+body.bn-skin .af-submit{
+  font-family:var(--bn-font);font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;
+  background:var(--bn-ink);color:#fff;border:0;border-radius:999px;padding:11px 20px;
+}
+body.bn-skin .af-submit:hover:not(:disabled){background:var(--bn-accent);color:#fff}
+body.bn-skin .af-alt{font-family:var(--bn-font);font-size:13px;color:var(--bn-ink-3)}
+body.bn-skin .af-error{border-radius:12px}
+body.bn-skin .cat-bubble{font-family:var(--bn-font)}
+
+/* ---------- Chrome: footer, banners, music widget ---------- */
+body.bn-skin .site-footer-inner{font-family:var(--bn-font);font-size:13px;color:var(--bn-ink-3);border-top-color:var(--bn-line)}
+body.bn-skin .site-footer-inner a{color:var(--bn-ink-2)}
+body.bn-skin .site-footer-inner a:hover{color:var(--bn-accent)}
+body.bn-skin .cookie-banner,
+body.bn-skin .mobile-prompt-banner{
+  font-family:var(--bn-font);background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border:0;border-radius:var(--bn-r-md);box-shadow:0 12px 40px -12px rgba(0,0,0,.25);
+}
+body.bn-skin .cookie-banner p,
+body.bn-skin .mobile-prompt-banner span{font-family:var(--bn-font);font-size:13.5px;color:var(--bn-ink-2)}
+body.bn-skin .cookie-banner-button{
+  font-family:var(--bn-font);font-size:13.5px;font-weight:500;text-transform:none;letter-spacing:0;
+  background:var(--bn-ink);color:#fff;border-radius:999px;
+}
+body.bn-skin .cookie-banner-button:hover{background:var(--bn-accent)}
+body.bn-skin .status-sidebar{
+  font-family:var(--bn-font);background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border:0;border-radius:var(--bn-r-md);box-shadow:0 12px 40px -16px rgba(0,0,0,.25);
+}
+body.bn-skin .status-sidebar-title,
+body.bn-skin .status-sidebar-line{font-family:var(--bn-font);letter-spacing:0}
+
+/* ---------- Small screens ---------- */
+@media (max-width:860px){
+  body.bn-skin .cover{width:100%;margin-left:0}
+  body.bn-skin .bn-detail-cover{margin:28px 0 0;min-height:300px}
+  body.bn-skin .prose figure{margin:28px 0}
+  body.bn-skin .prose figcaption{padding:0}
+}
+@media (max-width:600px){
+  body.bn-skin .wrap{padding:0 16px}
+  body.bn-skin .cat-form{padding:4px 18px 22px}
+  body.bn-skin .prose p,body.bn-skin .prose li{font-size:16px}
+}
+
+/* Legacy list hairlines pick up the new line colour */
+body.bn-skin .prose ul,body.bn-skin .prose ol,body.bn-skin .prose li{border-color:var(--bn-line)}

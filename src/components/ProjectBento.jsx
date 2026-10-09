@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { brandIcons } from '../data/site.js';
+import StatCover from './StatCover.jsx';
 
 // Shared by the homepage and /work. Each project gets a generated stat cover
 // built from its own CMS data (first metric, first tag), so no cover image is
@@ -29,47 +30,6 @@ function bentoLayout(count) {
     const first = i % 2 === 0;
     return (row % 2 === 0) === first ? 'wide' : 'narrow';
   });
-}
-
-// "15-page" + "SRS" reads better on a cover as "15" + "page SRS": keep the big
-// figure numeric so it never wraps, and fold any word part into the label.
-function splitStat(metric) {
-  const match = /^([~<>]?[\d.,]+[%+kKmMx×]?)[\s-]*(.*)$/.exec(metric.value || '');
-  if (!match) return { value: metric.value, label: metric.label };
-  const [, num, word] = match;
-  return { value: num, label: [word, metric.label].filter(Boolean).join(' ') };
-}
-
-function StatCover({ project, size }) {
-  const lead = project.metrics?.[0] ? splitStat(project.metrics[0]) : null;
-  const rest = size === 'narrow' ? [] : (project.metrics || []).slice(1, 3);
-  const eyebrow = project.tags?.[0] || project.role || 'Case study';
-  return (
-    <div className="bn-cover">
-      <span className="bn-cover-eyebrow">{eyebrow}</span>
-      {lead ? (
-        <div className="bn-cover-stat">
-          <span className="bn-cover-num">{lead.value}</span>
-          <span className="bn-cover-rule" aria-hidden="true" />
-          <span className="bn-cover-label">{lead.label}</span>
-        </div>
-      ) : (
-        <div className="bn-cover-stat">
-          <span className="bn-cover-num bn-cover-num--title">{project.title}</span>
-        </div>
-      )}
-      {rest.length > 0 && (
-        <ul className="bn-cover-side">
-          {rest.map(splitStat).map((m, i) => (
-            <li key={i}>
-              <b>{m.value}</b>
-              <span>{m.label}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
 }
 
 function ProjectCard({ project, size = 'wide' }) {
