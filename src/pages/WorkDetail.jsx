@@ -105,9 +105,6 @@ export default function WorkDetail() {
                 {l.label} ↗
               </a>
             ))}
-            <a className="bn-btn" href="#story">
-              Read the case study
-            </a>
           </div>
         </div>
       </header>
