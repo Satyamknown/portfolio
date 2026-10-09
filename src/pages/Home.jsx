@@ -26,21 +26,11 @@ const monogram = (name) =>
     .join('')
     .toUpperCase();
 
-// Bento sizes on a 6-column grid. Full groups of five tile perfectly:
-//   [ big big big big | a a ]
-//   [ big big big big | b b ]
-//   [ c c c           | d d d ]
-// Leftovers are sized so the last row always ends flush, whatever the count.
-const GROUP = ['xl', 'sm', 'sm', 'md', 'md'];
-const TAIL = { 1: ['full'], 2: ['md', 'md'], 3: ['sm', 'sm', 'sm'], 4: ['md', 'md', 'md', 'md'] };
-
-function bentoSizes(count) {
-  const sizes = [];
-  const full = Math.floor(count / 5);
-  for (let g = 0; g < full; g++) sizes.push(...GROUP);
-  const rest = count % 5;
-  if (rest) sizes.push(...TAIL[rest]);
-  return sizes;
+// Project covers are 4:3 posters, so tiles show them whole rather than cropping.
+// Two equal columns; an odd one out spans the full row (image left, text right)
+// so the grid always ends flush whatever the count.
+function tileSizes(count) {
+  return Array.from({ length: count }, (_, i) => (count % 2 === 1 && i === count - 1 ? 'full' : 'half'));
 }
 
 function ProjectTile({ project, size }) {
@@ -52,12 +42,12 @@ function ProjectTile({ project, size }) {
       data-cursor="open-folder"
     >
       <div className="bn-tile-shot">
-        <img src={project.image} alt="" loading={size === 'xl' ? 'eager' : 'lazy'} />
+        <img src={project.image} alt="" loading="lazy" />
       </div>
       <div className="bn-tile-body">
         <div className="bn-tile-text">
           <h3 className="bn-tile-title">{project.title}</h3>
-          {size === 'xl' && project.summary && <p className="bn-tile-summary">{project.summary}</p>}
+          {project.summary && <p className="bn-tile-summary">{project.summary}</p>}
           {meta && <span className="bn-meta">{meta}</span>}
         </div>
         <span className="bn-arrow" aria-hidden="true">
@@ -96,7 +86,7 @@ export default function Home() {
     return [...lead, ...withImages.filter((p) => !lead.includes(p))];
   }, [projects]);
 
-  const sizes = bentoSizes(ordered.length);
+  const sizes = tileSizes(ordered.length);
   const intro = home.intro;
 
   return (
@@ -126,17 +116,17 @@ export default function Home() {
       {/* ---------- Intro + photo ---------- */}
       <section className="bn-hero">
         <div className="bn-card bn-intro">
+          <div>
+            <p className="bn-name">{profile.name}</p>
+            <h1 className="bn-headline">{intro.headline}</h1>
+            <p className="bn-lede">{intro.body}</p>
+          </div>
           <div className="bn-intro-top">
             <span className="bn-status">
               <span className="bn-dot" />
               {profile.status}
             </span>
             <span className="bn-meta">{profile.location}</span>
-          </div>
-          <div>
-            <p className="bn-name">{profile.name}</p>
-            <h1 className="bn-headline">{intro.headline}</h1>
-            <p className="bn-lede">{intro.body}</p>
           </div>
         </div>
 
