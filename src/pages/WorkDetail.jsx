@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, formatDate } from '../lib/api.js';
-import { brandIcon, monogram } from '../lib/brand.js';
+import { brandIcon, linksFor, monogram } from '../lib/brand.js';
 import Markdown from '../components/Markdown.jsx';
 import Loading from '../components/Loading.jsx';
 import StatCover from '../components/StatCover.jsx';
@@ -67,6 +67,8 @@ export default function WorkDetail() {
   }
 
   const icon = brandIcon(project.slug);
+  const links = linksFor(project);
+  const [primary, ...extra] = links;
   const client = project.client?.split('·')[0]?.trim();
   const metaLine = [project.role, project.client].filter(Boolean).join(' · ');
   const details = [
@@ -93,11 +95,16 @@ export default function WorkDetail() {
           {taglineOf(project) && <p className="bn-case-tagline">{taglineOf(project)}</p>}
           {metaLine && <p className="bn-case-meta">{metaLine}</p>}
           <div className="bn-case-actions">
-            {project.url && (
-              <a className="bn-btn bn-btn--accent" href={project.url} target="_blank" rel="noreferrer">
+            {primary && (
+              <a className="bn-btn bn-btn--accent" href={primary.url} target="_blank" rel="noreferrer">
                 Visit site
               </a>
             )}
+            {extra.map((l) => (
+              <a className="bn-btn" href={l.url} target="_blank" rel="noreferrer" key={l.url}>
+                {l.label} ↗
+              </a>
+            ))}
             <a className="bn-btn" href="#story">
               Read the case study
             </a>
@@ -167,11 +174,18 @@ export default function WorkDetail() {
               </div>
             </div>
           )}
-          {project.url && (
-            <a className="bn-aside-card bn-aside-link" href={project.url} target="_blank" rel="noreferrer">
-              <span>Visit the live site</span>
-              <span aria-hidden="true">↗</span>
-            </a>
+          {links.length > 0 && (
+            <div className="bn-aside-card">
+              <h3 className="bn-aside-title">Live</h3>
+              <div className="bn-aside-links">
+                {links.map((l) => (
+                  <a className="bn-aside-link" href={l.url} target="_blank" rel="noreferrer" key={l.url}>
+                    <span>{l.label}</span>
+                    <span className="bn-aside-host">{l.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} ↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
           )}
         </aside>
       </section>

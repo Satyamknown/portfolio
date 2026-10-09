@@ -55,13 +55,30 @@ export const home = {
 // Logos (public/logos/) come from the Rsquare Figma "Logos" board, each kept on
 // its own brand background. Without a `logo`, the strip shows a monogram + name.
 export const companies = [
-  { name: 'Stratalite', logo: '/logos/stratalite.png' },
-  { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png' },
-  { name: 'Skooltag', logo: '/logos/skooltag.png' },
-  { name: 'PCC Roofing', logo: '/logos/pcc-roofing.png' },
-  { name: 'PCC Renovations', logo: '/logos/pcc-renovations.png' },
-  { name: 'PCC Decking', logo: '/logos/pcc-decking.png' }
+  { name: 'Stratalite', logo: '/logos/stratalite.png', url: 'https://stratalite.ca/' },
+  { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png', url: 'https://pacificcoastcontracting.ca/' },
+  { name: 'Skooltag', logo: '/logos/skooltag.png', url: 'https://skooltag.com/' },
+  { name: 'PCC Roofing', logo: '/logos/pcc-roofing.png', url: 'https://pccroofing.ca/' },
+  { name: 'PCC Renovations', logo: '/logos/pcc-renovations.png', url: 'https://www.pccrenovations.ca/' },
+  { name: 'PCC Decking', logo: '/logos/pcc-decking.png', url: 'https://pccdecking.com/' }
 ];
+
+// Live sites per client, matched by slug prefix like brandIcons. The first link
+// is the "Visit site" button; the rest show as extra links. A Website URL set
+// in /admin for a case study takes priority over the first entry here.
+export const projectLinks = {
+  'pacific-coast-contracting': [
+    { label: 'PCC', url: 'https://pacificcoastcontracting.ca/' },
+    { label: 'PCC Roofing', url: 'https://pccroofing.ca/' },
+    { label: 'PCC Decking', url: 'https://pccdecking.com/' },
+    { label: 'PCC Renovations', url: 'https://www.pccrenovations.ca/' }
+  ],
+  stratalite: [
+    { label: 'Stratalite', url: 'https://stratalite.ca/' },
+    { label: 'Beta app', url: 'https://dev-app.stratalite.ca/' }
+  ],
+  skooltag: [{ label: 'Skooltag', url: 'https://skooltag.com/' }]
+};
 
 // Square brand icon for each project card, matched by the start of the
 // project's slug (so "stratalite-platform-testing" also gets Stratalite's).

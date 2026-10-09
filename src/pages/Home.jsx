@@ -54,7 +54,13 @@ export default function Home() {
                   <li className={`bn-co${c.logo ? ' bn-co--logo' : ''}`} key={c.name}>
                     {c.logo ? (
                       // A real logo already carries the name, so it stands alone.
-                      <img className="bn-co-logo" src={c.logo} alt={c.name} loading="lazy" />
+                      c.url ? (
+                        <a href={c.url} target="_blank" rel="noreferrer" tabIndex={run === 1 ? -1 : undefined}>
+                          <img className="bn-co-logo" src={c.logo} alt={c.name} loading="lazy" />
+                        </a>
+                      ) : (
+                        <img className="bn-co-logo" src={c.logo} alt={c.name} loading="lazy" />
+                      )
                     ) : (
                       <>
                         <span className="bn-co-mark">{monogram(c.name)}</span>
