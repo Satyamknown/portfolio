@@ -5,6 +5,8 @@ import { brandIcon, linksFor, monogram } from '../lib/brand.js';
 import Markdown from '../components/Markdown.jsx';
 import Loading from '../components/Loading.jsx';
 import StatCover from '../components/StatCover.jsx';
+import BrandCover from '../components/BrandCover.jsx';
+import { projectCovers } from '../data/site.js';
 import '../bento.css';
 
 // The first images in the case study body double as preview tiles, so the
@@ -126,7 +128,11 @@ export default function WorkDetail() {
         <h2 className="bn-section-title">Preview</h2>
         <div className={`bn-previews bn-previews--${previews.length}`}>
           <div className="bn-preview bn-preview--cover">
-            <StatCover project={project} size="wide" />
+            {projectCovers[project.slug] ? (
+              <BrandCover cover={projectCovers[project.slug]} title={project.title} />
+            ) : (
+              <StatCover project={project} size="wide" />
+            )}
           </div>
           {previews.map((img) => (
             <figure className="bn-preview" key={img.src}>

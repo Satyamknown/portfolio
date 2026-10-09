@@ -80,6 +80,47 @@ export const projectLinks = {
   skooltag: [{ label: 'Skooltag', url: 'https://skooltag.com/' }]
 };
 
+// Project covers: the live product in a browser (or phone) frame on a gradient
+// in the client's colours, plus the one-line stat under the card title.
+// Keyed by slug; a project without an entry keeps the generated stat cover.
+export const projectCovers = {
+  stratalite: {
+    frame: 'browser',
+    domain: 'app.stratalite.ca',
+    shot: '/design/stratalite/screen-project-detail.webp',
+    eyebrow: 'B2B SaaS · Live in beta',
+    tone: 'dark',
+    background: 'radial-gradient(120% 90% at 85% 110%, #ff6a2b 0%, #c2410c 28%, #1a0d07 62%, #0b0b0b 100%)',
+    stat: '106 UAT cases run across 5 roles before beta'
+  },
+  'pacific-coast-contracting': {
+    frame: 'browser',
+    domain: 'pacificcoastcontracting.ca',
+    shot: '/design/pacific-coast-contracting/live-umbrella-home.webp',
+    eyebrow: 'Lead management · 4 brands',
+    tone: 'light',
+    background: 'radial-gradient(110% 80% at 15% 0%, #fffaf0 0%, #fbeec8 45%, #eccb73 100%)',
+    stat: '30 conversions from two ad campaigns'
+  },
+  skooltag: {
+    frame: 'phone',
+    shot: '/design/skooltag/phone-onboarding.webp',
+    eyebrow: 'E-commerce · Parent app',
+    tone: 'light',
+    background: 'radial-gradient(90% 70% at 50% 100%, #fff3b0 0%, #fbd53a 45%, #f4b400 100%)',
+    stat: '85 screens handed off in 3 release phases'
+  },
+  'stratalite-platform-testing': {
+    frame: 'browser',
+    domain: 'dev-app.stratalite.ca',
+    shot: '/design/stratalite/screen-quotes.webp',
+    eyebrow: 'B2B SaaS · Product audit',
+    tone: 'dark',
+    background: 'radial-gradient(70% 90% at 95% 120%, rgba(255,90,31,.55) 0%, rgba(255,90,31,0) 70%), radial-gradient(110% 90% at 10% 0%, #2a2f3a 0%, #14161c 55%, #0b0b0b 100%)',
+    stat: '237 flows mapped, 87 business questions raised'
+  }
+};
+
 // Square brand icon for each project card, matched by the start of the
 // project's slug (so "stratalite-platform-testing" also gets Stratalite's).
 export const brandIcons = {

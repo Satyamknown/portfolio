@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { brandIcon, monogram } from '../lib/brand.js';
 import StatCover from './StatCover.jsx';
+import BrandCover from './BrandCover.jsx';
+import { projectCovers } from '../data/site.js';
 
 // Shared by the homepage and /work. Each project gets a generated stat cover
 // built from its own CMS data (first metric, first tag), so no cover image is
@@ -19,14 +21,19 @@ function bentoLayout(count) {
 }
 
 function ProjectCard({ project, size = 'wide' }) {
-  const meta = [project.client?.split('·')[0]?.trim(), project.year].filter(Boolean).join(' · ');
+  const cover = projectCovers[project.slug];
+  const lead = project.metrics?.[0];
+  // One-line stat under the title; client and year when there is no stat.
+  const meta =
+    cover?.stat ||
+    (lead ? `${lead.value} ${lead.label}` : [project.client?.split('·')[0]?.trim(), project.year].filter(Boolean).join(' · '));
   return (
     <Link
       to={`/work/${project.slug}`}
       className={`bn-pcard bn-pcard--${size}`}
       data-cursor="open-folder"
     >
-      <StatCover project={project} size={size} />
+      {cover ? <BrandCover cover={cover} title={project.title} /> : <StatCover project={project} size={size} />}
       <div className="bn-pcard-foot">
         <span className="bn-pcard-icon" aria-hidden="true">
           {brandIcon(project.slug) ? <img src={brandIcon(project.slug)} alt="" /> : monogram(project.title)}

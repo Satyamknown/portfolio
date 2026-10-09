@@ -211,10 +211,10 @@ body:has(.bn) .top-glass{
 .bn-pcard-icon img{width:100%;height:100%;object-fit:cover;display:block}
 .bn-pcard-text{display:flex;flex-direction:column;min-width:0;flex:1}
 .bn-pcard-title{
-  font-size:15px;font-weight:600;letter-spacing:-.015em;line-height:1.3;
+  font-size:15px;line-height:1.3;font-weight:600;letter-spacing:-.015em;line-height:1.3;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.bn-pcard-meta{font-size:12.5px;color:var(--bn-ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bn-pcard-meta{font-size:12.5px;line-height:1.4;color:var(--bn-ink-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 /* ---------- Contact line ---------- */
 .bn-cta{
@@ -351,3 +351,37 @@ body:has(.bn) .top-glass{
   .bn-previews,.bn-previews--1{grid-template-columns:1fr}
   .bn-preview{min-height:260px}
 }
+
+/* ---------- Brand covers: live product framed on a brand gradient ---------- */
+.bn-bcover{
+  flex:1;position:relative;margin:8px 8px 0;border-radius:calc(var(--bn-r-lg) - 8px);
+  overflow:hidden;min-height:300px;
+}
+.bn-bcover-eyebrow{
+  position:absolute;left:24px;top:22px;z-index:1;
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+}
+.bn-bcover--dark .bn-bcover-eyebrow{color:rgba(255,255,255,.72)}
+.bn-bcover--light .bn-bcover-eyebrow{color:rgba(29,29,31,.6)}
+.bn-bcover-browser{
+  position:absolute;left:9%;right:9%;top:64px;bottom:-40px;background:#fff;border-radius:12px;overflow:hidden;
+  box-shadow:0 40px 80px -24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.06);
+  transition:transform .6s var(--bn-ease);
+}
+.bn-bcover--light .bn-bcover-browser{box-shadow:0 30px 70px -24px rgba(122,82,0,.45),0 0 0 1px rgba(0,0,0,.05)}
+.bn-pcard--narrow .bn-bcover-browser{left:22px;right:-38%}
+.bn-bcover-bar{height:26px;background:#f2f2f4;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid #e5e5ea}
+.bn-bcover-dot{width:9px;height:9px;border-radius:50%;flex:none}
+.bn-bcover-url{margin:0 auto;font-size:10.5px;color:#6e6e73;background:#fff;border-radius:6px;padding:2px 28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.bn-pcard--narrow .bn-bcover-url{margin:0 0 0 12px}
+.bn-bcover-browser img{width:100%;display:block}
+.bn-bcover-phone{
+  position:absolute;left:50%;top:64px;width:min(200px,46%);transform:translateX(-50%);
+  padding:7px;background:#111;border-radius:36px;box-shadow:0 40px 70px -20px rgba(120,80,0,.55);
+  transition:transform .6s var(--bn-ease);
+}
+.bn-bcover-phone img{width:100%;display:block;border-radius:29px}
+.bn-pcard:hover .bn-bcover-browser{transform:translateY(-6px)}
+.bn-pcard:hover .bn-bcover-phone{transform:translate(-50%,-6px)}
+.bn-preview--cover .bn-bcover{margin:8px}
+@media (prefers-reduced-motion:reduce){.bn-bcover-browser,.bn-bcover-phone{transition:none}}
