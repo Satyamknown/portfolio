@@ -103,18 +103,16 @@ body:has(.bn) .top-glass{
 .bn-marquee-track{display:flex;width:max-content;animation:bnMarquee 42s linear infinite}
 .bn-marquee-window:hover .bn-marquee-track{animation-play-state:paused}
 .bn-marquee-run{display:flex;align-items:center;gap:48px;margin:0;padding:0 48px 0 0;list-style:none}
-.bn-co{display:flex;align-items:center;gap:10px;white-space:nowrap;opacity:.55;filter:grayscale(1);transition:opacity .25s,filter .25s}
-.bn-co:hover{opacity:1;filter:none}
+.bn-co{display:flex;align-items:center;gap:10px;white-space:nowrap}
 .bn-co-mark{
   width:24px;height:24px;border-radius:7px;display:grid;place-items:center;flex:none;
   background:var(--bn-ink);color:#fff;font-size:9.5px;font-weight:700;overflow:hidden;
 }
 .bn-co-mark img{width:100%;height:100%;object-fit:contain;background:#fff}
 .bn-co-name{font-size:14px;font-weight:500;color:var(--bn-ink-2);letter-spacing:-.01em}
-/* Logos sit at one optical height, greyscale until hovered. */
-/* Each logo keeps its own brand background, so it sits in a small rounded tile. */
+/* Logos sit at one optical height, in full colour.
+   Each logo keeps its own brand background, so it sits in a small rounded tile. */
 .bn-co-logo{height:34px;width:auto;display:block;border-radius:9px;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
-.bn-co--logo{opacity:.6}
 @keyframes bnMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.bn-marquee-track{animation:none}}
 
@@ -139,9 +137,7 @@ body:has(.bn) .top-glass{
   margin:0;min-height:320px;border-radius:var(--bn-r-lg);overflow:hidden;position:relative;
   background:var(--bn-well);box-shadow:var(--bn-shadow);border:0;
 }
-.bn-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%;filter:grayscale(1);transition:filter .5s ease}
-/* Black and white like the rest of the page; colour comes back on hover. */
-.bn-photo:hover img{filter:none}
+.bn-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}
 .bn-photo-fallback{
   position:absolute;inset:0;display:grid;place-items:center;
   font-size:64px;font-weight:600;letter-spacing:-.04em;color:var(--bn-ink-4);
@@ -297,8 +293,7 @@ body:has(.bn) .top-glass{
 }
 .bn-preview--cover .bn-cover{flex:1;margin:8px}
 .bn-preview-img{flex:1;margin:8px 8px 0;border-radius:calc(var(--bn-r-lg) - 8px);background:var(--bn-well);overflow:hidden;position:relative}
-.bn-preview-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left top;filter:grayscale(1);transition:filter .4s}
-.bn-preview:hover .bn-preview-img img{filter:none}
+.bn-preview-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left top}
 /* Captions wrap in full and the tile grows to fit: no clamped or cut-off text. */
 .bn-preview figcaption{
   padding:14px 18px 16px;font-size:13px;line-height:1.45;color:var(--bn-ink-3);
@@ -313,7 +308,7 @@ body:has(.bn) .top-glass{
   font:inherit;color:inherit;text-align:left;cursor:pointer;
 }
 .bn-preview--video .bn-preview-img{display:block;min-height:220px}
-.bn-preview--video .bn-preview-img img{filter:none;object-position:center;transition:transform .5s cubic-bezier(.32,.72,0,1)}
+.bn-preview--video .bn-preview-img img{object-position:center;transition:transform .5s cubic-bezier(.32,.72,0,1)}
 .bn-video-open:hover .bn-preview-img img{transform:scale(1.03)}
 .bn-video-play{
   position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;
@@ -351,9 +346,10 @@ body:has(.bn) .top-glass{
 
 /* Story + details */
 .bn-case-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:48px;padding-top:64px;scroll-margin-top:90px;align-items:start}
-.bn-case-main > .bn-section-title{margin:0 0 14px}
 .bn-case-summary{margin:0;font-size:20px;line-height:1.5;letter-spacing:-.01em;color:var(--bn-ink);max-width:60ch}
-.bn-case-main .prose{padding-top:20px}
+/* No section title: the body's own first heading starts level with the Details card. */
+.bn-case .bn-case-main .prose{padding-top:0}
+.bn-case-main .prose > :first-child{margin-top:0}
 .bn-case-aside{position:sticky;top:96px;display:flex;flex-direction:column;gap:12px}
 .bn-aside-card{background:var(--bn-card);border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);padding:18px 20px}
 .bn-aside-title{margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--bn-ink-3)}

@@ -164,7 +164,6 @@ export default function WorkDetail() {
       {/* ---------- Story + details ---------- */}
       <section className="bn-case-body" id="story">
         <div className="bn-case-main">
-          <h2 className="bn-section-title">The story</h2>
           <Markdown>{project.body}</Markdown>
         </div>
 
