@@ -662,7 +662,10 @@ button, .btn, .af-submit, a{
 
 /* ---------- Appointment form (design restyle) ---------- */
 .af{display:flex;flex-direction:column;gap:18px}
-.af-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.af-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+/* Inputs size to their column, never to their own default width. */
+.af label{min-width:0}
+.af input,.af textarea{width:100%;min-width:0;box-sizing:border-box}
 @media(max-width:600px){.af-pair{grid-template-columns:1fr}}
 .af label{
   display:flex;flex-direction:column;gap:8px;

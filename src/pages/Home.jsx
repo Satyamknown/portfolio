@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { ProjectGridSkeleton } from '../components/Skeleton.jsx';
 import ProjectBento from '../components/ProjectBento.jsx';
-import { home, profile, companies, microcopy } from '../data/site.js';
+import { ArrowUpRight } from '../components/Icons.jsx';
+import { home, profile, companies, microcopy, emailCompose } from '../data/site.js';
 import '../bento.css';
 
 const monogram = (name) =>
@@ -132,8 +133,8 @@ export default function Home() {
             <p className="bn-cta-text">{home.intro.contactLine}</p>
           </div>
           <div className="bn-cta-actions">
-            <a className="bn-btn" href={`mailto:${profile.email}`}>
-              Email
+            <a className="bn-btn" href={emailCompose} target="_blank" rel="noreferrer">
+              Email <ArrowUpRight />
             </a>
             <Link className="bn-btn bn-btn--dark" to="/contact">
               Contact me

@@ -1,185 +1,190 @@
+// PM-framed rewrite (v3.0): one story across 18 months, from scoping to a small
+// beta, pulling it back, and fixing what touches money first. Facts confirmed by
+// Abhishek on 2026-10-10. A production deploy publishes this file to the CMS
+// (the v2.1 copy is backed up first). Same slug, so resume links keep working.
 export default {
   slug: 'stratalite',
   title: 'Stratalite',
-  version: 'v2.1',
+  version: 'v3.0',
+  tagline: 'One place for property managers to hire vendors, track the work and get it paid.',
   summary:
-    'Scoped the roles, permissions and success metrics for a 5-role property-management SaaS, then checked the build against the design and ran 106 UAT cases across roles. The product is live in beta.',
-  role: 'Design lead · delivery & UAT',
+    'Property managers were running repairs and renovations over WhatsApp, email and phone calls. On a team of three with no product manager, I acted as one for 18 months: I scoped a five-role platform, decided who sees what, chose the numbers the dashboard should show, ran a small beta, and when it showed us problems, pulled it back and fixed the things that touch money first.',
+  role: 'Lead designer, acting product owner',
   client: 'Stratalite · Vancouver',
-  year: '2026',
-  tags: ['B2B SaaS', 'Scope & requirements', 'Access control', 'KPI definition', 'UAT'],
+  year: '2025-26',
+  tags: ['B2B SaaS', 'Product scoping', 'Access control', 'Success metrics', 'Beta and quality'],
   metrics: [
-    { value: '106', label: 'UAT test cases' },
-    { value: '15', label: 'distinct issues, 6 high-priority' },
-    { value: '5 roles', label: 'by 13 actions in the access matrix' },
-    { value: '10', label: 'KPIs traced to source fields' },
+    { value: '18 months', label: 'from first sketch to a stable product' },
+    { value: '5', label: 'roles, each seeing only what it should' },
+    { value: '106', label: 'test cases run across every role' },
+    { value: '10', label: 'dashboard numbers, each tied to real data' }
   ],
   coverImage: '/case-studies/stratalite/cover.webp',
   order: 1,
   published: true,
-  body: `## At a glance
+  body: `## The ask
 
-- **My role:** Design lead with delivery ownership, at Rsquare Web Studio. I joined before any screen existed and stayed through the build review and UAT.
-- **Timeline:** About 8 months. The three UAT passes ran 18 to 20 Aug 2026.
-- **Worked with:** the client's team at Stratalite, who aligned on priorities and KPIs, and the development team who built the product.
-- **What I owned:** scope, the permission model, IA, flow requirements, KPI definition, the design-vs-build review and UAT.
-- **Status:** live in beta with real property management companies, managers and vendors.
+Stratalite is a Vancouver startup building software for property management companies: the firms that look after buildings for their owners and hire vendors to fix, maintain and renovate them.
 
-## The problem
+They wanted one platform for the whole job, from finding a vendor to paying them. I joined before a single screen existed and stayed through the beta and the clean-up after it.
 
-Property management companies (PMCs) ran maintenance and renovation projects across a patchwork of tools: vendor onboarding over WhatsApp, coordination in email threads, approvals by phone. That had three business costs:
+## What was actually broken
 
-- **Slow approvals.** Quotes sat in inboxes; checking a milestone meant calling the vendor.
-- **Disputes with no evidence.** Nobody could show what had been agreed, done or approved.
-- **No portfolio view.** A PMC director could not see spend or progress across properties.
+The problem wasn't missing features. It was that the work lived in five places at once:
 
-Existing platforms were too generic, too expensive, or made PMCs bend their workflow around the software. Stratalite set out to cover the whole pipeline in one place, from vendor onboarding to payment.
+- **Vendors were found and onboarded over WhatsApp.** Coordination happened in email threads. Approvals happened on the phone.
+- **Quotes sat in inboxes.** Checking whether a job was done meant calling the vendor and hoping they picked up.
+- **Nobody could prove anything.** When a vendor and a manager disagreed about what was agreed, there was no record to point at.
+- **The boss was flying blind.** A director couldn't see spend or progress across their properties without asking around.
 
-## What I owned
+Existing tools were too generic, too expensive, or made companies change how they work to suit the software. Nobody wants to retrain a whole office just to approve a gutter repair.
 
-My title was designer; the job was closer to product delivery:
+There was also a split worth noticing early: the person who **buys** Stratalite (the company's director) is not the person who **uses** it every day (managers and vendors). The product had to win both.
 
-- **Scope:** what the platform covers, who uses it, and who sits outside it.
-- **Rules:** who can do what, as a permission matrix and as business rules in the flows.
-- **Requirements:** decision points and field specs for each flow, plus open questions for the client.
-- **Success measures:** which dashboard numbers matter and where each comes from.
-- **Quality:** the design-vs-build review, then UAT, with every issue given a priority and an owner action.
+## What success looked like
 
-## How I scoped it
+Before designing anything, I set four goals:
 
-**Stakeholder map first.** Before any UI, I mapped the ecosystem in four rings: the 5 direct users, then owners, tenants and finance teams, then services the platform depends on (payment gateway, banking, insurance), then regulators. It settled what Stratalite owns and what it only connects to.
+1. **One place:** every step, from hiring a vendor to paying them, happens inside Stratalite.
+2. **Right access:** each person sees exactly what their job needs, and nothing else.
+3. **A paper trail:** every quote, milestone and dispute is on the project record.
+4. **A useful dashboard:** the numbers a director sees come from real data, not wishful thinking.
 
-![Stakeholder map in four rings around the Stratalite platform](/case-studies/stratalite/stakeholder-map.webp "4 rings, 5 direct users: drawn before any screen to decide what the platform owns and what it only connects to")
+## My role
 
-**Traceability.** A system map linked 8 pain points to 8 core modules and 6 desired outcomes, so each module traced back to a real problem.
+We were a team of three at Rsquare Web Studio: one developer, one designer, and me as lead designer. There was no product manager, so I did that job too.
 
-**Users and journeys.** Four persona cards and 11 journey-map boards broke each role's work into stages, touchpoints and pain points. The transactions board found a party with no account at all: Accounts Payable, who gets a shareable link from the manager, records the cheque and closes the project.
+I decided what the platform covers and who it's for, wrote the rules for who can do what, turned them into requirements the developer could build from, agreed the metrics with the client, ran the beta, and decided what got fixed first when it went wrong.
 
-**Roles and permissions.** The personas exposed the biggest scoping question:
+## The timeline
 
-> Independent Manager and PMC Manager look like the same role but have completely different permission scopes.
-
-The access matrix covers 5 roles by 13 actions in 5 domains, at three levels: full, conditional or none. The real rules sit in the conditional cells. A PMC Manager creates projects only on assigned properties; managers see quotations submitted to them and invoices shared with them; vendors see only their own. The Super Admin (Stratalite's own team) cannot view quotations or invoices: running the platform does not mean seeing a client's pricing.
-
-![Role-based access control matrix](/case-studies/stratalite/rbac-matrix.webp "5 roles by 13 actions in 5 domains: permissions scoped at sign-up, not toggled later")
-
-**Information architecture.** 13 sections, 22 groups and 118 leaf screens, mapped before design started.
-
-![Part of the information architecture tree](/case-studies/stratalite/information-architecture.webp "5 of the 13 IA sections: the full tree has 22 groups and 118 leaf screens")
-
-**Flows as requirements.** Three flow boards (Admin, Vendor, Manager) doubled as the spec, with decision points such as "Quotation approved?" and the business rules developers needed:
-
-- A project asks for 1, 2 or 3 quotes, which caps how many vendors get shortlisted.
-- The project tier is set after quote approval, based on value.
-- Only vendors mark milestones complete; every milestone edit is timestamped.
-- Announcements can be deleted only within 10 minutes.
-
-Where the brief was unclear, I wrote the question on the screen for the client, such as whether submitting interest is the same as submitting a quote range.
-
-![Manager flow from project assignment to cheque payment](/case-studies/stratalite/completion-to-payment-flow.webp "Assignment to payment: the dispute loop, the completion decision, and the hand-off to Accounts Payable, an external party with no account")
-
-## Key decisions and trade-offs
-
-### 1. Split "manager" into two roles at sign-up
-
-- **Problem:** We first treated all managers as one type. But Independent Managers create their own properties; PMC Managers work on properties a PMC Admin assigns.
-- **Decision:** Two roles, chosen at account creation. Permissions are scoped from login, not toggled later.
-- **Trade-off:** Two onboarding paths and two permission sets to specify and test. Shared steps, such as project execution and payment, were specified once for both.
-- **Result:** A cleaner IA and no permission confusion mid-flow.
-
-### 2. Vendors earn the brief: interest, then shortlist, then unlock
-
-- **Problem:** Showing full details to every vendor created noise; unqualified vendors applied to everything.
-- **Decision:** Vendors submit interest first. Property details and the manager's contact unlock only after shortlisting.
-- **Trade-off:** Vendors commit on less information, and the journey maps had already flagged incomplete briefs as a pain point, so the public brief still had to be enough to decide on.
-- **Result:** A natural funnel. Managers deal only with vendors who opted in and were shortlisted.
-
-![Vendor project view after submitting interest](/case-studies/stratalite/vendor-submit-interest.webp "The vendor side of the funnel: interest first, with the manager's contact unlocked only after shortlisting")
-
-### 3. Put the invoice inside "Mark as complete"
-
-- **Problem:** Completion and payment were separate flows. Managers approved completion, then chased the invoice, delaying payment on every project.
-- **Decision:** Invoice number, file, amount and billing method moved into the Mark as Complete modal. One action closes the work and starts payment.
-- **Trade-off:** A heavier last step: the vendor cannot mark a job done until the invoice is ready.
-- **Result:** Payment data captured at one point, followed by a clear "Waiting for approval" state. That invoice amount later fed 6 of the 10 PMC Admin dashboard outputs.
-
-### 4. Keep disputes inside the project
-
-- **Problem:** A standalone disputes section lost context; managers forgot what an issue was about.
-- **Decision:** Disputes live in the project view, with evidence and resolution notes on the project record.
-- **Trade-off:** No separate dispute module. "Disputed" became a status filter on project lists instead.
-- **Result:** Full context and an automatic audit trail on the project timeline.
-
-## Defining what success looks like
-
-Dashboard metrics are often picked because they look good, not because the data exists. Before designing any dashboard, I ran five steps:
-
-1. **Inventory:** 35 input fields across 6 forms, with who enters each.
-2. **Projection:** where each input appears in the UI.
-3. **Field mapping:** an input-to-output matrix across 18 dashboard outputs.
-4. **Stakeholder alignment:** the client's stakeholders agreed priority metrics before any design.
-5. **Design** from the mapping.
-
-Each of the 10 KPIs has a written justification:
-
-| KPI | Question it answers | Source | Decision it supports |
-|---|---|---|---|
-| Total spend | What is my portfolio costing me? | Sum of invoice amounts from Mark as Complete | Are we over budget? Which properties cost most? |
-| Invoice cleared / pending | What do I owe right now? | Invoice status, paid vs submitted | Is a payment backlog building? |
-| New projects | What is sitting in my queue? | Projects with no vendor shortlisted yet | Start shortlisting before these slip |
-
-The mapping also exposed a dependency: one field, the invoice amount, feeds 6 of the 10 PMC Admin outputs. An error there spreads through most of the director's dashboard.
-
-For managers, a Next Step column turns each project status into a plain-language action:
-
-> Status tells you where you are. Next Step tells you what to do.
-
-![PMC Admin dashboard field matrix](/case-studies/stratalite/kpi-field-matrix.webp "PMC Admin field matrix: every dashboard output traced to its input. One field, the invoice amount (V17), feeds 6 of 10")
-
-## Getting it built right
-
-### Design-vs-build review
-
-As the development team shipped flows, I placed about 200 captures of the live app beside the designs, grouped by numbered flow, and gave each flow a verdict: two "Approved: perfectly implemented", three "Partial match: structural difference".
-
-### UAT
-
-I ran three UAT passes on the dev environment. Vendor and manager/PMC accounts worked the same test project side by side, so each hand-off, from interest to payment, was checked from both ends. I mixed manual testing with AI browser automation, and checked outcomes where they land: for an email, the receiving inbox, not the in-app message.
-
-| Pass | Date | Test cases | Passed | Flagged | Issues logged |
-|---|---|---|---|---|---|
-| Vendor side | 18 Aug | 43 | 31 | 6 | 9 |
-| Manager side | 18 Aug | 21 | 17 | 2 | 5 |
-| Manager / PMC Admin | 20 Aug | 42 | 38 | 4 | 6 |
-| **Total** | **18 to 20 Aug** | **106** | **86** | **12** | **20 (15 distinct)** |
-
-The other 8 cases were inconclusive or queued for retest. Merging issues seen from both sides left 15 distinct ones, each with an ID, test data, expected vs actual result, a priority and an owner action:
-
-| Priority | Distinct issues | Owner action |
+| Phase | When | What happened |
 |---|---|---|
-| High | 6 | Fix before rollout or the next release |
-| Medium | 4 | Investigate and schedule a fix |
-| Low | 5 | Track for a future polish pass |
+| 1. Understand the problem | Months 1–3 | Studied how companies actually ran their jobs, mapped who the product touches, and set the four goals. |
+| 2. Define the product | Months 3–8 | Wrote who can do what for each role and made the big product calls. |
+| 3. Build | Months 6–14 | The developer built it piece by piece. Agreed the dashboard numbers with the client. |
+| 4. Small beta | Around month 14 | Opened it to a small group of real managers and vendors. |
+| 5. Pull it back | Right after | The beta surfaced problems, so we took it back instead of letting real users work around them. |
+| 6. Stress test and fix | Aug 2026 onwards | Tested every role with AI help, ranked every problem by business risk, and fixed money and work first. Most issues are now patched. |
 
-The clearest example: inviting a manager showed "Invitation sent!", but no email arrived, on first send or re-send. Without the activation link, the new manager could not log in. The screen reported success while the business outcome failed. Both went in as High, "fix before manager onboarding rollout", with the activation retest queued behind the email fix.
+## Part 1: Building the right thing
 
-The other High issues: quote emails not reaching the manager, no reminder for an expired vendor certificate, and broken change-email and change-password flows.
+### 1. Decide what the platform owns
 
-## Outcome
+Before any UI, I mapped everyone the product touches, in four rings: the five people who log in, then owners, tenants and finance teams, then the services it relies on (payments, banking, insurance), then regulators.
 
-- Stratalite is live in beta with real PMCs, managers and vendors.
-- The scope work (access matrix, IA, flow boards) defined the lifecycle UAT then tested, phase by phase.
-- All 10 KPIs trace to a source field and were agreed before dashboard design.
-- Design-vs-build: 2 flows approved as built, 3 flagged for structural differences.
-- UAT: 106 cases, 15 distinct issues, 6 high-priority, each handed over with an owner action.
+That one map settled the most expensive question early: what Stratalite does itself, and what it only connects to. It also found someone easy to forget: the accounts payable person who pays the vendor but never logs in. They get a shareable link instead of an account.
 
-I don't have adoption or cycle-time figures from the beta to report.
+![Stakeholder map in four rings around the Stratalite platform](/case-studies/stratalite/stakeholder-map.webp "Everyone the platform touches: what Stratalite owns, and what it only connects to")
+
+### 2. Split "manager" into two roles
+
+At first we treated every manager as one type of user. Looking at how they actually worked showed two very different jobs:
+
+- **Independent managers** create and run their own properties.
+- **Company managers** only work on properties their company assigns to them.
+
+Same title, completely different access. So they became two roles, chosen at sign-up, each with its own permissions from the first login. It meant two onboarding paths to build and test, but it removed a whole class of "wait, why can I see this?" moments.
+
+Then I wrote down who can do what across all five roles. The interesting rules were the in-between ones: managers see only the quotes sent to them, vendors see only their own, and Stratalite's own admin team can't see any client's pricing. Running the platform doesn't mean reading everyone's invoices.
+
+![Who-can-do-what matrix for the five roles](/case-studies/stratalite/rbac-matrix.webp "Five roles, each with access set at sign-up rather than switched on later")
+
+### 3. Make vendors earn the details
+
+If every vendor sees every job in full, managers drown in applications from vendors who were never a fit.
+
+So vendors first say they're interested. Only once a manager shortlists them do they see the property details and the manager's contact. The trade-off: vendors decide on less information, so the public job brief had to be good enough to decide on. In return, managers only ever talk to vendors who opted in and made the cut.
+
+![Manager project view listing interested vendors, each with a Shortlist button](/design/stratalite/screen-interested.webp "The manager's side: vendors who said they're interested, waiting to be shortlisted")
+
+### 4. Put the invoice inside "Mark as complete"
+
+Finishing a job and getting paid were two separate steps. Managers approved the work, then chased the invoice, and every payment waited on that chase.
+
+I moved the invoice into "Mark as complete". One action now closes the job and starts the payment. The vendor's last step gets a little heavier, but the chasing ends, and the invoice amount is captured in one place.
+
+![Vendor project page with every task ticked and a Proceed with Invoice card](/design/stratalite/proceed-with-invoice.webp "Finishing the job and sending the invoice became one step")
+
+### 5. Keep disputes inside the project
+
+A separate disputes section lost the context: by the time anyone opened it, nobody remembered what the job was. So disputes live on the project itself, with the evidence and the resolution right there. "Disputed" became a filter on the project list instead of a feature of its own.
+
+### 6. Pick dashboard numbers the data can actually support
+
+Dashboards often show numbers because they look impressive, not because the product collects the data behind them.
+
+So I worked backwards: listed every piece of information people enter, traced where it ends up, and only then agreed with the client which ten numbers the director's dashboard shows. Each one answers a real question, like "what do I owe right now?" or "what's stuck in my queue?"
+
+It also flagged a risk: the invoice amount feeds six of the ten numbers. One wrong entry there skews most of the dashboard. Remember that one; it comes back.
+
+![Company admin dashboard annotated with the source behind each number](/design/stratalite/kpi-pmc-annotated.webp "Every number on the director's dashboard, traced back to where its data comes from")
+
+## Part 2: The beta, and pulling it back
+
+### 7. A small beta, on purpose
+
+We didn't launch to everyone. We opened Stratalite to a small group of real managers and vendors and let them run real jobs through it.
+
+That was the point of a small beta: to find out what breaks while the damage is still small.
+
+### 8. Then we took it back
+
+It did its job. Real use surfaced problems we hadn't caught, and some of them touched money. Rather than ask early users to work around them, we pulled the beta back and fixed things properly first.
+
+It's not the exciting decision, but it's the right one for a product that handles other people's payments. A vendor who gets paid wrong once doesn't come back.
+
+### 9. Use AI to test like a much bigger team
+
+With a team of three, we couldn't hire a QA team. So I used AI to do the heavy lifting: AI agents stress-tested the application, ran QA tests across all five roles, and hunted for edge cases and system faults: the odd paths real users take that nobody writes a test for.
+
+I set what to test, decided what counted as a real problem (anything that could harm someone's work, money or records), and reviewed every result before it went to the developer. Over three rounds that was 106 test cases, with a vendor and a manager working the same job side by side, so every hand-off was checked from both ends.
+
+The most important finds weren't broken buttons. They were missing checks:
+
+- **An invoice above the agreed price could be accepted without review.** (Remember the invoice amount that feeds six dashboard numbers? This is why it mattered.)
+- **The approval screen didn't show the amount being approved.** Managers were saying yes to a number they couldn't see.
+- **Some jobs could get stuck.** A project marked incomplete couldn't be reopened, and a vendor who lost a job was never told.
+- **Deleting a finished project erased its history for everyone,** which breaks the paper trail the whole product promises.
+
+### 10. Fix in order of business risk
+
+Not every bug matters equally, so every finding went back to the developer straight away, ranked:
+
+1. **First: anything touching vendors' work or money.** Quotes, approvals, invoices, payments, and the project record. If it can pay someone wrong or lose a job's history, it's fixed before anything else.
+2. **Then: messaging and everything else.** Notifications, messages and the rest: annoying when broken, but nobody loses money.
+
+Where a problem was really a business decision rather than a bug (should a manager be able to reopen a finished job?), I didn't guess. It went to the client as a question, marked as a blocker, a decision or a clarification.
+
+The money and work issues were fixed first, and most of the rest are now patched. What's left is on a list with a priority and an owner.
+
+
+## What we chose not to do
+
+- **One "manager" role with toggles.** Faster to build, but it would have meant permission mistakes in the middle of real jobs.
+- **A separate disputes feature.** It looked tidy on paper and lost all the context in practice.
+- **A dashboard full of numbers we couldn't source.** Ten numbers we can trust beat thirty we can't.
+- **Keeping the beta running while we fixed things.** Early users shouldn't be our testers for payment bugs.
+
+## Did it work?
+
+Back to the four goals:
+
+1. **One place: yes.** Vendor onboarding, quotes, milestones, disputes and payment all run inside Stratalite.
+2. **Right access: yes.** Five roles, each with access set at sign-up, and no client's pricing visible to anyone who shouldn't see it.
+3. **A paper trail: yes, after the fixes.** Testing found the gaps (lost history, missing amounts on approval), and they were first in line to be fixed.
+4. **A useful dashboard: yes.** All ten numbers trace back to data the product actually collects, and the client agreed them before design.
+
+![Payment completed view with payment, invoice and quotation details together](/design/stratalite/screen-payment.webp "Quote, invoice and payment for a job, in one place")
+
+And the product: the beta did what a beta is for. It showed us the problems while they were small, we fixed the ones that touch money and work first, and most of the rest are patched.
+
 
 ## What I'd do differently
 
-- **Set up the design system in Sprint 1.** We put shipping screens ahead of foundations, which caused visual inconsistency and handoff friction with the developers.
-- **Test outcomes, not screens, from the first sprint.** Most high-priority issues were emails that never arrived and settings flows that failed. A design-vs-build review can't see those: the screens looked right. I'd write acceptance criteria that include side effects ("the invite email arrives") and test them every sprint.
-- **Agree baseline metrics before beta.** The decisions above describe intended effects. I'd agree with the client how to measure them, such as time from completion to payment, so the beta could confirm or disprove them.
-- **Keep the numbers in one place.** My own artefacts drifted: one slide said 4 roles instead of 5, a headline said 26 input fields where the tables list 35.
-`,
+- **Test the risky parts from day one, not after the beta.** The worst issues were around money. I'd stress-test quotes, approvals and payments every sprint, not just before launch.
+- **Get the business rules signed off before building.** Many "bugs" were really open questions. A one-page rules sheet agreed with the client would have settled them before a line of code.
+- **Bring AI testing in earlier.** It let a team of three test like a team of ten. I'd use it from the first build, not the first beta.
+- **Agree how to measure success before the beta.** A baseline like "time from job done to vendor paid" would let the beta prove the decisions worked, not just that they were sensible.
+`
 };

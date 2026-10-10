@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { profile } from '../data/site.js';
+import { emailCompose, profile } from '../data/site.js';
 import StatusSidebar from './StatusSidebar.jsx';
 import '../bento.css';
 import '../skin.css';
@@ -115,7 +115,9 @@ export default function Layout({ children }) {
         <div className="site-footer-inner">
           <span>©{new Date().getFullYear()} — Abhishek Manjhi</span>
           <div className="site-footer-links">
-            <a href={`mailto:${profile.email}`}>Email</a>
+            <a href={emailCompose} target="_blank" rel="noreferrer">
+              Email
+            </a>
             <a href={profile.linkedin} target="_blank" rel="noreferrer">
               LinkedIn
             </a>

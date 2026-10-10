@@ -91,7 +91,7 @@ export const projectCovers = {
     eyebrow: 'B2B SaaS · Live in beta',
     tone: 'dark',
     background: 'radial-gradient(120% 90% at 85% 110%, #ff6a2b 0%, #c2410c 28%, #1a0d07 62%, #0b0b0b 100%)',
-    stat: '106 UAT cases run across 5 roles before beta'
+    stat: '18 months from first sketch to a stable product'
   },
   'pacific-coast-contracting': {
     frame: 'browser',
@@ -200,6 +200,10 @@ export const inProgress = {
     }
   ]
 };
+
+// "Email me" opens a Gmail draft in a new tab: mailto: links silently do
+// nothing on computers without a mail app set up.
+export const emailCompose = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(profile.email)}`;
 
 export const contact = {
   heading: 'Let’s talk',

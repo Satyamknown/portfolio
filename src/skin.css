@@ -100,9 +100,14 @@ body.bn-skin .prose blockquote{
 body.bn-skin .prose blockquote p{font-size:inherit;line-height:inherit;font-weight:inherit;color:inherit}
 body.bn-skin .prose code{font-size:.88em;background:var(--bn-well);border-radius:6px}
 body.bn-skin .prose pre{border-radius:var(--bn-r-md)}
-body.bn-skin .prose figure{margin:36px -40px}
+/* Figures bleed 40px into the gutter only when the screen has room for it. */
+body.bn-skin .prose figure{margin:36px 0}
 body.bn-skin .prose figure img{border:0;border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);background:var(--bn-card)}
-body.bn-skin .prose figcaption{font-family:var(--bn-font);font-size:13px;color:var(--bn-ink-3);margin-top:12px;padding:0 40px}
+body.bn-skin .prose figcaption{font-family:var(--bn-font);font-size:13px;color:var(--bn-ink-3);margin-top:12px;padding:0}
+@media (min-width:1260px){
+  body.bn-skin .prose figure{margin:36px -40px}
+  body.bn-skin .prose figcaption{padding:0 40px}
+}
 /* Tables become a white card with hairline rows */
 body.bn-skin .prose table{
   background:var(--bn-card);border-radius:var(--bn-r-md);box-shadow:var(--bn-shadow);
@@ -235,3 +240,52 @@ body.bn-skin .prose li{border:0;padding:4px 0 4px 4px;margin:0}
 body.bn-skin .prose li + li{margin-top:6px}
 body.bn-skin .prose li::marker{color:var(--bn-ink-4)}
 body.bn-skin .prose h2{margin-top:48px}
+
+/* ---------- Contact: cat on the left, form on the right ---------- */
+body.bn-skin .cat-form{
+  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:28px;
+  padding:16px 28px 16px 16px;align-items:stretch;
+}
+.cat-side{
+  position:relative;display:flex;flex-direction:column;justify-content:flex-end;
+  min-height:440px;border-radius:20px;background:var(--bn-page,#f5f5f7);overflow:hidden;
+}
+.cat-side .cat-stage{max-width:none;margin:0}
+.cat-main{display:flex;flex-direction:column;justify-content:center;padding:16px 0;min-width:0}
+body.bn-skin .af-actions{flex-direction:column;align-items:stretch;gap:10px;margin-top:4px}
+body.bn-skin .af-submit{width:100%;padding:14px 20px;font-size:15px}
+body.bn-skin .af-alt{
+  display:flex;align-items:center;justify-content:center;gap:2px;width:100%;
+  padding:13px 20px;border:1px solid var(--bn-line);border-radius:999px;
+  font-size:15px;font-weight:500;color:var(--bn-ink);text-decoration:none;background:#fff;
+  transition:border-color .2s,color .2s;
+}
+body.bn-skin .af-alt:hover{border-color:var(--bn-ink);color:var(--bn-ink)}
+.btn-icon{display:inline-block;flex:none;vertical-align:-2px;margin-left:5px}
+
+/* Envelopes drifting behind the cat (components/ContactLines.jsx) */
+.contact-lines{position:absolute;left:8%;top:5%;width:84%;height:auto;max-height:58%;overflow:visible}
+.cl-solid{fill:#fff;stroke:#86868b;stroke-width:1.2;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.cl-solid.cl-hi{stroke:var(--bn-accent,#0071e3)}
+.cl-sil{stroke:#86868b;stroke-width:1.2;vector-effect:non-scaling-stroke}
+.cl-crease{fill:none;stroke:#c7c7cc;stroke-width:1;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.cl-guides line{stroke:#d2d2d7;stroke-width:1;stroke-dasharray:3 5;vector-effect:non-scaling-stroke}
+.cl-float{animation:cl-float 6.8s cubic-bezier(.45,0,.55,1) infinite alternate}
+.cl-float--a{animation-duration:6.2s;animation-delay:-1.4s}
+.cl-float--b{animation-duration:7.6s}
+.cl-float--c{animation-duration:5.6s;animation-delay:-3s}
+@keyframes cl-float{from{transform:translateY(-5px)}to{transform:translateY(7px)}}
+@media (prefers-reduced-motion:reduce){.cl-float{animation:none}}
+
+@media (max-width:760px){
+  body.bn-skin .cat-form{grid-template-columns:1fr;gap:8px;padding:12px 12px 20px}
+  .cat-side{min-height:0}
+  .contact-lines{display:none} /* no room beside the cat on a phone */
+  .cat-main{padding:8px 8px 0}
+}
+
+/* Phones: story tables wrap their text to fit instead of running off the edge. */
+@media (max-width:600px){
+  body.bn-skin .prose table{display:table;width:100%;table-layout:auto;font-size:13px}
+  body.bn-skin .prose th,body.bn-skin .prose td{padding:9px 10px;overflow-wrap:anywhere;hyphens:auto}
+}

@@ -2,8 +2,10 @@ import { useRef, useState } from 'react';
 import { api } from '../lib/api.js';
 import feedback from '../lib/feedback.js';
 import { setCursorState } from '../lib/cursor.js';
-import { profile } from '../data/site.js';
+import { emailCompose } from '../data/site.js';
 import ContactCat from './ContactCat.jsx';
+import ContactLines from './ContactLines.jsx';
+import { ArrowUpRight } from './Icons.jsx';
 
 const EMPTY = { name: '', email: '', message: '', website: '' };
 
@@ -48,7 +50,13 @@ export default function AppointmentForm({ prompt }) {
 
   return (
     <div className="cat-form">
-      <ContactCat ref={cat} prompt={prompt} onSettled={() => setSettled(true)} />
+      {/* Left: the cat on its ledge, with envelopes drifting behind it. */}
+      <div className="cat-side">
+        <ContactLines />
+        <ContactCat ref={cat} prompt={prompt} onSettled={() => setSettled(true)} />
+      </div>
+
+      <div className="cat-main">
 
       {sent ? (
         // Reserved in place so nothing shifts while the cat is mid-jump.
@@ -125,12 +133,19 @@ export default function AppointmentForm({ prompt }) {
             >
               {status === 'sending' ? 'Sending…' : 'Request a time →'}
             </button>
-            <a className="af-alt" href={`mailto:${profile.email}`} onPointerDown={() => feedback.tap()}>
-              or email directly
+            <a
+              className="af-alt"
+              href={emailCompose}
+              target="_blank"
+              rel="noreferrer"
+              onPointerDown={() => feedback.tap()}
+            >
+              Or email me directly <ArrowUpRight />
             </a>
           </div>
         </form>
       )}
+      </div>
     </div>
   );
 }

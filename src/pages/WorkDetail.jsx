@@ -125,10 +125,20 @@ export default function WorkDetail() {
         </dl>
       )}
 
-      {/* ---------- Preview ---------- */}
+      {/* ---------- Preview: the video leads when there is one ---------- */}
       <section className="bn-case-section">
-        <h2 className="bn-section-title">Preview</h2>
+        {video ? (
+          <div className="bn-section-head bn-section-head--stack">
+            <h2 className="bn-section-title">Watch the short version</h2>
+            <p className="bn-section-sub">
+              Don&rsquo;t feel like reading the whole case study? This video tells the story in about a minute.
+            </p>
+          </div>
+        ) : (
+          <h2 className="bn-section-title">Preview</h2>
+        )}
         <div className={`bn-previews bn-previews--${previews.length + (video ? 1 : 0)}`}>
+          {video && <VideoTile video={video} />}
           <div className="bn-preview bn-preview--cover">
             {projectCovers[project.slug] ? (
               <BrandCover cover={projectCovers[project.slug]} title={project.title} />
@@ -136,7 +146,6 @@ export default function WorkDetail() {
               <StatCover project={project} size="wide" />
             )}
           </div>
-          {video && <VideoTile video={video} />}
           {previews.map((img) => (
             <figure className="bn-preview" key={img.src}>
               <div className="bn-preview-img">

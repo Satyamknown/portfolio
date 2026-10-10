@@ -212,9 +212,10 @@ body:has(.bn) .top-glass{
 .bn-pcard-text{display:flex;flex-direction:column;min-width:0;flex:1}
 .bn-pcard-title{
   font-size:15px;line-height:1.3;font-weight:600;letter-spacing:-.015em;line-height:1.3;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  overflow-wrap:anywhere;
 }
-.bn-pcard-meta{font-size:12.5px;line-height:1.4;color:var(--bn-ink-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Titles and one-line stats wrap in full rather than being cut with "…". */
+.bn-pcard-meta{font-size:12.5px;line-height:1.4;color:var(--bn-ink-3);overflow-wrap:anywhere}
 
 /* ---------- Contact line ---------- */
 .bn-cta{
@@ -298,10 +299,13 @@ body:has(.bn) .top-glass{
 .bn-preview-img{flex:1;margin:8px 8px 0;border-radius:calc(var(--bn-r-lg) - 8px);background:var(--bn-well);overflow:hidden;position:relative}
 .bn-preview-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;filter:grayscale(1);transition:filter .4s}
 .bn-preview:hover .bn-preview-img img{filter:none}
+/* Captions wrap in full and the tile grows to fit: no clamped or cut-off text. */
 .bn-preview figcaption{
   padding:14px 18px 16px;font-size:13px;line-height:1.45;color:var(--bn-ink-3);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  overflow-wrap:anywhere;
 }
+.bn-section-head--stack{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px}
+.bn-section-sub{margin:0;font-size:15px;line-height:1.5;color:var(--bn-ink-3);max-width:60ch}
 
 /* Video tile: poster + play button; the Vimeo player opens in a lightbox. */
 .bn-video-open{
@@ -378,7 +382,7 @@ body:has(.bn) .top-glass{
 .bn-more-card:hover .bn-pill{background:var(--bn-ink);color:#fff}
 
 @media (max-width:960px){
-  .bn-case-body{grid-template-columns:1fr;gap:28px}
+  .bn-case-body{grid-template-columns:minmax(0,1fr);gap:28px}
   .bn-case-aside{position:static}
   .bn-previews,.bn-previews--1{grid-template-columns:1fr 1fr}
   .bn-preview--cover{grid-column:1 / -1}
@@ -415,7 +419,7 @@ body:has(.bn) .top-glass{
 .bn-pcard--narrow .bn-bcover-browser{left:22px;right:-38%}
 .bn-bcover-bar{height:26px;background:#f2f2f4;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid #e5e5ea}
 .bn-bcover-dot{width:9px;height:9px;border-radius:50%;flex:none}
-.bn-bcover-url{margin:0 auto;font-size:10.5px;color:#6e6e73;background:#fff;border-radius:6px;padding:2px 28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.bn-bcover-url{margin:0 auto;font-size:10.5px;color:#6e6e73;background:#fff;border-radius:6px;padding:2px clamp(8px,2vw,28px);white-space:nowrap;min-width:0}
 .bn-pcard--narrow .bn-bcover-url{margin:0 0 0 12px}
 .bn-bcover-browser img{width:100%;display:block}
 .bn-bcover-phone{
