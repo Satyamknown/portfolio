@@ -502,5 +502,35 @@
     "jobUrl": "https://jobs.beinguser.com/o/clueso-senior-product-designer",
     "role": "Senior Product Designer",
     "track": "design"
+  },
+  {
+    "label": "CarTrade Tech (listed as Olx India on Foundit)",
+    "token": "r-cartrade-hml6",
+    "jobUrl": "https://www.foundit.in/srp/results?query=associate+product+manager&locations=mumbai&postingDate=3&sort=1",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "Enlite Research (Enliteresearch)",
+    "token": "r-enlite-yurf",
+    "jobUrl": "https://www.enliteresearch.com/careers/jobs/associate-product-manager",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "Firmway Services Pvt Ltd",
+    "token": "r-firmway-kkhs",
+    "jobUrl": "https://to.indeed.com/aabfgkwbbld2",
+    "role": "Associate Product Manager (B2B SaaS)"
+  },
+  {
+    "label": "Flexiple (for an unnamed VC-backed SaaS company)",
+    "token": "r-flexiple-zb35",
+    "jobUrl": "https://www.linkedin.com/jobs/view/4478030921/",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "Gyaan AI (now MaxIQ)",
+    "token": "r-gyaan-5nkd",
+    "jobUrl": "https://www.naukri.com/job-listings-associate-product-manager-gyaan-ai-pune-2-to-5-years-091026023792",
+    "role": "Associate Product Manager"
   }
 ]
