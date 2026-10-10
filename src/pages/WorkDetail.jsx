@@ -7,7 +7,7 @@ import { CaseStudySkeleton } from '../components/Skeleton.jsx';
 import StatCover from '../components/StatCover.jsx';
 import BrandCover from '../components/BrandCover.jsx';
 import VideoTile from '../components/VideoTile.jsx';
-import { projectCovers, projectVideos } from '../data/site.js';
+import { projectCovers, projectVideos, projectPreviews, isListed } from '../data/site.js';
 import '../bento.css';
 
 // The first images in the case study body double as preview tiles, so the
@@ -47,11 +47,15 @@ export default function WorkDetail() {
       .finally(() => setLoaded(true));
     api
       .listProjects()
-      .then((list) => setOthers(list.filter((p) => p.slug !== slug).slice(0, 3)))
+      .then((list) => setOthers(list.filter((p) => p.slug !== slug && isListed(p)).slice(0, 3)))
       .catch(() => setOthers([]));
   }, [slug]);
 
-  const previews = useMemo(() => previewImages(project?.body), [project]);
+  // A curated preview set (site.js) wins over the first images in the story.
+  const previews = useMemo(
+    () => (project ? projectPreviews[project.slug] || previewImages(project.body) : []),
+    [project]
+  );
 
   if (!loaded) return <CaseStudySkeleton />;
 

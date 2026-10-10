@@ -45,17 +45,11 @@ export default function Layout({ children }) {
   }, [skinned]);
 
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
-  const [showMobilePrompt, setShowMobilePrompt] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     setCookiesAccepted(window.localStorage.getItem('cookiesAccepted') === 'true');
-    setShowMobilePrompt(window.innerWidth <= 920);
-
-    const updateMobile = () => setShowMobilePrompt(window.innerWidth <= 920);
-    window.addEventListener('resize', updateMobile);
-    return () => window.removeEventListener('resize', updateMobile);
   }, []);
 
   const acceptCookies = () => {
@@ -64,7 +58,6 @@ export default function Layout({ children }) {
     setCookiesAccepted(true);
   };
 
-  const dismissMobilePrompt = () => setShowMobilePrompt(false);
 
   return (
     <>
@@ -102,14 +95,6 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      {showMobilePrompt && !onDesign && (
-        <div className="mobile-prompt-banner" role="status" aria-live="polite">
-          <span>Please view this site on desktop for the best experience.</span>
-          <button type="button" className="mobile-prompt-close" onClick={dismissMobilePrompt}>
-            ×
-          </button>
-        </div>
-      )}
 
       <footer className="site-footer">
         <div className="site-footer-inner">

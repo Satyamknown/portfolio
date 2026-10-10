@@ -38,9 +38,17 @@ export const home = {
 
   // Bento homepage (redesign/bento). The intro card and photo tile.
   intro: {
-    headline: 'Design Lead → Product Manager.',
+    // Lead with what the work delivers; the design background is the subtitle.
+    role: 'Product manager, formerly design lead',
+    headline: 'I build products that fix how businesses actually run.',
     body:
-      'Four years owning funnels, design systems and internal tools for clients in Canada, the UK and India.',
+      'Four years as the de facto product owner on B2B SaaS and lead-generation work for clients in Canada, the UK and India.',
+    // Three results a hiring manager can check in the case studies.
+    proof: [
+      { value: '4–8 h → 30 min', label: 'reply time, Pacific Coast' },
+      { value: 'CA$80 → CA$43', label: 'cost per lead' },
+      { value: '18 months', label: 'B2B SaaS, sketch to stable product' }
+    ],
     contactLine: 'Open to product roles at B2B SaaS companies. I reply within a day.',
     photo: '/portrait.webp',
     photoAlt: 'Portrait of Abhishek Manjhi'
@@ -57,10 +65,7 @@ export const home = {
 export const companies = [
   { name: 'Stratalite', logo: '/logos/stratalite.png', url: 'https://stratalite.ca/' },
   { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png', url: 'https://pacificcoastcontracting.ca/' },
-  { name: 'Skooltag', logo: '/logos/skooltag.png', url: 'https://skooltag.com/' },
-  { name: 'PCC Roofing', logo: '/logos/pcc-roofing.png', url: 'https://pccroofing.ca/' },
-  { name: 'PCC Renovations', logo: '/logos/pcc-renovations.png', url: 'https://www.pccrenovations.ca/' },
-  { name: 'PCC Decking', logo: '/logos/pcc-decking.png', url: 'https://pccdecking.com/' }
+  { name: 'Skooltag', logo: '/logos/skooltag.png', url: 'https://skooltag.com/' }
 ];
 
 // Live sites per client, matched by slug prefix like brandIcons. The first link
@@ -108,7 +113,7 @@ export const projectCovers = {
     eyebrow: 'E-commerce · Parent app',
     tone: 'light',
     background: 'radial-gradient(90% 70% at 50% 100%, #fff3b0 0%, #fbd53a 45%, #f4b400 100%)',
-    stat: '85 screens handed off in 3 release phases'
+    stat: 'Taking a uniform retailer from offline-only to online'
   },
   'stratalite-platform-testing': {
     frame: 'browser',
@@ -119,6 +124,29 @@ export const projectCovers = {
     background: 'radial-gradient(70% 90% at 95% 120%, rgba(255,90,31,.55) 0%, rgba(255,90,31,0) 70%), radial-gradient(110% 90% at 10% 0%, #2a2f3a 0%, #14161c 55%, #0b0b0b 100%)',
     stat: '237 flows mapped, 87 business questions raised'
   }
+};
+
+// Case studies kept in the CMS (and in /admin) but not listed on the site.
+// The platform-testing study now lives inside the main Stratalite story, and
+// its old URL redirects there (App.jsx), so shared links still land somewhere.
+export const hiddenProjects = ['stratalite-platform-testing'];
+export const isListed = (p) => !hiddenProjects.includes(p.slug);
+
+// Preview row images, when the first images in the story aren't the best
+// first impression. Real product screens read better than diagrams here.
+export const projectPreviews = {
+  stratalite: [
+    {
+      src: '/design/stratalite/screen-interested.webp',
+      alt: 'Manager project view listing interested vendors, each with a Shortlist button',
+      caption: 'Vendors who said they are interested, waiting to be shortlisted'
+    },
+    {
+      src: '/design/stratalite/proceed-with-invoice.webp',
+      alt: 'Vendor project page with every task ticked and a Proceed with Invoice card',
+      caption: 'Finishing the job and sending the invoice: one step'
+    }
+  ]
 };
 
 // Case-study videos, shown as a play tile in the Preview row. Hosted on Vimeo

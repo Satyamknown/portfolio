@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { ProjectGridSkeleton } from '../components/Skeleton.jsx';
 import ProjectBento from '../components/ProjectBento.jsx';
-import { microcopy } from '../data/site.js';
+import { microcopy, isListed } from '../data/site.js';
 import '../bento.css';
 
 // Same data and order as before (published projects, CMS order); only the
@@ -14,7 +14,7 @@ export default function Work() {
   useEffect(() => {
     api
       .listProjects()
-      .then(setProjects)
+      .then((list) => setProjects(list.filter(isListed)))
       .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { ProjectGridSkeleton } from '../components/Skeleton.jsx';
 import ProjectBento from '../components/ProjectBento.jsx';
-import { ArrowUpRight } from '../components/Icons.jsx';
-import { home, profile, companies, microcopy, emailCompose } from '../data/site.js';
+import { ArrowUpRight, Download } from '../components/Icons.jsx';
+import { home, profile, companies, microcopy, emailCompose, isListed } from '../data/site.js';
 import '../bento.css';
 
 const monogram = (name) =>
@@ -32,7 +32,7 @@ export default function Home() {
 
   // Featured slugs (site.js) lead and take the large tiles; the rest keep CMS order.
   const ordered = useMemo(() => {
-    const withImages = projects;
+    const withImages = projects.filter(isListed);
     const lead = (home.featured || [])
       .map((slug) => withImages.find((p) => p.slug === slug))
       .filter(Boolean);
@@ -44,12 +44,16 @@ export default function Home() {
   return (
     <div ref={rootRef} className="bn">
       {/* ---------- Worked with: infinite logo marquee ---------- */}
-      <section className="bn-marquee" aria-label="Companies I have worked with">
+      {/* A handful of logos sits still; scrolling them would loop the same three. */}
+      <section
+        className={`bn-marquee${companies.length < 5 ? ' bn-marquee--static' : ''}`}
+        aria-label="Companies I have worked with"
+      >
         <span className="bn-eyebrow">Worked with</span>
         <div className="bn-marquee-window">
           {/* Two identical runs; the track slides by exactly one run, so the loop is seamless. */}
           <div className="bn-marquee-track">
-            {[0, 1].map((run) => (
+            {(companies.length < 5 ? [0] : [0, 1]).map((run) => (
               <ul className="bn-marquee-run" key={run} aria-hidden={run === 1 || undefined}>
                 {companies.map((c) => (
                   <li className={`bn-co${c.logo ? ' bn-co--logo' : ''}`} key={c.name}>
@@ -80,16 +84,33 @@ export default function Home() {
       <section className="bn-hero">
         <div className="bn-card bn-intro">
           <div>
-            <p className="bn-name">{profile.name}</p>
+            <p className="bn-name">
+              {profile.name} · {intro.role}
+            </p>
             <h1 className="bn-headline">{intro.headline}</h1>
             <p className="bn-lede">{intro.body}</p>
+            {intro.proof?.length > 0 && (
+              <dl className="bn-proof">
+                {intro.proof.map((p) => (
+                  <div key={p.label}>
+                    <dt>{p.value}</dt>
+                    <dd>{p.label}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
           <div className="bn-intro-top">
             <span className="bn-status">
               <span className="bn-dot" />
               {profile.status}
             </span>
-            <span className="bn-meta">{profile.location}</span>
+            <span className="bn-intro-right">
+              <span className="bn-meta">{profile.location}</span>
+              <a className="bn-btn bn-btn--sm" href={profile.resume} download="Abhishek-Manjhi-Resume.pdf">
+                Resume <Download />
+              </a>
+            </span>
           </div>
         </div>
 

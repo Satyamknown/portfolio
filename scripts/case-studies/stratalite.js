@@ -1,11 +1,11 @@
-// PM-framed rewrite (v3.0): one story across 18 months, from scoping to a small
+// PM-framed rewrite (v3.1, drawn diagrams replace the stakeholder map and access matrix): one story across 18 months, from scoping to a small
 // beta, pulling it back, and fixing what touches money first. Facts confirmed by
 // Abhishek on 2026-10-10. A production deploy publishes this file to the CMS
 // (the v2.1 copy is backed up first). Same slug, so resume links keep working.
 export default {
   slug: 'stratalite',
   title: 'Stratalite',
-  version: 'v3.0',
+  version: 'v3.1',
   tagline: 'One place for property managers to hire vendors, track the work and get it paid.',
   summary:
     'Property managers were running repairs and renovations over WhatsApp, email and phone calls. On a team of three with no product manager, I acted as one for 18 months: I scoped a five-role platform, decided who sees what, chose the numbers the dashboard should show, ran a small beta, and when it showed us problems, pulled it back and fixed the things that touch money first.',
@@ -75,7 +75,7 @@ Before any UI, I mapped everyone the product touches, in four rings: the five pe
 
 That one map settled the most expensive question early: what Stratalite does itself, and what it only connects to. It also found someone easy to forget: the accounts payable person who pays the vendor but never logs in. They get a shareable link instead of an account.
 
-![Stakeholder map in four rings around the Stratalite platform](/case-studies/stratalite/stakeholder-map.webp "Everyone the platform touches: what Stratalite owns, and what it only connects to")
+![Diagram: inside Stratalite are the five roles and the work they do; outside, it connects to payments, banking, insurance and an accounts payable contact who pays by link](/case-studies/stratalite/scope-diagram.webp "The scope in one picture: the five roles work inside Stratalite; money and paperwork connect from outside")
 
 ### 2. Split "manager" into two roles
 
@@ -88,7 +88,7 @@ Same title, completely different access. So they became two roles, chosen at sig
 
 Then I wrote down who can do what across all five roles. The interesting rules were the in-between ones: managers see only the quotes sent to them, vendors see only their own, and Stratalite's own admin team can't see any client's pricing. Running the platform doesn't mean reading everyone's invoices.
 
-![Who-can-do-what matrix for the five roles](/case-studies/stratalite/rbac-matrix.webp "Five roles, each with access set at sign-up rather than switched on later")
+![Diagram: independent managers run their own properties, company managers only assigned ones; who sees quotes and invoices](/case-studies/stratalite/roles-diagram.webp "Two manager roles from sign-up, and who gets to see pricing")
 
 ### 3. Make vendors earn the details
 

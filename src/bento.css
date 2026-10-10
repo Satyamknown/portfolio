@@ -432,3 +432,23 @@ body:has(.bn) .top-glass{
 .bn-pcard:hover .bn-bcover-phone{transform:translate(-50%,-6px)}
 .bn-preview--cover .bn-bcover{margin:8px}
 @media (prefers-reduced-motion:reduce){.bn-bcover-browser,.bn-bcover-phone{transition:none}}
+
+/* Hero proof: three results, each backed by a case study. */
+.bn-proof{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:26px 0 0}
+.bn-proof > div{background:var(--bn-page,#f5f5f7);border-radius:16px;padding:14px 16px;min-width:0}
+.bn-proof dt{font-size:17px;font-weight:600;letter-spacing:-.02em;color:var(--bn-ink);overflow-wrap:anywhere}
+.bn-proof dd{margin:4px 0 0;font-size:12.5px;line-height:1.4;color:var(--bn-ink-3)}
+.bn-intro-right{display:inline-flex;align-items:center;gap:14px}
+.bn-btn--sm{height:34px;padding:0 14px;font-size:13px}
+@media (max-width:640px){
+  .bn-proof{grid-template-columns:1fr;gap:8px}
+  .bn-proof > div{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .bn-proof dt{white-space:nowrap}
+  .bn-proof dd{margin:0;text-align:right}
+  .bn-intro-top{flex-wrap:wrap;row-gap:12px}
+  .bn-status,.bn-intro-right .bn-meta{white-space:nowrap}
+  .bn-intro-right{width:100%;justify-content:space-between}
+}
+.bn-marquee--static .bn-marquee-window{-webkit-mask-image:none;mask-image:none}
+.bn-marquee--static .bn-marquee-track{animation:none;width:auto}
+.bn-marquee--static .bn-marquee-run{padding:0;gap:clamp(20px,4vw,48px);flex-wrap:wrap}

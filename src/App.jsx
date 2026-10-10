@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Splash from './components/Splash.jsx';
 import Home from './pages/Home.jsx';
@@ -86,6 +86,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/work" element={<Work />} />
+          {/* Folded into the main Stratalite case study; old links land there. */}
+          <Route path="/work/stratalite-platform-testing" element={<Navigate to="/work/stratalite" replace />} />
           <Route path="/work/:slug" element={<WorkDetail />} />
           <Route path="/design" element={<DesignIndex />} />
           <Route path="/design/:slug" element={<DesignDetail />} />
