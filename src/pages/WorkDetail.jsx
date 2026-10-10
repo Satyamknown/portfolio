@@ -6,7 +6,8 @@ import Markdown from '../components/Markdown.jsx';
 import Loading from '../components/Loading.jsx';
 import StatCover from '../components/StatCover.jsx';
 import BrandCover from '../components/BrandCover.jsx';
-import { projectCovers } from '../data/site.js';
+import VideoTile from '../components/VideoTile.jsx';
+import { projectCovers, projectVideos } from '../data/site.js';
 import '../bento.css';
 
 // The first images in the case study body double as preview tiles, so the
@@ -69,6 +70,7 @@ export default function WorkDetail() {
   }
 
   const icon = brandIcon(project.slug);
+  const video = projectVideos[project.slug];
   const links = linksFor(project);
   const [primary, ...extra] = links;
   const client = project.client?.split('·')[0]?.trim();
@@ -126,7 +128,7 @@ export default function WorkDetail() {
       {/* ---------- Preview ---------- */}
       <section className="bn-case-section">
         <h2 className="bn-section-title">Preview</h2>
-        <div className={`bn-previews bn-previews--${previews.length}`}>
+        <div className={`bn-previews bn-previews--${previews.length + (video ? 1 : 0)}`}>
           <div className="bn-preview bn-preview--cover">
             {projectCovers[project.slug] ? (
               <BrandCover cover={projectCovers[project.slug]} title={project.title} />
@@ -134,6 +136,7 @@ export default function WorkDetail() {
               <StatCover project={project} size="wide" />
             )}
           </div>
+          {video && <VideoTile video={video} />}
           {previews.map((img) => (
             <figure className="bn-preview" key={img.src}>
               <div className="bn-preview-img">

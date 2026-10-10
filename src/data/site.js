@@ -121,6 +121,17 @@ export const projectCovers = {
   }
 };
 
+// Case-study videos, shown as a play tile in the Preview row. Hosted on Vimeo
+// so the site stays light; the poster is local so the tile renders instantly.
+export const projectVideos = {
+  'pacific-coast-contracting': {
+    vimeoId: '1234554098',
+    title: 'The lead system in 73 seconds',
+    poster: '/case-studies/pacific-coast-contracting/video-poster.webp',
+    duration: '1:13'
+  }
+};
+
 // Square brand icon for each project card, matched by the start of the
 // project's slug (so "stratalite-platform-testing" also gets Stratalite's).
 export const brandIcons = {
