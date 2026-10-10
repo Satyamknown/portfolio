@@ -297,7 +297,7 @@ body:has(.bn) .top-glass{
 }
 .bn-preview--cover .bn-cover{flex:1;margin:8px}
 .bn-preview-img{flex:1;margin:8px 8px 0;border-radius:calc(var(--bn-r-lg) - 8px);background:var(--bn-well);overflow:hidden;position:relative}
-.bn-preview-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;filter:grayscale(1);transition:filter .4s}
+.bn-preview-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left top;filter:grayscale(1);transition:filter .4s}
 .bn-preview:hover .bn-preview-img img{filter:none}
 /* Captions wrap in full and the tile grows to fit: no clamped or cut-off text. */
 .bn-preview figcaption{

@@ -1,11 +1,11 @@
-// PM-framed rewrite (v5.2, answers the recruiter audit). Facts come from the v2.1 case study, the design
+// PM-framed rewrite (v5.3, adds the final landing page, answers the recruiter audit). Facts come from the v2.1 case study, the design
 // study in scripts/design-studies/, and Abhishek's notes on the lead funnel
 // and ad results, confirmed by him on 2026-10-10. A production deploy
 // publishes this file to the CMS (old copy backed up first).
 export default {
   slug: 'pacific-coast-contracting',
   title: 'Pacific Coast Contracting',
-  version: 'v5.2',
+  version: 'v5.3',
   tagline: 'One lead system for four brands, so no enquiry gets lost again.',
   summary:
     'Pacific Coast Contracting has four brands and four websites. Leads were spread across all of them, some quietly vanished, and replies took hours. I led a four-person team to build one lead system: every enquiry in one CRM, answered in about 30 minutes instead of 4 to 8 hours, and paid ads only once the system worked.',
@@ -94,6 +94,10 @@ The landing page went through three or four rounds, each based on what visitors 
 Once tracking could be trusted, we also switched the campaign from paying for clicks to paying for leads.
 
 ![Two early layouts for the paid-ad landing page: Option A with hero and form side by side, Option B with a sticky call and WhatsApp bar and a call-back modal](/case-studies/pacific-coast-contracting/landing-ab.webp "Two early layouts of the landing page, before the speed and gallery changes. Phone number blurred.")
+
+![The final paid-ad landing page: a kitchen renovation headline with a limited-time offer and one quote button, a kitchen photo slider, and Request a Call Back and Message on WhatsApp buttons on the first screen](/case-studies/pacific-coast-contracting/landing-final.webp "The final version, after three or four rounds: one service, a clear offer, and call-back and WhatsApp on the first screen. Phone number blurred.")
+
+![Gallery section of the landing page: nine finished kitchens across the Lower Mainland, each labelled with its city and job](/case-studies/pacific-coast-contracting/landing-gallery.webp "The gallery people kept trying to click: nine real kitchens, each labelled by city and job")
 
 ### 6. Local search for the other three brands
 

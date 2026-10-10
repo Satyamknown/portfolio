@@ -134,6 +134,13 @@ export const projectCovers = {
 // Preview row images, when the first images in the story aren't the best
 // first impression. Real product screens read better than diagrams here.
 export const projectPreviews = {
+  'pacific-coast-contracting': [
+    {
+      src: '/case-studies/pacific-coast-contracting/landing-final.webp',
+      alt: 'The final paid-ad landing page for kitchen renovations, with call-back and WhatsApp on the first screen',
+      caption: 'The final landing page, after three or four rounds of changes'
+    }
+  ],
   stratalite: [
     {
       src: '/design/stratalite/screen-interested.webp',
