@@ -532,5 +532,23 @@
     "token": "r-gyaan-5nkd",
     "jobUrl": "https://www.naukri.com/job-listings-associate-product-manager-gyaan-ai-pune-2-to-5-years-091026023792",
     "role": "Associate Product Manager"
+  },
+  {
+    "label": "Metaforms",
+    "token": "r-metaforms-jn7b",
+    "jobUrl": "https://jobs.ashbyhq.com/metaforms/11927a5f-ed4b-4e2a-ae42-aab75bb307c9",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "Composio",
+    "token": "r-composio-pu5f",
+    "jobUrl": "https://jobs.ashbyhq.com/composio/64bda86f-f25f-42f3-9d1a-b6ad3d736ca2",
+    "role": "APM - toolkits"
+  },
+  {
+    "label": "Kapture CX",
+    "token": "r-kapture-8aqv",
+    "jobUrl": "https://kapturecrm.keka.com/careers/jobdetails/164413",
+    "role": "Technical Product Manager"
   }
 ]
