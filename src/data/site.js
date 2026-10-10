@@ -11,7 +11,7 @@ export const profile = {
   location: 'Mumbai, IN',
   role: 'Design Lead → Product Manager',
   status: 'Open to opportunities',
-  email: 'abhishek.manjhi21@comp.sce.edu.in',
+  email: 'kumarabhishekbuild@gmail.com',
   linkedin: 'https://www.linkedin.com/in/akmanjhi/',
   resume: '/resume.pdf'
 };
@@ -40,7 +40,7 @@ export const home = {
   intro: {
     // Lead with what the work delivers; the design background is the subtitle.
     role: 'Product manager, formerly design lead',
-    headline: 'I build products that fix how businesses actually run.',
+    headline: 'I build products that fix how businesses run.',
     body:
       'Four years as the de facto product owner on B2B SaaS and lead-generation work for clients in Canada, the UK and India.',
     // Three results a hiring manager can check in the case studies.
@@ -113,7 +113,7 @@ export const projectCovers = {
     eyebrow: 'E-commerce · Parent app',
     tone: 'light',
     background: 'radial-gradient(90% 70% at 50% 100%, #fff3b0 0%, #fbd53a 45%, #f4b400 100%)',
-    stat: 'Taking a uniform retailer from offline-only to online'
+    stat: '85 screens handed off in 3 release phases'
   },
   'stratalite-platform-testing': {
     frame: 'browser',
@@ -125,12 +125,6 @@ export const projectCovers = {
     stat: '237 flows mapped, 87 business questions raised'
   }
 };
-
-// Case studies kept in the CMS (and in /admin) but not listed on the site.
-// The platform-testing study now lives inside the main Stratalite story, and
-// its old URL redirects there (App.jsx), so shared links still land somewhere.
-export const hiddenProjects = ['stratalite-platform-testing'];
-export const isListed = (p) => !hiddenProjects.includes(p.slug);
 
 // Preview row images, when the first images in the story aren't the best
 // first impression. Real product screens read better than diagrams here.

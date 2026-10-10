@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { emailCompose, profile } from '../data/site.js';
 import StatusSidebar from './StatusSidebar.jsx';
+import { Download } from './Icons.jsx';
 import '../bento.css';
 import '../skin.css';
 
@@ -45,11 +46,17 @@ export default function Layout({ children }) {
   }, [skinned]);
 
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
+  const [showMobilePrompt, setShowMobilePrompt] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     setCookiesAccepted(window.localStorage.getItem('cookiesAccepted') === 'true');
+    setShowMobilePrompt(window.innerWidth <= 920);
+
+    const updateMobile = () => setShowMobilePrompt(window.innerWidth <= 920);
+    window.addEventListener('resize', updateMobile);
+    return () => window.removeEventListener('resize', updateMobile);
   }, []);
 
   const acceptCookies = () => {
@@ -58,6 +65,7 @@ export default function Layout({ children }) {
     setCookiesAccepted(true);
   };
 
+  const dismissMobilePrompt = () => setShowMobilePrompt(false);
 
   return (
     <>
@@ -73,6 +81,14 @@ export default function Layout({ children }) {
           <a className="bn-btn" href={onHome ? '#work' : '/work'}>
             Work
           </a>
+          {/* Resume sits with the main actions so a recruiter finds it on the first screen. */}
+          <a
+            className="bn-btn"
+            href={onDesign ? '/design/resume.pdf' : profile.resume}
+            download={onDesign ? 'Abhishek-Manjhi-Resume-Design.pdf' : 'Abhishek-Manjhi-Resume.pdf'}
+          >
+            Resume <Download />
+          </a>
           <Link className="bn-btn bn-btn--dark" to="/contact">
             Contact me
           </Link>
@@ -81,7 +97,8 @@ export default function Layout({ children }) {
       <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
-      {!onDesign && !onHome && !pathname.startsWith('/work') && <StatusSidebar />}
+      {/* The music widget is personality, kept to the contact page only. */}
+      {pathname === '/contact' && <StatusSidebar />}
 
       {!cookiesAccepted && (
         <div className="cookie-banner" role="dialog" aria-live="polite">
@@ -95,6 +112,15 @@ export default function Layout({ children }) {
         </div>
       )}
 
+      {/* One banner at a time: on phones the cookie banner wraps tall enough to cover this one. */}
+      {showMobilePrompt && cookiesAccepted && !onDesign && (
+        <div className="mobile-prompt-banner mobile-prompt-banner--alone" role="status" aria-live="polite">
+          <span>Please view this site on desktop for the best experience.</span>
+          <button type="button" className="mobile-prompt-close" onClick={dismissMobilePrompt}>
+            ×
+          </button>
+        </div>
+      )}
 
       <footer className="site-footer">
         <div className="site-footer-inner">

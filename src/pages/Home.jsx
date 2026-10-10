@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { ProjectGridSkeleton } from '../components/Skeleton.jsx';
 import ProjectBento from '../components/ProjectBento.jsx';
-import { ArrowUpRight, Download } from '../components/Icons.jsx';
-import { home, profile, companies, microcopy, emailCompose, isListed } from '../data/site.js';
+import { ArrowUpRight } from '../components/Icons.jsx';
+import { home, profile, companies, microcopy, emailCompose } from '../data/site.js';
 import '../bento.css';
 
 const monogram = (name) =>
@@ -32,7 +32,7 @@ export default function Home() {
 
   // Featured slugs (site.js) lead and take the large tiles; the rest keep CMS order.
   const ordered = useMemo(() => {
-    const withImages = projects.filter(isListed);
+    const withImages = projects;
     const lead = (home.featured || [])
       .map((slug) => withImages.find((p) => p.slug === slug))
       .filter(Boolean);
@@ -105,12 +105,7 @@ export default function Home() {
               <span className="bn-dot" />
               {profile.status}
             </span>
-            <span className="bn-intro-right">
-              <span className="bn-meta">{profile.location}</span>
-              <a className="bn-btn bn-btn--sm" href={profile.resume} download="Abhishek-Manjhi-Resume.pdf">
-                Resume <Download />
-              </a>
-            </span>
+            <span className="bn-meta">{profile.location}</span>
           </div>
         </div>
 

@@ -315,6 +315,11 @@ Real visitors won't get the auto-reply until a domain is verified in Resend and
 - Updated `src/pages/Contact.jsx` prompt copy and contact CTA.
 - Committed and pushed the contact prompt / feedback changes to `origin/main`.
 
+- 2026-10-10: the portfolio is public. `requireSiteAccess` now guards only `/api/tracker`;
+  App.jsx asks for the access password only on `/tracker`. Share links (`/go/:token`) still
+  log opens for the resume tracker in /admin. Contact email is kumarabhishekbuild@gmail.com;
+  "Email" buttons open a Gmail draft (mailto: did nothing without a mail app).
+
 ## 11. Conventions
 
 - Match surrounding style: no semicolon-free experiments, no new dependencies without

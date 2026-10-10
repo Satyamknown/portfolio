@@ -22,8 +22,10 @@ app.use(express.json({ limit: '2mb' }));
 app.use('/api/access', accessRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-app.use(['/api/projects', '/api/posts', '/api/appointments', '/api/home-settings', '/api/tracker'], requireSiteAccess);
-app.use('/api/design-studies', requireSiteAccess);
+// The portfolio is public. Only the personal tracker still needs the access
+// cookie (or an admin token). Share links (/go/...) keep working: they still
+// log who opened them, they just no longer have anything to unlock.
+app.use('/api/tracker', requireSiteAccess);
 
 // Open the database connection before any route touches it
 app.use(async (req, res, next) => {

@@ -1239,3 +1239,4 @@ img.is-loaded{animation:none;background:none}
 .sk--dark{background:#26211d}
 .sk--dark::after{background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.06) 50%,rgba(255,255,255,0) 100%)}
 .sk-blank{min-height:100vh}
+.mobile-prompt-banner--alone{bottom:24px}
