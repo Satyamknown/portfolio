@@ -49,7 +49,7 @@ export default function AppointmentForm({ prompt }) {
   const sent = status === 'sent';
 
   return (
-    <div className="cat-form">
+    <div className={`cat-form${sent ? ' is-sent' : ''}`}>
       {/* Left: the cat on its ledge, with envelopes drifting behind it. */}
       <div className="cat-side">
         <ContactLines />

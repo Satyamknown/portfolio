@@ -242,9 +242,9 @@ body.bn-skin .prose li::marker{color:var(--bn-ink-4)}
 body.bn-skin .prose h2{margin-top:48px}
 
 /* ---------- Contact: the cat peeks over the top of the form ----------
-   One column. A grey band holds the envelopes (left), the cat (centre) with its
-   head on the band's bottom edge, so it reads as peeking over the form and
-   pointing down at it, and the speech bubble beside it (right).
+   One column. A short grey band holds only the cat, its head on the band's
+   bottom edge so it reads as peeking over the form and pointing down at it,
+   and the speech bubble beside it.
    The unscoped .cat-side / .cat-main rules are what /design still uses. */
 .cat-side{
   position:relative;display:flex;flex-direction:column;justify-content:flex-end;
@@ -256,13 +256,18 @@ body.bn-skin .prose h2{margin-top:48px}
 body.bn-skin .cat-form{display:flex;flex-direction:column;gap:0;padding:12px}
 body.bn-skin .cat-side{
   /* The cat's size is the stage width (catAnimation.js scales to it). The band
-     stops short of the canvas top: only the jump after a send uses that
-     headroom, and it is allowed to leap out of the band for that moment. */
+     only clears the peeking and pointing poses; the canvas headroom above it is
+     for the jump after a send, which may leap out of the band. Once sent, the
+     band grows so the seated cat fits inside it. */
   --cat-w:440px;
-  display:block;min-height:0;height:calc(var(--cat-w) * 25 / 36 * .76);overflow:visible;
+  display:block;min-height:0;height:168px;overflow:visible;
+  transition:height .5s var(--bn-ease);
 }
-body.bn-skin .cat-side .cat-stage{position:absolute;left:50%;bottom:0;width:var(--cat-w);transform:translateX(-50%)}
-body.bn-skin .cat-side .contact-lines{left:5%;top:50%;width:min(32%,230px);max-height:none;transform:translateY(-50%)}
+body.bn-skin .cat-form.is-sent .cat-side{height:calc(var(--cat-w) * 25 / 36 * .76)}
+/* A little left of centre, so the cat and its bubble sit centred as a pair. */
+body.bn-skin .cat-side .cat-stage{position:absolute;left:calc(50% - 64px);bottom:0;width:var(--cat-w);transform:translateX(-50%)}
+/* Only the cat: the drifting envelopes stay on /design. */
+body.bn-skin .contact-lines{display:none}
 
 /* Bubble beside the cat's head; it steps up when the cat sits after a send. */
 body.bn-skin .cat-side .cat-stage{--bubble-bottom:22%}
@@ -314,9 +319,12 @@ body.bn-skin .af-alt:hover{border-color:var(--bn-ink);color:var(--bn-ink)}
   .cat-side{min-height:0}
   .contact-lines{display:none} /* no room beside the cat on a phone */
   .cat-main{padding:8px 8px 0}
-  /* Phones: the band grows to fit the canvas and the bubble goes back above the cat. */
-  body.bn-skin .cat-side{height:auto;padding-top:24px}
-  body.bn-skin .cat-side .cat-stage{position:relative;left:auto;width:100%;transform:none;--bubble-bottom:42%}
+  /* Phones: the bubble goes back above the cat; once sent, the band grows to
+     the full canvas so the seated cat and the longer thank-you line fit. */
+  body.bn-skin .cat-side{height:164px}
+  body.bn-skin .cat-side .cat-stage{left:0;width:100%;transform:none;--bubble-bottom:42%}
+  body.bn-skin .cat-form.is-sent .cat-side{height:auto;padding-top:24px}
+  body.bn-skin .cat-form.is-sent .cat-side .cat-stage{position:relative}
   body.bn-skin .cat-side .cat-stage[data-stance='tall']{--bubble-bottom:76%}
   body.bn-skin .cat-side .cat-bubble{
     left:50%;max-width:min(260px,82%);text-align:center;
