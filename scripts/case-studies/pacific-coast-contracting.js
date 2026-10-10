@@ -1,11 +1,11 @@
-// PM-framed rewrite (v5.0, answers the recruiter audit). Facts come from the v2.1 case study, the design
+// PM-framed rewrite (v5.1, answers the recruiter audit). Facts come from the v2.1 case study, the design
 // study in scripts/design-studies/, and Abhishek's notes on the lead funnel
 // and ad results, confirmed by him on 2026-10-10. A production deploy
 // publishes this file to the CMS (old copy backed up first).
 export default {
   slug: 'pacific-coast-contracting',
   title: 'Pacific Coast Contracting',
-  version: 'v5.0',
+  version: 'v5.1',
   tagline: 'One lead system for four brands, so no enquiry gets lost again.',
   summary:
     'Pacific Coast Contracting has four brands and four websites. Leads were spread across all of them, some quietly vanished, and replies took hours. I led a four-person team to build one lead system: every enquiry in one CRM, answered in about 30 minutes instead of 4 to 8 hours, and paid ads only once the system worked.',
@@ -33,7 +33,7 @@ Before buying any, I wanted to answer a simpler question: what happens to the le
 ## What was actually broken
 
 - **Four websites, four separate inboxes,** and no single place to see who had asked for what.
-- **Some leads were vanishing.** One form showed every visitor a cheerful "Thanks, we'll be in touch!" and then threw the message away. It did this 26 times out of 26 in a month.
+- **Some leads were vanishing.** One form showed every visitor a cheerful "Thanks, we'll be in touch!" and then threw the message away. In one month alone, that was 26 enquiries gone.
 - **Replies took 4 to 8 hours.** In home services that's an eternity. The first contractor to call back usually gets the job. The second one gets "sorry, we've already hired someone."
 - **Nobody knew what a lead cost,** so there was no way to tell whether ad money was working.
 
