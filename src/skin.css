@@ -241,18 +241,50 @@ body.bn-skin .prose li + li{margin-top:6px}
 body.bn-skin .prose li::marker{color:var(--bn-ink-4)}
 body.bn-skin .prose h2{margin-top:48px}
 
-/* ---------- Contact: cat on the left, form on the right ---------- */
-body.bn-skin .cat-form{
-  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:28px;
-  padding:16px 28px 16px 16px;align-items:stretch;
-}
+/* ---------- Contact: the cat peeks over the top of the form ----------
+   One column. A grey band holds the envelopes (left), the cat (centre) with its
+   head on the band's bottom edge, so it reads as peeking over the form and
+   pointing down at it, and the speech bubble beside it (right).
+   The unscoped .cat-side / .cat-main rules are what /design still uses. */
 .cat-side{
   position:relative;display:flex;flex-direction:column;justify-content:flex-end;
   min-height:440px;border-radius:20px;background:var(--bn-page,#f5f5f7);overflow:hidden;
 }
 .cat-side .cat-stage{max-width:none;margin:0}
 .cat-main{display:flex;flex-direction:column;justify-content:center;padding:16px 0;min-width:0}
-body.bn-skin .af-actions{flex-direction:column;align-items:stretch;gap:10px;margin-top:4px}
+
+body.bn-skin .cat-form{display:flex;flex-direction:column;gap:0;padding:12px}
+body.bn-skin .cat-side{
+  /* The cat's size is the stage width (catAnimation.js scales to it). The band
+     stops short of the canvas top: only the jump after a send uses that
+     headroom, and it is allowed to leap out of the band for that moment. */
+  --cat-w:440px;
+  display:block;min-height:0;height:calc(var(--cat-w) * 25 / 36 * .76);overflow:visible;
+}
+body.bn-skin .cat-side .cat-stage{position:absolute;left:50%;bottom:0;width:var(--cat-w);transform:translateX(-50%)}
+body.bn-skin .cat-side .contact-lines{left:5%;top:50%;width:min(32%,230px);max-height:none;transform:translateY(-50%)}
+
+/* Bubble beside the cat's head; it steps up when the cat sits after a send. */
+body.bn-skin .cat-side .cat-stage{--bubble-bottom:22%}
+body.bn-skin .cat-side .cat-stage[data-stance='tall']{--bubble-bottom:50%}
+body.bn-skin .cat-side .cat-bubble{
+  left:calc(50% + 88px);width:max-content;max-width:200px;
+  padding:9px 13px;border:1px solid var(--bn-line);border-radius:14px;background:#fff;
+  font-size:13.5px;line-height:1.4;text-align:left;color:var(--bn-ink-2);
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 24px -16px rgba(0,0,0,.28);
+  transform:rotate(-1.5deg);transform-origin:0 100%;animation-name:bnBubbleIn;
+}
+body.bn-skin .cat-side .cat-bubble::after{
+  left:-6px;bottom:14px;width:10px;height:10px;background:#fff;
+  border:0;border-left:1px solid var(--bn-line);border-bottom:1px solid var(--bn-line);
+}
+@keyframes bnBubbleIn{
+  from{opacity:0;transform:rotate(-1.5deg) translateX(-6px) scale(.92)}
+  to{opacity:1;transform:rotate(-1.5deg)}
+}
+
+body.bn-skin .cat-main{justify-content:flex-start;padding:28px 20px 16px}
+body.bn-skin .af-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
 body.bn-skin .af-submit{width:100%;padding:14px 20px;font-size:15px}
 body.bn-skin .af-alt{
   display:flex;align-items:center;justify-content:center;gap:2px;width:100%;
@@ -278,10 +310,25 @@ body.bn-skin .af-alt:hover{border-color:var(--bn-ink);color:var(--bn-ink)}
 @media (prefers-reduced-motion:reduce){.cl-float{animation:none}}
 
 @media (max-width:760px){
-  body.bn-skin .cat-form{grid-template-columns:1fr;gap:8px;padding:12px 12px 20px}
+  body.bn-skin .cat-form{padding:8px 8px 16px}
   .cat-side{min-height:0}
   .contact-lines{display:none} /* no room beside the cat on a phone */
   .cat-main{padding:8px 8px 0}
+  /* Phones: the band grows to fit the canvas and the bubble goes back above the cat. */
+  body.bn-skin .cat-side{height:auto;padding-top:24px}
+  body.bn-skin .cat-side .cat-stage{position:relative;left:auto;width:100%;transform:none;--bubble-bottom:42%}
+  body.bn-skin .cat-side .cat-stage[data-stance='tall']{--bubble-bottom:76%}
+  body.bn-skin .cat-side .cat-bubble{
+    left:50%;max-width:min(260px,82%);text-align:center;
+    transform:translateX(-50%) rotate(-1.5deg);transform-origin:50% 100%;animation-name:bnBubbleUp;
+  }
+  body.bn-skin .cat-side .cat-bubble::after{left:calc(50% - 5px);bottom:-6px;border-left:0;border-right:1px solid var(--bn-line)}
+  body.bn-skin .cat-main{padding:24px 8px 0}
+  body.bn-skin .af-actions{grid-template-columns:1fr}
+}
+@keyframes bnBubbleUp{
+  from{opacity:0;transform:translateX(-50%) rotate(-1.5deg) translateY(6px) scale(.92)}
+  to{opacity:1;transform:translateX(-50%) rotate(-1.5deg)}
 }
 
 /* Phones: story tables wrap their text to fit instead of running off the edge. */

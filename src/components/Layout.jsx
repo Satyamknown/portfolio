@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { emailCompose, profile } from '../data/site.js';
-import StatusSidebar from './StatusSidebar.jsx';
 import { Download } from './Icons.jsx';
 import '../bento.css';
 import '../skin.css';
@@ -28,7 +27,7 @@ export default function Layout({ children }) {
   const { pathname } = useLocation();
   const time = useIstClock();
   const onHome = pathname === '/';
-  // The /design pages must read well on a phone: no desktop nudge, no music widget there.
+  // The /design pages must read well on a phone: no desktop nudge there.
   const onDesign = pathname === '/design' || pathname.startsWith('/design/');
   // The admin editor needs more room than the reading column allows.
   const wide = pathname.startsWith('/admin');
@@ -97,8 +96,6 @@ export default function Layout({ children }) {
       <div className="top-glass" aria-hidden="true" />
 
       <main className={wrap}>{children}</main>
-      {/* The music widget is personality, kept to the contact page only. */}
-      {pathname === '/contact' && <StatusSidebar />}
 
       {!cookiesAccepted && (
         <div className="cookie-banner" role="dialog" aria-live="polite">
