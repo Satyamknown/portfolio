@@ -44,10 +44,11 @@ export const home = {
     body:
       'Four years as the de facto product owner on B2B SaaS and lead-generation work for clients in Canada, the UK and India.',
     // Three results a hiring manager can check in the case studies.
+    // Shown large is the result; the "before" sits quietly underneath.
     proof: [
-      { value: '4–8 h → 30 min', label: 'reply time, Pacific Coast' },
-      { value: 'CA$80 → CA$43', label: 'cost per lead' },
-      { value: '18 months', label: 'B2B SaaS, sketch to stable product' }
+      { value: '30 min', label: 'to reply to a lead', was: 'down from 4–8 h' },
+      { value: 'CA$43', label: 'per lead', was: 'down from CA$80' },
+      { value: '18 months', label: 'on one B2B SaaS', was: 'sketch to stable' }
     ],
     contactLine: 'Open to product roles at B2B SaaS companies. I reply within a day.',
     photo: '/portrait.webp',
@@ -65,7 +66,11 @@ export const home = {
 export const companies = [
   { name: 'Stratalite', logo: '/logos/stratalite.png', url: 'https://stratalite.ca/' },
   { name: 'Pacific Coast Contracting', logo: '/logos/pcc.png', url: 'https://pacificcoastcontracting.ca/' },
-  { name: 'Skooltag', logo: '/logos/skooltag.png', url: 'https://skooltag.com/' }
+  { name: 'Skooltag', logo: '/logos/skooltag.png', url: 'https://skooltag.com/' },
+  // PCC's own brands, each with its own site and its own leads.
+  { name: 'PCC Roofing', logo: '/logos/pcc-roofing.png', url: 'https://pccroofing.ca/' },
+  { name: 'PCC Renovations', logo: '/logos/pcc-renovations.png', url: 'https://www.pccrenovations.ca/' },
+  { name: 'PCC Decking', logo: '/logos/pcc-decking.png', url: 'https://pccdecking.com/' }
 ];
 
 // Live sites per client, matched by slug prefix like brandIcons. The first link

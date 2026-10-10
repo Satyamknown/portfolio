@@ -94,7 +94,10 @@ export default function Home() {
                 {intro.proof.map((p) => (
                   <div key={p.label}>
                     <dt>{p.value}</dt>
-                    <dd>{p.label}</dd>
+                    <dd>
+                      {p.label}
+                      {p.was && <span className="bn-proof-was">{p.was}</span>}
+                    </dd>
                   </div>
                 ))}
               </dl>
