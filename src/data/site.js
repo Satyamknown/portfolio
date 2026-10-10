@@ -125,10 +125,9 @@ export const projectCovers = {
 // so the site stays light; the poster is local so the tile renders instantly.
 export const projectVideos = {
   'pacific-coast-contracting': {
-    vimeoId: '1234554098',
-    title: 'The lead system in 73 seconds',
-    poster: '/case-studies/pacific-coast-contracting/video-poster.webp',
-    duration: '1:13'
+    vimeoId: '1234555639',
+    title: 'The lead system, explained in about a minute',
+    poster: '/case-studies/pacific-coast-contracting/video-poster.webp'
   }
 };
 

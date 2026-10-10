@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, formatDate } from '../lib/api.js';
 import Markdown from '../components/Markdown.jsx';
-import Loading from '../components/Loading.jsx';
+import { ArticleSkeleton } from '../components/Skeleton.jsx';
 
 export default function WritingDetail() {
   const { slug } = useParams();
@@ -20,7 +20,7 @@ export default function WritingDetail() {
       .finally(() => setLoaded(true));
   }, [slug]);
 
-  if (!loaded) return <Loading />;
+  if (!loaded) return <ArticleSkeleton />;
 
   if (error || !post) {
     return (

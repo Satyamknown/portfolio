@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { designApi } from '../lib/designApi.js';
-import Loading from '../components/Loading.jsx';
+import { DesignDetailSkeleton } from '../components/Skeleton.jsx';
 import Shot from '../components/design/Shot.jsx';
 import ImpactStrip from '../components/design/ImpactStrip.jsx';
 import Section from '../components/design/Section.jsx';
@@ -30,7 +30,7 @@ export default function DesignDetail() {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  if (!loaded) return <Loading />;
+  if (!loaded) return <DesignDetailSkeleton />;
 
   if (error || !study) {
     return (

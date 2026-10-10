@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { api, formatDate } from '../lib/api.js';
 import { brandIcon, linksFor, monogram } from '../lib/brand.js';
 import Markdown from '../components/Markdown.jsx';
-import Loading from '../components/Loading.jsx';
+import { CaseStudySkeleton } from '../components/Skeleton.jsx';
 import StatCover from '../components/StatCover.jsx';
 import BrandCover from '../components/BrandCover.jsx';
 import VideoTile from '../components/VideoTile.jsx';
@@ -53,7 +53,7 @@ export default function WorkDetail() {
 
   const previews = useMemo(() => previewImages(project?.body), [project]);
 
-  if (!loaded) return <Loading />;
+  if (!loaded) return <CaseStudySkeleton />;
 
   if (error || !project) {
     return (

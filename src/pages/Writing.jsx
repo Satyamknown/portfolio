@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, formatDate } from '../lib/api.js';
-import Loading from '../components/Loading.jsx';
+import { ListSkeleton } from '../components/Skeleton.jsx';
 import { microcopy } from '../data/site.js';
 
 export default function Writing() {
@@ -22,7 +22,7 @@ export default function Writing() {
       <p className="section-intro">{microcopy.writingIntro}</p>
 
       {!loaded ? (
-        <Loading />
+        <ListSkeleton />
       ) : posts.length === 0 ? (
         <div className="empty">
           <h3>Nothing here yet</h3>

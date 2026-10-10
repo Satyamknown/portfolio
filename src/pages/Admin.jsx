@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, auth, slugify, formatDate } from '../lib/api.js';
 import Editor from '../components/Editor.jsx';
 import ResumeTracking from '../components/ResumeTracking.jsx';
+import { AdminSkeleton } from '../components/Skeleton.jsx';
 
 const EMPTY_PROJECT = {
   title: '', slug: '', summary: '', tagline: '', url: '', role: '', client: '', year: '', version: '',
@@ -457,7 +458,7 @@ export default function Admin() {
       </div>
 
       {!loaded ? (
-        <div className="loading">Loading…</div>
+        <AdminSkeleton />
       ) : tab === 'settings' ? (
         <div className="panel">
           <div className="field">

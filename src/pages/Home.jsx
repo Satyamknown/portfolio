@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
-import Loading from '../components/Loading.jsx';
+import { ProjectGridSkeleton } from '../components/Skeleton.jsx';
 import ProjectBento from '../components/ProjectBento.jsx';
 import { home, profile, companies, microcopy } from '../data/site.js';
 import '../bento.css';
@@ -113,7 +113,7 @@ export default function Home() {
         </div>
 
         {!loaded ? (
-          <Loading />
+          <ProjectGridSkeleton />
         ) : ordered.length === 0 ? (
           <div className="empty">
             <h3>Nothing published yet</h3>

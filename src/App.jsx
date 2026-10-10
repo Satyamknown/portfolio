@@ -17,6 +17,7 @@ import Access from './pages/Access.jsx';
 import DesignIndex from './pages/DesignIndex.jsx';
 import DesignDetail from './pages/DesignDetail.jsx';
 import { api } from './lib/api.js';
+import { SiteSkeleton } from './components/Skeleton.jsx';
 
 export default function App() {
   const { pathname, search, hash } = useLocation();
@@ -62,7 +63,7 @@ export default function App() {
   const handleAccessUnlock = () => setAccess({ checking: false, ok: true });
 
   if (access.checking) {
-    return <div className="access-loading">Checking access...</div>;
+    return isStandaloneTool ? <div className="sk-blank" aria-busy="true" /> : <SiteSkeleton />;
   }
 
   if (!access.ok) {

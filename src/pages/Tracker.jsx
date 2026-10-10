@@ -409,7 +409,29 @@ export default function Tracker() {
     });
   };
 
-  if (!state) return <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", color: T.mut, fontFamily: FONT_BODY }}>Loading your journey…</div>;
+  if (!state) {
+    // Skeleton in the tracker's own dark palette: header, progress, day cards.
+    const bar = (w, h, extra = {}) => <span className="sk sk--dark" style={{ width: w, height: h, ...extra }} />;
+    return (
+      <div className="sk-wrap" aria-busy="true" role="status" style={{ minHeight: "100vh", background: T.bg, padding: "32px 20px" }}>
+        <span className="sk-sr">Loading your tracker</span>
+        <div style={{ maxWidth: 920, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
+          {bar("38%", 30, { borderRadius: 8 })}
+          {bar("62%", 14)}
+          {bar("100%", 10, { borderRadius: 999, marginTop: 8 })}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 14, marginTop: 12 }}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} style={{ background: T.panel, border: `1px solid ${T.line}`, borderRadius: 14, padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+                {bar("40%", 12)}
+                {bar("85%", 18)}
+                {bar("65%", 12)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const dayState = (d) => state.days[d] || {};
   const isDayDone = (d) => !!dayState(d).done;

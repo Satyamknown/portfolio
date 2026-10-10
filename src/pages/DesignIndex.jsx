@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { designApi } from '../lib/designApi.js';
-import Loading from '../components/Loading.jsx';
+import { DesignCardsSkeleton } from '../components/Skeleton.jsx';
 import Shot from '../components/design/Shot.jsx';
 import useDesignHead from '../components/design/useDesignHead.js';
 import DesignContact from '../components/design/DesignContact.jsx';
@@ -75,7 +75,7 @@ export default function DesignIndex() {
             </span>
           </div>
 
-          {!loaded && <Loading />}
+          {!loaded && <DesignCardsSkeleton />}
           {loaded && error && <p className="dz-empty">Couldn't load the projects. {error}</p>}
           {loaded && !error && projects.length === 0 && <p className="dz-empty">No design case studies yet.</p>}
 
