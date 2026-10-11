@@ -5,7 +5,7 @@
 export default {
   slug: 'stratalite',
   title: 'Stratalite',
-  version: 'v3.2',
+  version: 'v3.3',
   tagline: 'One place for property managers to hire vendors, track the work and get it paid.',
   summary:
     'Property managers were running repairs and renovations over WhatsApp, email and phone calls. On a team of three with no product manager, I acted as one for 18 months: I scoped a five-role platform, decided who sees what, chose the numbers the dashboard should show, ran a small beta, and when it showed us problems, pulled it back and fixed the things that touch money first.',
@@ -143,7 +143,7 @@ I set what to test, decided what counted as a real problem (anything that could 
 The most important finds weren't broken buttons. They were missing checks:
 
 - **An invoice above the agreed price could be accepted without review.** (Remember the invoice amount that feeds six dashboard numbers? This is why it mattered.)
-- **A job posted by a company admin never reached the building's manager.** Their page showed zero projects, so the same job could be posted, and paid for, twice.
+- **A job posted by a company admin never reached the building's manager.** Their page showed zero projects, so the same job could be posted and hired twice.
 - **Some jobs could get stuck.** A project marked incomplete couldn't be reopened, and a vendor who lost a job was never told.
 - **Deleting a finished project erased its history for everyone,** which breaks the paper trail the whole product promises.
 
