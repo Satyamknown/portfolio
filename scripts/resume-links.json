@@ -550,5 +550,29 @@
     "token": "r-kapture-8aqv",
     "jobUrl": "https://kapturecrm.keka.com/careers/jobdetails/164413",
     "role": "Technical Product Manager"
+  },
+  {
+    "label": "Supernova AI",
+    "token": "r-supernova-a9rs",
+    "jobUrl": "https://wellfound.com/jobs/4824094-associate-product-manager",
+    "role": "Associate Product Manager"
+  },
+  {
+    "label": "Infoblox",
+    "token": "r-infoblox-c93l",
+    "jobUrl": "https://efpv.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/8052",
+    "role": "Product Manager - Ansible & Terraform"
+  },
+  {
+    "label": "Weekday AI (for an unnamed client)",
+    "token": "r-weekday-ehuw",
+    "jobUrl": "https://jobs.workable.com/view/dcPRF6H7ACWvgsVF6Bi7sv/product-manager-in-bengaluru-at-weekday-ai",
+    "role": "Product Manager (Customer Experience)"
+  },
+  {
+    "label": "Tata Communications",
+    "token": "r-tatacomm-p7if",
+    "jobUrl": "https://www.naukri.com/job-listings-product-owner-sms-customer-interaction-suite-tata-communications-bengaluru-3-to-5-years-290926934840",
+    "role": "Product Owner, SMS - Customer Interaction Suite"
   }
 ]
