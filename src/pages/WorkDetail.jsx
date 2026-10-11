@@ -7,6 +7,7 @@ import { CaseStudySkeleton } from '../components/Skeleton.jsx';
 import StatCover from '../components/StatCover.jsx';
 import BrandCover from '../components/BrandCover.jsx';
 import VideoTile from '../components/VideoTile.jsx';
+import useImageZoom from '../components/useImageZoom.js';
 import { projectCovers, projectVideos, projectPreviews } from '../data/site.js';
 import '../bento.css';
 
@@ -36,6 +37,7 @@ export default function WorkDetail() {
   const [others, setOthers] = useState([]);
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  useImageZoom(Boolean(project));
 
   useEffect(() => {
     setLoaded(false);

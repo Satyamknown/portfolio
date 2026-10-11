@@ -447,3 +447,6 @@ body:has(.bn) .top-glass{
 .bn-marquee--static .bn-marquee-window{-webkit-mask-image:none;mask-image:none}
 .bn-marquee--static .bn-marquee-track{animation:none;width:auto}
 .bn-marquee--static .bn-marquee-run{padding:0;gap:clamp(20px,4vw,48px);flex-wrap:wrap}
+
+/* Case-study images open in the zoom viewer (useImageZoom). */
+.bn-case-main .prose img,.bn-preview-img img{cursor:zoom-in}
