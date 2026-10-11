@@ -143,6 +143,11 @@ export const projectPreviews = {
   ],
   stratalite: [
     {
+      src: '/case-studies/stratalite/lifecycle-overview.webp',
+      alt: 'All 26 steps of a Stratalite job as real screens, colour-coded by role, from posting the job to Payment Completed',
+      caption: 'One job, posted to paid: every step in real screens'
+    },
+    {
       src: '/design/stratalite/screen-interested.webp',
       alt: 'Manager project view listing interested vendors, each with a Shortlist button',
       caption: 'Vendors who said they are interested, waiting to be shortlisted'

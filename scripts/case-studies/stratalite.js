@@ -5,7 +5,7 @@
 export default {
   slug: 'stratalite',
   title: 'Stratalite',
-  version: 'v3.4',
+  version: 'v3.5',
   tagline: 'One place for property managers to hire vendors, track the work and get it paid.',
   summary:
     'Property managers were running repairs and renovations over WhatsApp, email and phone calls. On a team of three with no product manager, I acted as one for 18 months: I scoped a five-role platform, decided who sees what, chose the numbers the dashboard should show, ran a beta with 4 companies, 12 managers and 6 vendors, and when real use showed it was not ready, pulled it back and fixed the things that touch money first. Almost all issues are now fixed.',
@@ -67,6 +67,10 @@ I decided what the platform covers and who it's for, wrote the rules for who can
 | 5. Pull it back | Right after | Real use showed it was buggier than expected, so we took it back instead of letting users work around it. |
 | 6. Stress test and fix | Aug 2026 onwards | Tested the vendor, manager and admin accounts with AI help, ranked every problem by business risk, and fixed money and work first. Almost all issues are now fixed. |
 
+One job, start to finish, in real screens (click any image to zoom):
+
+![All 26 steps of a Stratalite job as small real screens, colour-coded by role (manager side, vendor, accounts payable), from posting the job to Payment Completed](/case-studies/stratalite/lifecycle-overview.webp "Every step of one job, from posting to paid, and who acts at each")
+
 ## Part 1: Building the right thing
 
 ### 1. Decide what the platform owns
@@ -98,6 +102,12 @@ So vendors first say they're interested. Only once a manager shortlists them do 
 
 ![Manager project view listing interested vendors, each with a Shortlist button](/design/stratalite/screen-interested.webp "The manager's side: vendors who said they're interested, waiting to be shortlisted")
 
+![Eight real Stratalite screens in order: the manager fills in and posts a job, the job appears in the vendor feed, the vendor opens it and submits interest, the manager is notified, sees the vendor under Interested Vendors and opens their profile](/case-studies/stratalite/lifecycle-1-post-and-interest.webp "Steps 1 to 6: a job is posted and vendors raise their hand")
+
+![Eight real Stratalite screens in order: the manager requests compliance documents, the vendor grants access, the manager sees GST, WCB and insurance, shortlists the vendor, the vendor books a site visit, the manager sees the visit, and the vendor marks it complete](/case-studies/stratalite/lifecycle-2-check-and-shortlist.webp "Steps 7 to 10: documents checked, vendor shortlisted, site visited")
+
+![Nine real Stratalite screens in order: the vendor submits a quotation, the manager is notified and opens the quotation details, asks for changes, the vendor sees them and sends a revised quote, the manager accepts and assigns, and the vendor sees the project under progress](/case-studies/stratalite/lifecycle-3-quote-and-award.webp "Steps 11 to 15: quote, change request, award")
+
 ### 4. Put the invoice inside "Mark as complete"
 
 Finishing a job and getting paid were two separate steps. Managers approved the work, then chased the invoice, and every payment waited on that chase.
@@ -106,9 +116,15 @@ I moved the invoice into "Mark as complete". One action now closes the job and s
 
 ![Vendor project page with every task ticked and a Proceed with Invoice card](/design/stratalite/proceed-with-invoice.webp "Finishing the job and sending the invoice became one step")
 
+![Seven real Stratalite screens in order: the vendor adds and ticks milestones, posts an update, the manager sees it on the timeline, the vendor marks the job complete with the invoice, and the manager sees Project Completed and opens the invoice](/case-studies/stratalite/lifecycle-4-do-the-work.webp "Steps 16 to 19: milestones, updates, and completion with the invoice")
+
 ### 5. Keep disputes inside the project
 
 A separate disputes section lost the context: by the time anyone opened it, nobody remembered what the job was. So disputes live on the project itself, with the evidence and the resolution right there. "Disputed" became a filter on the project list instead of a feature of its own.
+
+![Five real Stratalite screens in order: the manager raises an issue, the vendor sees it and resubmits, the project is back in review, the manager confirms completion and the job is complete](/case-studies/stratalite/lifecycle-5-review-and-sign-off.webp "Steps 20 and 21: an issue raised and resolved on the project, then sign-off")
+
+![Eight real Stratalite screens in order: the manager sends the invoice to accounts payable, accounts payable opens the emailed link, picks the vendor's payment method, records the e-transfer, the page awaits confirmation, the vendor confirms and rates, and the manager sees Payment Completed](/case-studies/stratalite/lifecycle-6-get-paid.webp "Steps 22 to 26: invoice to accounts payable, payment by link, project closed")
 
 ### 6. Pick dashboard numbers the data can actually support
 
