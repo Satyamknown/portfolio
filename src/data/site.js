@@ -98,10 +98,10 @@ export const projectCovers = {
     frame: 'browser',
     domain: 'app.stratalite.ca',
     shot: '/design/stratalite/screen-project-detail.webp',
-    eyebrow: 'B2B SaaS · Live in beta',
+    eyebrow: 'B2B SaaS · Beta',
     tone: 'dark',
     background: 'radial-gradient(120% 90% at 85% 110%, #ff6a2b 0%, #c2410c 28%, #1a0d07 62%, #0b0b0b 100%)',
-    stat: '18 months from first sketch to a stable product'
+    stat: '18 months from first sketch through beta and fixes'
   },
   'pacific-coast-contracting': {
     frame: 'browser',

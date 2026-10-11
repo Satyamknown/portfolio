@@ -5,19 +5,19 @@
 export default {
   slug: 'stratalite',
   title: 'Stratalite',
-  version: 'v3.3',
+  version: 'v3.4',
   tagline: 'One place for property managers to hire vendors, track the work and get it paid.',
   summary:
-    'Property managers were running repairs and renovations over WhatsApp, email and phone calls. On a team of three with no product manager, I acted as one for 18 months: I scoped a five-role platform, decided who sees what, chose the numbers the dashboard should show, ran a small beta, and when it showed us problems, pulled it back and fixed the things that touch money first.',
-  role: 'Lead designer, acting product owner',
+    'Property managers were running repairs and renovations over WhatsApp, email and phone calls. On a team of three with no product manager, I acted as one for 18 months: I scoped a five-role platform, decided who sees what, chose the numbers the dashboard should show, ran a beta with 4 companies, 12 managers and 6 vendors, and when real use showed it was not ready, pulled it back and fixed the things that touch money first. Almost all issues are now fixed.',
+  role: 'Acting product owner (no PM on the team), lead designer',
   client: 'Stratalite · Vancouver',
   year: '2025-26',
   tags: ['B2B SaaS', 'Product scoping', 'Access control', 'Success metrics', 'Beta and quality'],
   metrics: [
-    { value: '18 months', label: 'from first sketch to a stable product' },
-    { value: '5', label: 'roles, each seeing only what it should' },
-    { value: '106', label: 'test cases run across every role' },
-    { value: '10', label: 'dashboard numbers, each tied to real data' }
+    { value: '18 months', label: 'from first sketch through beta and fixes' },
+    { value: '4 companies', label: 'in the beta, with 12 managers and 6 vendors' },
+    { value: '106', label: 'test cases across the vendor, manager and admin accounts' },
+    { value: '15', label: 'distinct issues found, 6 high priority; almost all now fixed' }
   ],
   coverImage: '/case-studies/stratalite/cover.webp',
   order: 1,
@@ -52,7 +52,7 @@ Before designing anything, I set four goals:
 
 ## My role
 
-We were a team of three at Rsquare Web Studio: one developer, one designer, and me as lead designer. There was no product manager, so I did that job too.
+We were a team of three at Rsquare Web Studio: one developer, one designer, and me as lead designer. There was no product manager on our team, so I did that job too, working with the client's product owner on every open question.
 
 I decided what the platform covers and who it's for, wrote the rules for who can do what, turned them into requirements the developer could build from, agreed the metrics with the client, ran the beta, and decided what got fixed first when it went wrong.
 
@@ -63,9 +63,9 @@ I decided what the platform covers and who it's for, wrote the rules for who can
 | 1. Understand the problem | Months 1–3 | Studied how companies actually ran their jobs, mapped who the product touches, and set the four goals. |
 | 2. Define the product | Months 3–8 | Wrote who can do what for each role and made the big product calls. |
 | 3. Build | Months 6–14 | The developer built it piece by piece. Agreed the dashboard numbers with the client. |
-| 4. Small beta | Around month 14 | Opened it to a small group of real managers and vendors. |
-| 5. Pull it back | Right after | The beta surfaced problems, so we took it back instead of letting real users work around them. |
-| 6. Stress test and fix | Aug 2026 onwards | Tested every role with AI help, ranked every problem by business risk, and fixed money and work first. Most issues are now patched. |
+| 4. Small beta | July 2026 | Opened it to 4 companies: 12 managers and 6 vendors running real jobs. |
+| 5. Pull it back | Right after | Real use showed it was buggier than expected, so we took it back instead of letting users work around it. |
+| 6. Stress test and fix | Aug 2026 onwards | Tested the vendor, manager and admin accounts with AI help, ranked every problem by business risk, and fixed money and work first. Almost all issues are now fixed. |
 
 ## Part 1: Building the right thing
 
@@ -124,19 +124,19 @@ It also flagged a risk: the invoice amount feeds six of the ten numbers. One wro
 
 ### 7. A small beta, on purpose
 
-We didn't launch to everyone. We opened Stratalite to a small group of real managers and vendors and let them run real jobs through it.
+We didn't launch to everyone. In July 2026 we opened Stratalite to 4 property management companies, 12 of their managers and 6 vendors, and let them run real jobs through it.
 
 That was the point of a small beta: to find out what breaks while the damage is still small.
 
 ### 8. Then we took it back
 
-It did its job. Real use surfaced problems we hadn't caught, and some of them touched money. Rather than ask early users to work around them, we pulled the beta back and fixed things properly first.
+It did its job. Real use showed the platform was buggier than we expected, and some of the problems touched money. Rather than ask early users to work around them, we pulled the beta back and fixed things properly first.
 
 It's not the exciting decision, but it's the right one for a product that handles other people's payments. A vendor who gets paid wrong once doesn't come back.
 
 ### 9. Use AI to test like a much bigger team
 
-With a team of three, we couldn't hire a QA team. So I used AI to do the heavy lifting: AI agents stress-tested the application, ran QA tests across all five roles, and hunted for edge cases and system faults: the odd paths real users take that nobody writes a test for.
+With a team of three, we couldn't hire a QA team. So I used AI to do the heavy lifting: AI agents stress-tested the application, ran QA tests across the vendor, manager and company-admin accounts, and hunted for edge cases and system faults: the odd paths real users take that nobody writes a test for.
 
 I set what to test, decided what counted as a real problem (anything that could harm someone's work, money or records), and reviewed every result before it went to the developer. Over three rounds that was 106 test cases, with a vendor and a manager working the same job side by side, so every hand-off was checked from both ends.
 
@@ -156,7 +156,7 @@ Not every bug matters equally, so every finding went back to the developer strai
 
 Where a problem was really a business decision rather than a bug (should a manager be able to reopen a finished job?), I didn't guess. It went to the client as a question, marked as a blocker, a decision or a clarification.
 
-The money and work issues were fixed first, and most of the rest are now patched. What's left is on a list with a priority and an owner.
+The money and work issues were fixed first. Almost all of the rest are now fixed too, and anything left is on a list with a priority and an owner.
 
 
 ## What we chose not to do
@@ -166,18 +166,20 @@ The money and work issues were fixed first, and most of the rest are now patched
 - **A dashboard full of numbers we couldn't source.** Ten numbers we can trust beat thirty we can't.
 - **Keeping the beta running while we fixed things.** Early users shouldn't be our testers for payment bugs.
 
-## Did it work?
+## Where it landed
 
-Back to the four goals:
+**What the design delivered,** against the four goals:
 
-1. **One place: yes.** Vendor onboarding, quotes, milestones, disputes and payment all run inside Stratalite.
-2. **Right access: yes.** Five roles, each with access set at sign-up, and no client's pricing visible to anyone who shouldn't see it.
-3. **A paper trail: yes, after the fixes.** Testing found the gaps (lost history, jobs that never reached the right manager), and they were first in line to be fixed.
-4. **A useful dashboard: yes.** All ten numbers trace back to data the product actually collects, and the client agreed them before design.
+1. **One place.** Vendor onboarding, quotes, milestones, disputes and payment all run inside Stratalite.
+2. **Right access.** Five roles, each set at sign-up, and no client's pricing visible to Stratalite's own team.
+3. **A paper trail.** Every quote, milestone and dispute sits on the project record.
+4. **A dashboard the data supports.** All ten numbers trace back to data the product actually collects, agreed with the client before design.
+
+**What real use and testing showed:** the July beta with 4 companies, 12 managers and 6 vendors showed the build was not ready. Testing after it ran 106 cases (86 passed) and found 15 distinct issues, 6 of them high priority, including gaps in the paper trail and a job that never reached the right manager. Money and work issues were fixed first, and almost all of them are now fixed.
 
 ![Payment completed view with payment, invoice and quotation details together](/design/stratalite/screen-payment.webp "Quote, invoice and payment for a job, in one place")
 
-And the product: the beta did what a beta is for. It showed us the problems while they were small, we fixed the ones that touch money and work first, and most of the rest are patched.
+The beta did what a beta is for: it showed us the problems while only 4 companies were using it, not hundreds.
 
 
 ## What I'd do differently
