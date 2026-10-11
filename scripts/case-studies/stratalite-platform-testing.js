@@ -1,7 +1,7 @@
 export default {
   slug: 'stratalite-platform-testing',
   title: 'Stratalite: mapping and testing the live platform',
-  version: 'v1.0',
+  version: 'v1.1',
   summary:
     'Mapped every flow of a 5-role property-management SaaS, one role at a time, then directed AI-assisted lifecycle tests across roles and wrote up the gaps as questions for the client.',
   role: 'Design lead · QA & product audit',
@@ -53,7 +53,7 @@ AI browser agents did the clicking and logged every click, field and system resp
 The biggest finds were not broken buttons. They were missing checks between people:
 
 - An invoice above the agreed price could be accepted without review.
-- The screens that approve completion and send an invoice never show the amount being approved.
+- A job posted by a company admin never reached the building's own manager, so the same job could be posted and hired twice.
 - Work done by one role could appear on the project record as another role's.
 - Some states had no way out. A project marked incomplete could not be reopened by its owner, and a vendor who lost a job was never told.
 - Deleting a finished project removed its history for everyone.
