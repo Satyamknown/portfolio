@@ -2,9 +2,10 @@
 // design-portfolio-blender/build.py --glb) drawn with three.js. Loaded lazily, so three.js and
 // the model download right after the hero paints.
 //
-// One canvas covers the whole window. Scrolling from the hero to the Work screen carries the crate
-// from its hero pose (low in the window, logo side turned to the viewer) to the isometric pose,
-// where the folders rattle and settle. Folders lift with a damped ease every frame (smooth at any frame rate). The scene only
+// One canvas covers the whole window. After the headline is in, the crate falls in from above the
+// window and lands; the impact throws the folders up out of it and they fall back in under gravity. Scrolling then carries it from that hero pose (low in
+// the window, turned a little to the front) to the isometric Work pose. The scene reads the scroll
+// position itself on every frame, so the crate tracks the scroll with no lag. Folders lift with a damped ease every frame (smooth at any frame rate). The scene only
 // renders while something moves, so an idle page costs nothing.
 import {
   WebGLRenderer,
@@ -14,7 +15,8 @@ import {
   HemisphereLight,
   Mesh,
   PlaneGeometry,
-  ShadowMaterial,
+  MeshBasicMaterial,
+  TextureLoader,
   PMREMGenerator,
   Raycaster,
   Vector2,
@@ -23,7 +25,6 @@ import {
   Group,
   SRGBColorSpace,
   AgXToneMapping,
-  VSMShadowMap,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -39,15 +40,15 @@ const FRAME_H = 0.84; // ortho height that frames the crate, as in Blender
 const SHIFT_Y = 0.045; // headroom above the crate for a popped folder
 
 export async function createCrate(host, { onHover, onClick, onIntroDone, reducedMotion }) {
-  // Everything that travels with the scroll sits in one group: the crate and its floor shadow.
+  // rig = the scroll pose (crate + its shadow); body = the crate alone, so it can fall onto the shadow.
   const rig = new Group();
+  const body = new Group();
+  rig.add(body);
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); // full-window canvas: keep it cheap
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = AgXToneMapping;
   renderer.toneMappingExposure = 1.15;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = VSMShadowMap;
   renderer.domElement.className = 'dh-gl';
   host.appendChild(renderer.domElement);
 
@@ -59,13 +60,6 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   // Key and fill placed like the Blender area lights (glTF is Y-up: Blender x,y,z -> x,z,-y).
   const key = new DirectionalLight(0xfff6ec, 3.4);
   key.position.set(-0.9, 1.4, 0.7);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.blurSamples = 16;
-  Object.assign(key.shadow.camera, { left: -0.7, right: 0.7, top: 0.7, bottom: -0.7, near: 0.1, far: 5 });
-  key.shadow.bias = -0.0004;
-  key.shadow.normalBias = 0.002;
-  key.shadow.radius = 14;
   scene.add(key);
   const fill = new DirectionalLight(0xeef4ff, 0.4);
   fill.position.set(1.0, 0.9, 0.4);
@@ -73,27 +67,28 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   scene.add(new HemisphereLight(0xffffff, 0xcfd8e2, 0.5));
 
 
-  // Nothing under the crate but the page itself: an invisible floor that only takes its shadow.
-  const floor = new Mesh(new PlaneGeometry(6, 6), new ShadowMaterial({ opacity: 0.15 }));
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  rig.add(floor);
+  // Nothing under the crate but the page: a soft pre-blurred shadow image (public/design/home/shadow.png),
+  // cast away from the key light. Cheaper than a live shadow map on a full-window canvas.
+  const shadowTex = await new TextureLoader().loadAsync(BASE + 'shadow.png');
+  shadowTex.colorSpace = SRGBColorSpace;
+  const shadowMat = new MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 1, toneMapped: false });
+  const shadow = new Mesh(new PlaneGeometry(0.86, 0.72), shadowMat);
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.set(0.07, 0.001, -0.035);
+  rig.add(shadow);
 
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
   const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + 'crate.glb');
   draco.dispose();
 
   scene.add(rig);
-  scene.add(key.target);
   const src = gltf.scene;
   const camNode = src.getObjectByName('Camera');
-  rig.add(src);
+  body.add(src);
 
   const folders = [];
   src.traverse((o) => {
     if (o.isMesh) {
-      o.castShadow = true;
-      o.receiveShadow = true;
       const m = o.material;
       if (m && m.name.startsWith('sticker-')) {
         // die-cut stickers: hard alpha edge, no sorting trouble, crisp at any zoom
@@ -102,7 +97,6 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
         m.depthWrite = true;
         m.polygonOffset = true;
         m.polygonOffsetFactor = -2;
-        o.castShadow = false;
       }
       if (m?.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
       // the Blender stills get a saturation grade after rendering; do the same to the flat colours
@@ -126,7 +120,13 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
         cover: o.children.find((c) => /-cover$/.test(c.name)),
         f: 0,
         want: 0,
-        shake: 0,
+        // loose-file physics: height above its slot, vertical speed, tilt and tilt speed
+        py: 0,
+        vy: 0,
+        rx: 0,
+        wx: 0,
+        rz: 0,
+        wz: 0,
       };
       o.traverse((c) => (c.userData.folder = i));
     }
@@ -169,28 +169,85 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   let settled = false;
   let raf = 0;
   let last = 0;
-  const keyOff = key.position.clone();
+  let drop = { t: -1, h: 0, landed: false }; // the fall from above the window
+  const DROP_MS = 1050;
 
-  const apply = (F, t) => {
+  const axisZ = new Vector3(0, 0, 1);
+  const tiltZ = new Quaternion();
+  const G = 5; // softer than real gravity: at this scale 9.8 is over before the eye catches it
+  // Throw every folder up out of the crate; each gets its own speed and spin, like loose files.
+  const kick = (power) => {
+    folders.forEach((F, i) => {
+      if (!F) return;
+      const r = Math.sin(i * 12.9898 + power * 78.233) * 43758.5453;
+      const rnd = r - Math.floor(r); // a fixed pseudo-random 0..1 per folder
+      F.vy = power * (1.1 + 0.45 * rnd); // 12-24 cm out of the crate
+      F.wx = power * (rnd > 0.5 ? 1 : -1) * (2.2 + 2.4 * rnd);
+      F.wz = power * (i % 2 ? 1 : -1) * (1.4 + 1.6 * rnd);
+    });
+  };
+  // One physics step: gravity, a bounce off the crate floor that loses most of its energy,
+  // and a damped spring that rights the tilt.
+  const physics = (F, dt) => {
+    F.vy -= G * dt;
+    F.py += F.vy * dt;
+    if (F.py <= 0) {
+      F.py = 0;
+      F.vy = F.vy < -0.25 ? -F.vy * 0.32 : 0;
+      F.wx += F.vy ? (F.rx > 0 ? -1 : 1) * 0.6 : 0; // landing knocks the tilt a little
+    }
+    // in the air a folder tumbles freely; back in its slot the crate walls snap it upright
+    const air = F.py > 0;
+    for (const [a, w] of [['rx', 'wx'], ['rz', 'wz']]) {
+      F[w] += ((air ? -22 : -150) * F[a] - (air ? 1.2 : 7) * F[w]) * dt;
+      F[a] += F[w] * dt;
+    }
+    return F.py > 0 || Math.abs(F.vy) > 1e-3 || Math.abs(F.rx) + Math.abs(F.wx) + Math.abs(F.rz) + Math.abs(F.wz) > 1e-3;
+  };
+  const apply = (F) => {
     const e = F.f;
-    // a small rattle on arrival that dies away
-    const wob = F.shake > 0 ? Math.sin(t * 0.032 + F.root.id) * 0.06 * F.shake : 0;
-    F.root.position.set(F.pos.x, F.pos.y + LIFT * e + Math.abs(wob) * 0.04, F.pos.z + FORWARD * e);
-    lean.setFromAxisAngle(axisX, LEAN * e + wob * 0.5);
+    F.root.position.set(F.pos.x, F.pos.y + LIFT * e + F.py, F.pos.z + FORWARD * e);
+    // the crate walls hold a folder upright until it is clear of the rim, then it may tumble
+    const out = Math.min(1, F.py / 0.13);
+    lean.setFromAxisAngle(axisX, LEAN * e + F.rx * out);
     F.root.quaternion.copy(F.quat).multiply(lean);
+    if (F.rz) F.root.quaternion.multiply(tiltZ.setFromAxisAngle(axisZ, F.rz * out));
     for (const L of F.lift) L.o.position.y = L.y + CARD_OUT * e;
   };
 
   const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
   const place = () => {
     const e = ease(progress);
-    const drop = (hero.cy - land.cy) * u * (1 - e);
-    rig.position.copy(camDown).multiplyScalar(drop);
+    const down = (hero.cy - land.cy) * u * (1 - e);
+    rig.position.copy(camDown).multiplyScalar(down);
     rig.rotation.y = TURN * (1 - e);
     rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
-    key.position.copy(rig.position).add(keyOff);
-    key.target.position.copy(rig.position);
   };
+  // Fall: accelerate down (gravity), land at 62%, one small bounce, settle.
+  const fall = (p) => {
+    if (p < 0.62) return 1 - (p / 0.62) ** 2;
+    const b = (p - 0.62) / 0.38;
+    return Math.sin(b * Math.PI) * 0.07 * (1 - b);
+  };
+  const readScroll = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    return max > 0 ? window.scrollY / max : 0;
+  };
+  const arrive = (now) => {
+    if (now === settled) return;
+    settled = now;
+    el.style.pointerEvents = now ? 'auto' : 'none';
+    if (now && !arrived) {
+      arrived = true;
+      if (!reducedMotion) kick(0.35); // a light jostle as it settles in the Work pose
+      setTimeout(() => onIntroDone?.(), reducedMotion ? 0 : 450);
+    }
+    if (!now) {
+      hover = -1;
+      onHover?.(-1);
+    }
+  };
+  let arrived = false;
 
   const frame = (now) => {
     raf = 0;
@@ -198,21 +255,34 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     last = now;
     let moving = false;
 
+    progress = reducedMotion ? 1 : Math.min(1, Math.max(0, readScroll()));
     place();
+    arrive(progress > 0.985);
+
+    if (drop.t >= 0 && now >= drop.t) {
+      const p = Math.min(1, (now - drop.t) / DROP_MS);
+      const y = fall(p);
+      body.position.y = drop.h * y;
+      shadowMat.opacity = 1 - Math.min(1, Math.max(0, y)) * 0.85;
+      if (!drop.landed && p >= 0.62) {
+        drop.landed = true;
+        kick(1);
+      }
+      if (p < 1) moving = true;
+      else drop.t = -2;
+    } else if (drop.t >= 0) moving = true; // waiting for the headline to finish
 
     const k = 1 - Math.exp(-dt / 70);
     for (const F of folders) {
       if (!F) continue;
-      if (F.shake > 0) {
-        F.shake = Math.max(0, F.shake - dt / 1100);
-        moving = true;
-      }
+      // fixed small steps, so the bounces look the same at any frame rate
+      for (let n = Math.ceil(dt / 8), h = dt / 1000 / n; n > 0; n--) if (physics(F, h)) moving = true;
       const d = F.want - F.f;
       if (Math.abs(d) > 0.001) {
         F.f += d * k;
         moving = true;
       } else F.f = F.want;
-      apply(F, now);
+      apply(F);
     }
     renderer.render(scene, camera);
     if (moving) wake();
@@ -264,6 +334,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   el.addEventListener('pointerup', onUp);
 
   window.addEventListener('resize', resize);
+  window.addEventListener('scroll', wake, { passive: true });
   resize();
   place();
   el.style.pointerEvents = 'none';
@@ -282,23 +353,14 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       hero = { cy: heroCy };
       resize();
     },
-    // 0 = hero pose, 1 = Work pose; arriving at 1 the first time rattles the folders
-    setProgress(p) {
-      progress = reducedMotion ? 1 : Math.min(1, Math.max(0, p));
-      const now = progress > 0.985;
-      if (now !== settled) {
-        settled = now;
-        el.style.pointerEvents = now ? 'auto' : 'none';
-        if (now && !this.rattled) {
-          this.rattled = true;
-          if (!reducedMotion) folders.forEach((F) => F && (F.shake = 1));
-          setTimeout(() => onIntroDone?.(), reducedMotion ? 0 : 650);
-        }
-        if (!now) {
-          hover = -1;
-          onHover?.(-1);
-        }
-      }
+    // The crate falls in from above the window at `at` (a performance.now() time).
+    playDrop(at) {
+      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, get drop() { return drop; }, get folders() { return folders; } };
+      if (reducedMotion) return wake();
+      // high enough that the crate starts fully above the window, whatever the pose
+      drop = { t: at, h: ((window.innerHeight + land.size) * u) / 0.78, landed: false };
+      body.position.y = drop.h;
+      shadowMat.opacity = 0.15;
       wake();
     },
     // where folder i's cover card is on screen right now, as 4 points in viewport px
@@ -331,6 +393,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     dispose() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('scroll', wake);
+      shadowTex.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
       el.removeEventListener('pointerdown', onDown);

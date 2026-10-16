@@ -148,7 +148,6 @@ function Crate({ onSettled }) {
   // from its hero pose to its Work pose; the Work pose is wherever .dh-box sits in the layout.
   useEffect(() => {
     let alive = true;
-    let raf = 0;
     const layout = () => {
       const c = api.current;
       const b = wrap.current?.querySelector('.dh-box');
@@ -158,15 +157,6 @@ function Crate({ onSettled }) {
       const docTop = r.top + window.scrollY;
       const size = r.height;
       c.setLayout({ cx: r.left + r.width / 2, cy: docTop + size / 2 - maxScroll, size }, window.innerHeight * 0.5 + size * 0.4);
-      c.setProgress(window.scrollY / maxScroll);
-    };
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-        api.current?.setProgress(window.scrollY / maxScroll);
-      });
     };
     import('../components/design/crateScene.js')
       .then(({ createCrate }) =>
@@ -181,6 +171,8 @@ function Crate({ onSettled }) {
         if (!alive) return c.dispose();
         api.current = c;
         layout();
+        // the crate falls in once the headline has finished rising (about 1.1 s after load)
+        c.playDrop(Math.max(performance.now() + 120, 1150));
         setReady(true);
       })
       .catch(() => {
@@ -189,12 +181,9 @@ function Crate({ onSettled }) {
           onSettled();
         }
       });
-    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', layout);
     return () => {
       alive = false;
-      cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', layout);
       api.current?.dispose();
       api.current = null;
