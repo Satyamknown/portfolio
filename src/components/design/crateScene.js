@@ -17,6 +17,7 @@ import {
   SphereGeometry,
   Mesh,
   MeshLambertMaterial,
+  MeshBasicMaterial,
   InstancedMesh,
   DoubleSide,
   Vector4,
@@ -39,8 +40,14 @@ import { World, Body, Box, Sphere as CSphere, Vec3, Material as CMaterial, Conta
 
 const BASE = '/design/home/';
 
+// The About spot: on the far side of the planet, below the horizon, so it never shows until the
+// planet rolls round to it. Its direction from the planet's centre, and how far the planet turns.
+const ABOUT_A = (115 * Math.PI) / 180;
+const ABOUT_DIR = { x: 0, y: Math.cos(ABOUT_A), z: -Math.sin(ABOUT_A) };
+
 // Rolling hills over the planet: height above the sphere for a unit direction, in metres.
-// Flat where the crate lands, so it sits level. Used by the planet, the turf and the blades alike.
+// Flat where the crate lands and where the About camera stands, so both sit level.
+// Used by the planet, the turf and the blades alike.
 function hills(x, y, z) {
   let h =
     0.034 * Math.sin(x * 9.0 + 1.3) * Math.cos(z * 8.0 - 0.4) +
@@ -49,7 +56,9 @@ function hills(x, y, z) {
   h = 0.03 + h;
   const c = Math.hypot(x / 0.3, z / 0.23);
   const t = Math.min(1, Math.max(0, (c - 1) / 0.9));
-  return h * t * t * (3 - 2 * t);
+  const ang = Math.acos(Math.min(1, x * ABOUT_DIR.x + y * ABOUT_DIR.y + z * ABOUT_DIR.z));
+  const a = Math.min(1, Math.max(0, (ang - 0.4) / 0.22));
+  return h * t * t * (3 - 2 * t) * a * a * (3 - 2 * a);
 }
 function hillySphere(R, ws, hs, thetaLength) {
   const g = new SphereGeometry(R, ws, hs, 0, Math.PI * 2, 0, thetaLength);
@@ -72,10 +81,18 @@ const FRAME_H = 0.84; // ortho height that frames the crate, as in Blender
 const SHIFT_Y = 0.045; // headroom above the crate for a popped folder
 
 export async function createCrate(host, { onHover, onClick, onIntroDone, reducedMotion }) {
-  // rig = the scroll pose (crate + its shadow); body = the crate alone, so it can fall onto the shadow.
+  // rig = the scroll pose. Inside it the whole little world turns on the planet's centre (pivot):
+  // the crate (body) on top, the planet and grass (ground), and the About camera on the far side.
+  const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
   const rig = new Group();
+  const pivot = new Group();
+  pivot.position.y = -R;
+  rig.add(pivot);
+  const top = new Group();
+  top.position.y = R;
+  pivot.add(top);
   const body = new Group();
-  rig.add(body);
+  top.add(body);
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); // full-window canvas: keep it cheap
   renderer.outputColorSpace = SRGBColorSpace;
@@ -98,7 +115,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   // along with the crate (see place()), so the shadow camera can stay tight around it.
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
-  Object.assign(key.shadow.camera, { left: -0.55, right: 0.55, top: 0.55, bottom: -0.55, near: 0.2, far: 4 });
+  Object.assign(key.shadow.camera, { left: -0.75, right: 0.75, top: 0.75, bottom: -0.75, near: 0.2, far: 4 });
   key.shadow.radius = 9;
   key.shadow.blurSamples = 10;
   key.shadow.bias = -0.0005;
@@ -116,25 +133,61 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   // visible top. They sway in the wind and are flattened outward by the landing. The crate's
   // real-time shadow falls on both.
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
-  const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + 'crate.glb');
+  const loader = new GLTFLoader().setDRACOLoader(draco);
+  const [gltf, camModel] = await Promise.all([loader.loadAsync(BASE + 'crate.glb'), loader.loadAsync(BASE + 'camera.glb')]);
   draco.dispose();
-  const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
   const fine = window.matchMedia('(pointer: fine)').matches;
   // the bare planet: dark soil-green, only seen at the very roots
-  const planet = new Mesh(hillySphere(R, 220, 120, (110 * Math.PI) / 180), new MeshLambertMaterial({ color: 0x1f5a14 }));
+  const planet = new Mesh(hillySphere(R, 220, 160, Math.PI), new MeshLambertMaterial({ color: 0x1f5a14 }));
   planet.position.y = -R + 0.012; // the crate settles a little into the grass
   planet.receiveShadow = true;
   // planet, turf and blades share one group
   const ground = new Group();
-  rig.add(ground);
+  top.add(ground);
   ground.add(planet);
   // lush turf over the whole visible planet, right up to the crate's walls
-  const crateInv = { value: new Matrix4() }; // rig space -> crate space, to hide grass inside the crate only
-  const turf = makeTurf(R, planet.position.y, fine ? 24 : 12, crateInv);
+  const crateInv = { value: new Matrix4() }; // ground space -> crate space, to hide grass inside the crate only
+  const aboutInv = { value: new Matrix4() }; // ground space -> About camera space, to trim the grass under it
+  const turf = makeTurf(R, planet.position.y, fine ? 24 : 12, crateInv, aboutInv);
   for (const m of turf.meshes) ground.add(m);
   // longer wispy blades on top, for the silhouette the reference has
-  const grass = makeGrass(planet.position, R, fine ? 48000 : 14000, crateInv);
+  const grass = makeGrass(planet.position, R, fine ? 48000 : 14000, crateInv, aboutInv, new Vector3(0, 1, 0), 80);
   ground.add(grass.mesh);
+  const grass2 = makeGrass(planet.position, R, fine ? 20000 : 7000, crateInv, aboutInv, new Vector3(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z), 45);
+  ground.add(grass2.mesh);
+  // the About camera: stands on the far side, upright to the planet there
+  const aboutHolder = new Group();
+  aboutHolder.position.set(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z).multiplyScalar(R + 0.012);
+  // upright on the planet there, front and right side to the viewer once it comes round, like the crate
+  aboutHolder.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), -ABOUT_A);
+  pivot.add(aboutHolder);
+  aboutHolder.add(camModel.scene);
+  // the camera body settles a couple of centimetres into the turf, like the crate; the prints lie on it
+  for (const o of [...camModel.scene.children]) if (!/^print-/.test(o.name)) o.position.y -= 0.02;
+  const mePrint = camModel.scene.getObjectByName('print-me');
+  const Y = new Vector3(0, 1, 0);
+  const X = new Vector3(1, 0, 0);
+  const lay = (name, x, z, deg, y = 0.004) => {
+    const o = camModel.scene.getObjectByName(name);
+    o.position.set(x, y, z);
+    o.quaternion.setFromAxisAngle(Y, (deg * Math.PI) / 180);
+  };
+  // standing: tipped 15 degrees back from upright, turned to face the viewer, its foot in the grass
+  mePrint.position.set(-0.13, 0.116, 0.3);
+  mePrint.quaternion.setFromAxisAngle(Y, (38 * Math.PI) / 180).multiply(new Quaternion().setFromAxisAngle(X, (75 * Math.PI) / 180));
+  lay('print-a', 0.12, 0.33, 20); // these two must match the grass trim in ABOUT_TRIM
+  lay('print-b', 0.31, 0.27, -12, 0.006);
+  camModel.scene.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = true;
+    o.receiveShadow = true;
+    if (o.material?.map) o.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    // prints are glossy photo paper: keep them bright even where they face away from the sun
+    if (/^print-/.test(o.parent?.name || '') && o.material) {
+      const map = o.material.map;
+      o.material = new MeshBasicMaterial(map ? { map, color: 0xf4f3ef, toneMapped: false } : { color: 0xe9e7e1, toneMapped: false });
+    }
+  });
 
 
   scene.add(rig);
@@ -231,6 +284,12 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const axisUp = new Vector3(0, 1, 0);
   const yawQ = new Quaternion();
   const TILT = (-24 * Math.PI) / 180; // camera elevation goes from about 39 to 15 degrees
+  const ABOUT_TILT = 0; // About keeps the hero's three-quarter angle, just much closer
+  const focusW = new Vector3();
+  const focusC = new Vector3();
+  let aboutP = 0;
+  let aboutWant = 0;
+  const easeAbout = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 
   // ---------------------------------------------------------------- motion
   const lean = new Quaternion();
@@ -324,8 +383,23 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     rig.position.copy(camDown).multiplyScalar(down);
     // Work view: a lower camera angle (the scene tips toward the viewer), so the planet becomes a
     // horizon under the crate and the space above it stays white for project text
-    rig.quaternion.setFromAxisAngle(camRight, TILT * e).multiply(yawQ.setFromAxisAngle(axisUp, TURN * (1 - e)));
+    // About: the planet rolls toward the viewer, the crate dips away, the camera comes over the top,
+    // and the view tips almost straight down onto it
+    const a = easeAbout(aboutP);
+    rig.quaternion
+      .setFromAxisAngle(camRight, TILT * e * (1 - a) + ABOUT_TILT * a)
+      .multiply(yawQ.setFromAxisAngle(axisUp, TURN * (1 - e) * (1 - a)));
+    pivot.rotation.x = ABOUT_A * a;
     rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
+    if (a > 0) {
+      // closer, and centred on the owner's photo (a little toward the camera body)
+      rig.scale.multiplyScalar(1 + 0.62 * a);
+      rig.updateMatrixWorld(true);
+      mePrint.getWorldPosition(focusW);
+      aboutHolder.getWorldPosition(focusC);
+      focusW.lerp(focusC, 0.45).sub(rig.position);
+      rig.position.addScaledVector(focusW, -a);
+    }
     key.position.copy(rig.position).add(keyOff);
     key.target.position.copy(rig.position);
   };
@@ -355,6 +429,10 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     let moving = false;
 
     progress = reducedMotion ? 1 : Math.min(1, Math.max(0, readScroll()));
+    if (aboutP !== aboutWant) {
+      aboutP = reducedMotion ? aboutWant : Math.min(1, Math.max(0, aboutP + Math.sign(aboutWant - aboutP) * (dt / 1700)));
+      moving = true;
+    }
     if (Math.abs(shiftWant - shift) > 0.001) {
       shift += (shiftWant - shift) * (reducedMotion ? 1 : 1 - Math.exp(-dt / 160));
       frustum();
@@ -389,11 +467,14 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     // the wind never stops, so the scene keeps drawing while the page is visible
     if (!reducedMotion) {
       grass.tick(now / 1000);
+      grass2.tick(now / 1000);
       turf.tick(now / 1000);
       moving = true;
     }
     body.updateMatrix();
-    crateInv.value.copy(body.matrix).invert();
+    scene.updateMatrixWorld();
+    crateInv.value.copy(body.matrixWorld).invert().multiply(ground.matrixWorld);
+    aboutInv.value.copy(aboutHolder.matrixWorld).invert().multiply(ground.matrixWorld);
     renderer.render(scene, camera);
     if (moving) wake();
     else last = 0;
@@ -458,6 +539,13 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       wake();
     },
     // a project panel is open (crate slides left, hover pauses) or closed
+    setAbout(on) {
+      aboutWant = on ? 1 : 0;
+      this.setFocus(on);
+      // About text sits on the left, so the camera goes right
+      if (on) shiftWant = window.innerWidth > 1100 ? -0.82 : 0;
+      wake();
+    },
     setFocus(on) {
       focused = on;
       shiftWant = on && window.innerWidth > 1100 ? 1 : 0;
@@ -475,7 +563,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     },
     // The crate falls in from above the window at `at` (a performance.now() time).
     playDrop(at) {
-      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; } };
+      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; }, get aboutP() { return aboutP; } };
       if (reducedMotion) return wake();
       // start fully above the window, level, everything at rest
       const h = (window.innerHeight + land.size) * u / 0.78 / 1.25;
@@ -528,6 +616,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', wake);
       grass.dispose();
+      grass2.dispose();
       turf.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
@@ -548,10 +637,27 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   };
 }
 
+// The three prints in the About camera's own space (x across, z toward the front, y up), as laid
+// out in design-portfolio-blender/camera.py: 1 right under a print, fading out just past its edge.
+// Only there is the grass cut short; everywhere else it grows up round the prints and the camera.
+const ABOUT_TRIM = `
+float printMask(vec3 a, vec2 c, float th) {
+  vec2 d = a.xz - c;
+  float lx = d.x * cos(th) - d.y * sin(th);
+  float lz = d.x * sin(th) + d.y * cos(th);
+  return (1.0 - smoothstep(0.1, 0.118, abs(lx))) * (1.0 - smoothstep(0.121, 0.139, abs(lz)));
+}
+float aboutTrim(vec3 p) {
+  vec3 a = (uAboutInv * vec4(p, 1.0)).xyz;
+  if (abs(a.y) > 0.12) return 0.0;
+  // the two prints lying flat (the owner's own stands up, its foot in the grass)
+  return max(printMask(a, vec2(0.12, 0.33), 0.3491), printMask(a, vec2(0.31, 0.27), -0.2094));
+}`;
+
 // Grass blades: one instanced, tapered strip per blade, standing out of the planet's top cap,
 // thinning toward the cap's edge and none under the crate. Wind and the landing shockwave bend each
 // blade in the vertex shader (more at the tip), so thousands of blades cost one draw call.
-function makeGrass(center, R, count, crateInv) {
+function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg) {
   const blade = new PlaneGeometry(1, 1, 1, 4);
   blade.translate(0, 0.5, 0);
   const p = blade.attributes.position;
@@ -559,7 +665,7 @@ function makeGrass(center, R, count, crateInv) {
   const uniforms = { uTime: { value: 0 }, uImpact: { value: new Vector4(0, 0, -100, 0) } };
   const mat = new MeshLambertMaterial({ side: DoubleSide });
   mat.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, uniforms, { uCrateInv: crateInv });
+    Object.assign(sh.uniforms, uniforms, { uCrateInv: crateInv, uAboutInv: aboutInv });
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform vec4 uImpact;\nvarying float vH;\nvarying vec3 vRig;')
       .replace(
@@ -583,8 +689,8 @@ function makeGrass(center, R, count, crateInv) {
         vRig = (instanceMatrix * vec4(transformed, 1.0)).xyz;`
       );
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vH;\nvarying vec3 vRig;\nuniform mat4 uCrateInv;')
-      .replace('#include <color_fragment>', '#include <color_fragment>\nvec3 cl = (uCrateInv * vec4(vRig, 1.0)).xyz;\nif (abs(cl.x) < 0.218 && abs(cl.z) < 0.153 && cl.y > -0.06 && cl.y < 0.21) discard;\ndiffuseColor.rgb *= mix(0.45, 1.1, vH);');
+      .replace('#include <common>', '#include <common>\nvarying float vH;\nvarying vec3 vRig;\nuniform mat4 uCrateInv;\nuniform mat4 uAboutInv;\n' + ABOUT_TRIM)
+      .replace('#include <color_fragment>', '#include <color_fragment>\nvec3 cl = (uCrateInv * vec4(vRig, 1.0)).xyz;\nif (abs(cl.x) < 0.218 && abs(cl.z) < 0.153 && cl.y > -0.06 && cl.y < 0.21) discard;\nif (aboutTrim(vRig) > 0.5) discard;\ndiffuseColor.rgb *= mix(0.45, 1.1, vH);');
   };
 
   const mesh = new InstancedMesh(blade, mat, count);
@@ -600,15 +706,16 @@ function makeGrass(center, R, count, crateInv) {
   const deep = new Color('#3c9a1e');
   const light = new Color('#9ee04a');
   const c = new Color();
-  const CAP = (80 * Math.PI) / 180; // blades over everything the camera can see of the planet
+  const CAP = (capDeg * Math.PI) / 180; // a cap of blades around `axis`
   const cosCap = Math.cos(CAP);
+  const toAxis = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), axis);
   let n = 0;
   for (let tries = 0; n < count && tries < count * 4; tries++) {
     // uniform over the cap
     const ct = 1 - Math.random() * (1 - cosCap);
     const st = Math.sqrt(1 - ct * ct);
     const ph = Math.random() * Math.PI * 2;
-    dir.set(st * Math.cos(ph), ct, st * Math.sin(ph));
+    dir.set(st * Math.cos(ph), ct, st * Math.sin(ph)).applyQuaternion(toAxis);
     pos.copy(dir).multiplyScalar(R + hills(dir.x, dir.y, dir.z)).add(center);
     const h = 0.026 + Math.random() * 0.026;
     q.setFromUnitVectors(up, dir).multiply(yaw.setFromAxisAngle(up, Math.random() * Math.PI * 2));
@@ -636,23 +743,25 @@ function makeGrass(center, R, count, crateInv) {
 // the fragments where a strand of grass reaches that height (a hash per tiny cell of the
 // surface), so stacked together they read as dense, soft grass: dark at the roots, lime at the
 // tips. Wind and the landing ring lean the upper shells. One sphere per shell, shared geometry.
-function makeTurf(R, offsetY, layers, crateInv) {
+function makeTurf(R, offsetY, layers, crateInv, aboutInv) {
   const H = 0.036; // grass height, metres
-  const geo = hillySphere(R, 240, 130, (100 * Math.PI) / 180);
+  const geo = hillySphere(R, 240, 180, Math.PI);
   const shared = { uTime: { value: 0 }, uImpact: { value: new Vector4(0, 0, -100, 0) } };
   const meshes = [];
   for (let i = 1; i <= layers; i++) {
     const t = i / layers;
     const mat = new MeshLambertMaterial({ color: 0xffffff });
     mat.onBeforeCompile = (sh) => {
-      Object.assign(sh.uniforms, shared, { uT: { value: t }, uCrateInv: crateInv });
-      const head = `uniform float uT;\nuniform float uTime;\nuniform vec4 uImpact;\nuniform mat4 uCrateInv;\nvarying vec3 vSurf;\nvarying vec3 vRig;\nvarying float vWave;`;
+      Object.assign(sh.uniforms, shared, { uT: { value: t }, uCrateInv: crateInv, uAboutInv: aboutInv });
+      const head = `uniform float uT;\nuniform float uTime;\nuniform vec4 uImpact;\nuniform mat4 uCrateInv;\nuniform mat4 uAboutInv;\nvarying vec3 vSurf;\nvarying vec3 vRig;\nvarying float vWave;\n` + ABOUT_TRIM;
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + head).replace(
         '#include <begin_vertex>',
         `#include <begin_vertex>
         vSurf = normalize(position) * ${R.toFixed(3)};
         vec3 nrm = normalize(position);
-        transformed += nrm * uT * ${H};
+        // short, trimmed grass under the About camera and its prints, so nothing pokes through them
+        float trim = 1.0 - 0.88 * aboutTrim(position + vec3(0.0, ${offsetY.toFixed(4)}, 0.0));
+        transformed += nrm * uT * ${H} * trim;
         // wind as slow waves rolling across the field, plus a light flutter
         float wave = sin(dot(vSurf.xz, vec2(0.8, 0.6)) * 7.0 - uTime * 1.5) * 0.5 + 0.5;
         vWave = wave;
@@ -664,7 +773,7 @@ function makeTurf(R, offsetY, layers, crateInv) {
         float ring = age > 0.0 ? exp(-pow((dist - age * 0.9) / 0.09, 2.0)) * exp(-age * 1.6) * uImpact.w : 0.0;
         w.xz += (d / max(dist, 1e-4)) * ring * 4.0;
         w -= nrm * dot(w, nrm);
-        transformed += w * uT * uT * ${(H * 0.6).toFixed(4)};
+        transformed += w * uT * uT * ${(H * 0.6).toFixed(4)} * trim;
         vRig = transformed + vec3(0.0, ${offsetY.toFixed(4)}, 0.0);`
       );
       sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + head + `

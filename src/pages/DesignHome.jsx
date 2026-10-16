@@ -231,7 +231,65 @@ function ProjectPanel({ i, onClose, onOpenCase, onGo }) {
   );
 }
 
-function Crate({ onSettled }) {
+// About, shown beside the instant camera on the far side of the planet. First person, facts only:
+// from the case studies and the resume.
+const ABOUT = {
+  lines: [
+    "I'm a product designer at Rsquare Web Studio in Thane, India. I joined as a UI/UX intern in 2022 and now lead product design there.",
+    'Most of my work is B2B SaaS and websites for clients in Canada, the UK and India. I like the hard part: who can do what, in what order, and what happens when something goes wrong. Then I stay with the product until the live build matches the design.',
+  ],
+  rows: [
+    ['Based in', 'Thane, India'],
+    ['Now', 'Product Design Lead, Rsquare Web Studio (Oct 2025 – now)'],
+    ['Before', 'Product Designer (2022 – 2025), UI/UX Designer Intern (2022)'],
+    ['Education', 'B.E. Computer Engineering, University of Mumbai (2024)'],
+    ['Tools', 'Figma, Blender, Spline, Rive, LottieFiles, Claude'],
+  ],
+};
+
+function AboutPanel({ onClose }) {
+  useEffect(() => {
+    const key = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, [onClose]);
+  return (
+    <aside className="dh-panel dh-panel--about" aria-labelledby="dh-about-title">
+      <div className="dh-panel-top" style={{ '--d': '900ms' }}>
+        <span className="dh-panel-kicker">About</span>
+        <button type="button" className="dh-panel-close" aria-label="Close About" onClick={onClose}>
+          ×
+        </button>
+      </div>
+      <h2 id="dh-about-title" className="dh-panel-name" style={{ '--d': '980ms' }}>
+        Abhishek Manjhi
+      </h2>
+      {ABOUT.lines.map((t, k) => (
+        <p key={k} className="dh-panel-line" style={{ '--d': `${1060 + k * 90}ms` }}>
+          {t}
+        </p>
+      ))}
+      <dl className="dh-panel-rows" style={{ '--d': '1240ms' }}>
+        {ABOUT.rows.map(([k, v]) => (
+          <div key={k}>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="dh-panel-end dh-panel-end--two" style={{ '--d': '1320ms' }}>
+        <Link to="/contact">
+          Get in touch <span aria-hidden="true">↗</span>
+        </Link>
+        <a href="/design/resume.pdf" download="Abhishek-Manjhi-Resume-Design.pdf">
+          Resume <span aria-hidden="true">↓</span>
+        </a>
+      </div>
+    </aside>
+  );
+}
+
+function Crate({ onSettled, about, onCloseAbout }) {
   const fine = useFinePointer();
   const navigate = useNavigate();
   const host = useRef(null);
@@ -333,17 +391,29 @@ function Crate({ onSettled }) {
   }, [target, ready]);
   // the open project stays lifted; the crate slides left to make room for the panel
   useEffect(() => {
+    if (about) return;
     api.current?.setFocus(panel >= 0);
     if (panel >= 0) setTarget(panel);
-  }, [panel, ready]);
+  }, [panel, ready, about]);
+  // About: the planet rolls round to the instant camera
+  useEffect(() => {
+    if (!ready) return;
+    if (about) {
+      setPanel(-1);
+      setTarget(-1);
+    }
+    api.current?.setAbout(about);
+  }, [about, ready]);
   const closePanel = useCallback(() => {
     setPanel(-1);
     setTarget(-1);
   }, []);
   // While a project is open the page holds the Work view: it never slides back to the hero under
   // the panel. Scrolling up just closes the panel (and stays on the crate); after that it scrolls.
+  const held = panel >= 0 || about;
+  const closeHeld = about ? onCloseAbout : closePanel;
   useEffect(() => {
-    if (panel < 0) return undefined;
+    if (!held) return undefined;
     const html = document.documentElement;
     const before = html.style.overflow;
     html.style.overflow = 'hidden';
@@ -352,7 +422,7 @@ function Crate({ onSettled }) {
     let lastY = null;
     const up = (dy) => {
       pull += dy;
-      if (pull > 60) closePanel();
+      if (pull > 60) closeHeld();
     };
     const wheel = (e) => {
       if (e.target.closest?.('.dh-panel') && e.target.closest('.dh-panel').scrollHeight > e.target.closest('.dh-panel').clientHeight) return;
@@ -376,7 +446,7 @@ function Crate({ onSettled }) {
       window.removeEventListener('touchstart', tstart);
       window.removeEventListener('touchmove', tmove);
     };
-  }, [panel, closePanel]);
+  }, [held, closeHeld]);
 
   // arrows and swipes follow the same order as the panel: the front folder (Stratalite) first
   const step = (d) => setTarget((t) => (t < 0 ? TOUR[d > 0 ? 0 : n - 1] : TOUR[(TOUR.indexOf(t) + d + n) % n]));
@@ -434,8 +504,9 @@ function Crate({ onSettled }) {
       </ul>
 
       {panel >= 0 && <ProjectPanel i={panel} onClose={closePanel} onOpenCase={open} onGo={setPanel} />}
+      {about && <AboutPanel onClose={onCloseAbout} />}
 
-      {panel >= 0 ? null : fine ? (
+      {held ? null : fine ? (
         <p className="dh-caption dh-pill dh-reveal" aria-live="polite">
           <span className="dh-pill-a">{shown ? shown.name : 'Hover to preview'}</span>
           <span className="dh-pill-sep" aria-hidden="true" />
@@ -485,6 +556,15 @@ export default function DesignHome() {
   useDesignHead('Abhishek Manjhi · Lead product designer');
   const [settled, setSettled] = useState(false);
   const onSettled = useCallback(() => setSettled(true), []);
+  const [about, setAbout] = useState(false);
+  const closeAbout = useCallback(() => setAbout(false), []);
+  // About and Work both live on the Work screen: jump there, then roll the planet (or roll it back)
+  const toWork = (e, openAbout) => {
+    e.preventDefault();
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY < max - 2) window.scrollTo({ top: max, behavior: openAbout ? 'auto' : 'smooth' });
+    setAbout(openAbout);
+  };
   return (
     <div className="dh">
       <header className="dh-head">
@@ -492,8 +572,12 @@ export default function DesignHome() {
           Abhishek Manjhi
         </Link>
         <nav aria-label="Primary">
-          <a href="#work">Work</a>
-          <a href="#about">About</a>
+          <a href="#work" onClick={(e) => toWork(e, false)} aria-current={about ? undefined : 'page'}>
+            Work
+          </a>
+          <a href="#about" onClick={(e) => toWork(e, true)} aria-current={about ? 'page' : undefined}>
+            About
+          </a>
         </nav>
         <Link to="/contact" className="dh-contact">
           Contact
@@ -501,7 +585,7 @@ export default function DesignHome() {
       </header>
       <Hero />
       <section className={`dh-screen dh-work ${settled ? 'is-settled' : ''}`} id="work">
-        <Crate onSettled={onSettled} />
+        <Crate onSettled={onSettled} about={about} onCloseAbout={closeAbout} />
       </section>
       {/* fixed to the corners of the window on every screen */}
       <div className="dh-corners" aria-hidden="true">
