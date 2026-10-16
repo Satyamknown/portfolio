@@ -15,7 +15,8 @@ import {
   HemisphereLight,
   Mesh,
   PlaneGeometry,
-  MeshBasicMaterial,
+  MeshStandardMaterial,
+  VSMShadowMap,
   TextureLoader,
   PMREMGenerator,
   Raycaster,
@@ -49,6 +50,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = AgXToneMapping;
   renderer.toneMappingExposure = 1.15;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = VSMShadowMap;
   renderer.domElement.className = 'dh-gl';
   host.appendChild(renderer.domElement);
 
@@ -60,6 +63,17 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   // Key and fill placed like the Blender area lights (glTF is Y-up: Blender x,y,z -> x,z,-y).
   const key = new DirectionalLight(0xfff6ec, 3.4);
   key.position.set(-0.9, 1.4, 0.7);
+  // Real-time soft shadow. A small map with a blur keeps it soft and cheap; the light rides
+  // along with the crate (see place()), so the shadow camera can stay tight around it.
+  key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024);
+  Object.assign(key.shadow.camera, { left: -0.55, right: 0.55, top: 0.55, bottom: -0.55, near: 0.2, far: 4 });
+  key.shadow.radius = 9;
+  key.shadow.blurSamples = 10;
+  key.shadow.bias = -0.0005;
+  key.shadow.normalBias = 0.003;
+  scene.add(key.target);
+  const keyOff = key.position.clone();
   scene.add(key);
   const fill = new DirectionalLight(0xeef4ff, 0.4);
   fill.position.set(1.0, 0.9, 0.4);
@@ -67,24 +81,18 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   scene.add(new HemisphereLight(0xffffff, 0xcfd8e2, 0.5));
 
 
-  // The ground: a soft pool of floor slightly darker than the page (ground.png), and on it the
-  // crate's real shadow, baked in Blender with the same lights (build.py --shadow): a camera
-  // straight down at a shadow catcher, 1.4 m square centred under the crate. Baked, not a live
-  // shadow map, so the full-window canvas stays smooth.
-  const loader = new TextureLoader();
-  const [groundTex, shadowTex] = await Promise.all([loader.loadAsync(BASE + 'ground.png'), loader.loadAsync(BASE + 'ground-shadow.png')]);
-  for (const t of [groundTex, shadowTex]) t.colorSpace = SRGBColorSpace;
-  const flat = (map) => new MeshBasicMaterial({ map, transparent: true, depthWrite: false, toneMapped: false });
-  const ground = new Mesh(new PlaneGeometry(1.5, 1.5), flat(groundTex));
+  // The ground: a real lit floor under the crate that takes the crate's real-time shadow, so the
+  // shadow follows the fall, the bouncing folders and the scroll. Its edge fades into the page
+  // (ground-mask.png is only an opacity mask; the shading comes from the lights).
+  const groundMask = await new TextureLoader().loadAsync(BASE + 'ground-mask.png');
+  const ground = new Mesh(
+    new PlaneGeometry(1.5, 1.5),
+    new MeshStandardMaterial({ color: 0xe6e3dc, roughness: 1, metalness: 0, alphaMap: groundMask, transparent: true, depthWrite: false })
+  );
   ground.rotation.x = -Math.PI / 2;
-  ground.renderOrder = -2;
+  ground.receiveShadow = true;
+  ground.renderOrder = -1;
   rig.add(ground);
-  const shadowMat = flat(shadowTex);
-  const shadow = new Mesh(new PlaneGeometry(1.4, 1.4), shadowMat);
-  shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = 0.0005;
-  shadow.renderOrder = -1;
-  rig.add(shadow);
 
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
   const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + 'crate.glb');
@@ -99,6 +107,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   src.traverse((o) => {
     if (o.isMesh) {
       const m = o.material;
+      o.castShadow = true;
+      o.receiveShadow = true; // folders shade each other and the inside of the crate
       if (m && m.name.startsWith('sticker-')) {
         // die-cut stickers: hard alpha edge, no sorting trouble, crisp at any zoom
         m.transparent = false;
@@ -244,6 +254,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     rig.position.copy(camDown).multiplyScalar(down);
     rig.rotation.y = TURN * (1 - e);
     rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
+    key.position.copy(rig.position).add(keyOff);
+    key.target.position.copy(rig.position);
   };
   // Fall: accelerate down (gravity), land at 62%, one small bounce, settle.
   const fall = (p) => {
@@ -285,7 +297,6 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       const p = Math.min(1, (now - drop.t) / DROP_MS);
       const y = fall(p);
       body.position.y = drop.h * y;
-      shadowMat.opacity = 1 - Math.min(1, Math.max(0, y)) * 0.85;
       if (!drop.landed && p >= 0.62) {
         drop.landed = true;
         scatter();
@@ -389,7 +400,6 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       // high enough that the crate starts fully above the window, whatever the pose
       drop = { t: at, h: ((window.innerHeight + land.size) * u) / 0.78, landed: false };
       body.position.y = drop.h;
-      shadowMat.opacity = 0.15;
       wake();
     },
     // where folder i's cover card is on screen right now, as 4 points in viewport px
@@ -423,8 +433,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', wake);
-      shadowTex.dispose();
-      groundTex.dispose();
+      groundMask.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
       el.removeEventListener('pointerdown', onDown);
