@@ -651,3 +651,8 @@
     background: var(--dh-bg);
   }
 }
+
+/* while a cover card flies out to open a case study, the 3D layer goes over everything */
+.dh-gl-host.is-flying {
+  z-index: 40;
+}

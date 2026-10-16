@@ -295,7 +295,6 @@ function Crate({ onSettled, about, onCloseAbout }) {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [target, setTarget] = useState(-1);
-  const [takeover, setTakeover] = useState(null);
   const [panel, setPanel] = useState(-1);
   const panelRef = useRef(-1);
   panelRef.current = panel;
@@ -304,38 +303,30 @@ function Crate({ onSettled, about, onCloseAbout }) {
 
   // Clicking a folder: its black cover grows out of the crate until it fills the screen, then the
   // case study opens under it (DesignDetail fades the black away).
+  const [flying, setFlying] = useState(false);
   const open = useCallback(
     (i) => {
       const p = PROJECTS[i];
       if (!p.slug) return;
-      const pts = api.current?.coverQuad(i);
-      if (reducedMotion() || !pts) {
-        navigate(`/design/${p.slug}`);
-        return;
-      }
-      const xs = pts.map((q) => q[0]);
-      const ys = pts.map((q) => q[1]);
-      const start = {
-        left: Math.min(...xs),
-        top: Math.min(...ys),
-        width: Math.max(...xs) - Math.min(...xs),
-        height: Math.max(...ys) - Math.min(...ys),
-      };
-      setTakeover({ i, start, grown: false });
-      requestAnimationFrame(() => requestAnimationFrame(() => setTakeover((t) => t && { ...t, grown: true })));
-      setTimeout(() => {
+      const go = () => {
         try {
           sessionStorage.setItem('dz-takeover', '1');
         } catch {
           /* fine without it: the case page just appears without the fade */
         }
         navigate(`/design/${p.slug}`);
-      }, 720);
+      };
+      if (reducedMotion() || !api.current?.flyCover) return navigate(`/design/${p.slug}`);
+      // the cover card flies out of the crate and over the screen, then the case study opens under it
+      setFlying(true);
+      api.current.flyCover(i).then(go);
     },
     [navigate]
   );
   const openRef = useRef(open);
   openRef.current = open;
+  const navRef = useRef(navigate);
+  navRef.current = navigate;
 
   // Load three.js and the model right after the page paints. The scroll then drives the crate
   // from its hero pose to its Work pose; the Work pose is wherever .dh-box sits in the layout.
@@ -358,6 +349,7 @@ function Crate({ onSettled, about, onCloseAbout }) {
           onHover: (i) => panelRef.current < 0 && setTarget(i),
           onClick: (i, pointer) => (pointer === 'mouse' || panelRef.current >= 0 ? setPanel(i) : setTarget(i)),
           onIntroDone: () => onSettled(),
+          onBanner: () => navRef.current('/contact'),
         })
       )
       .then((c) => {
@@ -449,13 +441,6 @@ function Crate({ onSettled, about, onCloseAbout }) {
   const step = (d) => setTarget((t) => (t < 0 ? TOUR[d > 0 ? 0 : n - 1] : TOUR[(TOUR.indexOf(t) + d + n) % n]));
   const shown = target >= 0 ? PROJECTS[target] : null;
 
-  const full = (() => {
-    // the cover is a 16:10 black card; grown, it covers the whole screen
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const w = Math.max(vw, vh * 1.6);
-    return { left: (vw - w) / 2, top: (vh - w / 1.6) / 2, width: w, height: w / 1.6 };
-  })();
 
   return (
     <div className="dh-crate" ref={wrap}>
@@ -481,7 +466,7 @@ function Crate({ onSettled, about, onCloseAbout }) {
         )}
       </div>
       {/* the 3D layer covers the window; .dh-box above only marks where the crate lands */}
-      <div ref={host} className={`dh-gl-host ${ready ? 'is-ready' : ''}`} role="img" aria-label="A blue crate of manila folders, one per project, with company stickers on its sides" />
+      <div ref={host} className={`dh-gl-host ${ready ? 'is-ready' : ''} ${flying ? 'is-flying' : ''}`} role="img" aria-label="A blue crate of manila folders, one per project, with company stickers on its sides" />
 
       {/* keyboard and screen-reader route to the same projects */}
       <ul className="dh-sr">
@@ -500,7 +485,7 @@ function Crate({ onSettled, about, onCloseAbout }) {
         ))}
       </ul>
 
-      {panel >= 0 && <ProjectPanel i={panel} onClose={closePanel} onOpenCase={open} onGo={setPanel} />}
+      {panel >= 0 && !flying && <ProjectPanel i={panel} onClose={closePanel} onOpenCase={open} onGo={setPanel} />}
       {about && <AboutPanel onClose={onCloseAbout} />}
 
       {held ? null : fine ? (
@@ -540,11 +525,6 @@ function Crate({ onSettled, about, onCloseAbout }) {
         </div>
       )}
 
-      {takeover && (
-        <div className={`dh-takeover ${takeover.grown ? 'is-grown' : ''}`} aria-hidden="true">
-          <img src={`${BASE}cover-${PROJECTS[takeover.i].slug}.webp`} alt="" style={takeover.grown ? full : takeover.start} />
-        </div>
-      )}
     </div>
   );
 }

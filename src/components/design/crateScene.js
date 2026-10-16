@@ -15,6 +15,11 @@ import {
   HemisphereLight,
   PlaneGeometry,
   SphereGeometry,
+  BufferGeometry,
+  BufferAttribute,
+  Line,
+  LineBasicMaterial,
+  CanvasTexture,
   IcosahedronGeometry,
   CircleGeometry,
   MeshStandardMaterial,
@@ -84,7 +89,7 @@ const CARD_OUT = 0.075;
 const FRAME_H = 0.84; // ortho height that frames the crate, as in Blender
 const SHIFT_Y = 0.045; // headroom above the crate for a popped folder
 
-export async function createCrate(host, { onHover, onClick, onIntroDone, reducedMotion }) {
+export async function createCrate(host, { onHover, onClick, onIntroDone, onBanner, reducedMotion }) {
   // rig = the scroll pose. Inside it the whole little world turns on the planet's centre (pivot):
   // the crate (body) on top, the planet and grass (ground), and the About camera on the far side.
   const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
@@ -138,7 +143,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   // real-time shadow falls on both.
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
   const loader = new GLTFLoader().setDRACOLoader(draco);
-  const [gltf, camModel] = await Promise.all([loader.loadAsync(BASE + 'crate.glb'), loader.loadAsync(BASE + 'camera.glb')]);
+  const [gltf, camModel, planeModel] = await Promise.all([loader.loadAsync(BASE + 'crate.glb'), loader.loadAsync(BASE + 'camera.glb'), loader.loadAsync(BASE + 'plane.glb')]);
   draco.dispose();
   const fine = window.matchMedia('(pointer: fine)').matches;
   // the bare planet: dark soil-green, only seen at the very roots
@@ -307,6 +312,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     camera.updateProjectionMatrix();
   };
   const camDown = new Vector3(0, -1, 0).applyQuaternion(camera.quaternion);
+  const flyer = makeFlyer(planeModel, scene, camera, renderer);
   const camRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
   const axisUp = new Vector3(0, 1, 0);
   const yawQ = new Quaternion();
@@ -316,6 +322,38 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const focusC = new Vector3();
   let aboutP = 0;
   let aboutWant = 0;
+  // Opening a case study: the folder's cover card leaves the folder at the angle it sits, flips
+  // over once, then flies to the viewer along an arc, banking like a plane, turning to face the
+  // screen and growing until it fills it. Resolves when the screen is covered.
+  let flight = null;
+  const fq = new Quaternion();
+  const fq2 = new Quaternion();
+  const fp = new Vector3();
+  const flyAxisZ = new Vector3(0, 0, 1);
+  const updateFlight = (now) => {
+    const f = flight;
+    const t = Math.min(1, (now - f.t0) / f.dur);
+    const a = Math.min(1, t / 0.34);
+    const ea = 1 - Math.pow(1 - a, 3);
+    const b = Math.max(0, (t - 0.26) / 0.74);
+    const eb = b < 0.5 ? 4 * b * b * b : 1 - Math.pow(-2 * b + 2, 3) / 2;
+    // out of the folder, along the card's own up
+    fp.copy(f.p0).addScaledVector(f.up0, 0.13 * ea);
+    // then a curve to the middle of the screen, in front of everything
+    const k = 1 - eb;
+    fp.multiplyScalar(k * k).addScaledVector(f.ctrl, 2 * k * eb).addScaledVector(f.p1, eb * eb);
+    f.g.position.copy(fp);
+    // one flip at its own angle, then turn to face the viewer, banking on the way
+    fq.copy(f.q0).multiply(fq2.setFromAxisAngle(flyAxisZ, ea * Math.PI * 2));
+    fq.slerp(f.q1, eb);
+    fq.premultiply(fq2.setFromAxisAngle(f.view, Math.sin(eb * Math.PI) * 0.65));
+    f.g.quaternion.copy(fq);
+    f.g.scale.setScalar(1 + (f.s1 - 1) * Math.pow(eb, 1.7));
+    if (t >= 1 && !f.fired) {
+      f.fired = true;
+      f.done();
+    }
+  };
   const easeAbout = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 
   // ---------------------------------------------------------------- motion
@@ -491,6 +529,12 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       } else F.f = F.want;
       apply(F, tidy);
     }
+    // now and then, after the visitor has been here a while, the plane crosses the sky
+    if (!reducedMotion && flyer.update(now, focused)) moving = true;
+    if (flight) {
+      updateFlight(now);
+      moving = true;
+    }
     // the wind never stops, so the scene keeps drawing while the page is visible
     if (!reducedMotion) {
       grass.tick(now / 1000);
@@ -518,6 +562,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     const r = renderer.domElement.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
+    if (flyer.hit(ray)) return -2; // the banner
     const hits = ray.intersectObject(src, true);
     for (const h of hits) if (h.object.userData.folder !== undefined) return h.object.userData.folder;
     return -1;
@@ -528,8 +573,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     const i = pick(e);
     if (i !== hover) {
       hover = i;
-      renderer.domElement.style.cursor = i >= 0 ? 'pointer' : '';
-      onHover?.(i);
+      renderer.domElement.style.cursor = i >= 0 || i === -2 ? 'pointer' : '';
+      onHover?.(Math.max(-1, i));
     }
   };
   const onLeave = (e) => {
@@ -544,6 +589,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return (down = null);
     down = null;
     const i = pick(e);
+    if (i === -2) return onBanner?.();
     if (i >= 0) onClick?.(i, e.pointerType);
   };
   const el = renderer.domElement;
@@ -591,7 +637,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     },
     // The crate falls in from above the window at `at` (a performance.now() time).
     playDrop(at) {
-      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; }, get aboutP() { return aboutP; } };
+      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; }, get aboutP() { return aboutP; }, flyer, camera, renderer, scene };
       if (reducedMotion) return wake();
       // start fully above the window, level, everything at rest
       const h = (window.innerHeight + land.size) * u / 0.78 / 1.25;
@@ -613,6 +659,33 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       wake();
     },
     // where folder i's cover card is on screen right now, as 4 points in viewport px
+    // fly folder i's cover card out of the crate and over the whole screen
+    flyCover(i) {
+      const F = folders[i];
+      if (!F?.cover) return Promise.resolve();
+      scene.updateMatrixWorld(true);
+      const g = new Group();
+      F.cover.matrixWorld.decompose(g.position, g.quaternion, new Vector3());
+      scene.add(g);
+      g.updateMatrixWorld(true);
+      const parts = F.lift.map((L) => L.o);
+      F.lift = []; // the folder stops moving them
+      for (const o of parts) g.attach(o);
+      const coverScale = new Vector3().setFromMatrixScale(F.cover.matrixWorld);
+      const w = (camera.right - camera.left) / camera.zoom;
+      const h = (camera.top - camera.bottom) / camera.zoom;
+      const up0 = new Vector3(0, 0, -1).applyQuaternion(g.quaternion); // the card's own up
+      const view = new Vector3(0, 0, 1).applyQuaternion(camera.quaternion);
+      const p1 = new Vector3(0, 0, -0.97).unproject(camera);
+      const p0 = g.position.clone();
+      const ctrl = p0.clone().addScaledVector(up0, 0.3).lerp(p1, 0.35).addScaledVector(new Vector3(0, 1, 0).applyQuaternion(camera.quaternion), 0.18);
+      const q1 = camera.quaternion.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2));
+      const s1 = Math.max(w / coverScale.x, h / (coverScale.z || coverScale.y)) * 1.06;
+      return new Promise((done) => {
+        flight = { g, p0, p1, ctrl, up0, view, q0: g.quaternion.clone(), q1, s1, t0: performance.now(), dur: reducedMotion ? 1 : 1500 * (import.meta.env.DEV ? window.__slow || 1 : 1), done, fired: false };
+        wake();
+      });
+    },
     coverQuad(i) {
       const F = folders[i];
       if (!F?.cover) return null;
@@ -959,4 +1032,117 @@ function makeDetails(center, R) {
     group.add(m);
   }
   return group;
+}
+
+// The plane: a small propeller plane (design-portfolio-blender/plane.py) towing a cloth banner that
+// reads "Open to work · Book a call". It crosses the sky behind the planet, right to left, the first
+// time after the visitor has been on the page a while and then every so often. The banner ripples
+// like a flag, more toward its free end; clicking it opens Contact.
+function makeFlyer(model, scene, camera, renderer) {
+  const FIRST = 14000; // ms on the page before the first pass
+  const EVERY = 45000;
+  const DUR = 12000;
+  const plane = new Group();
+  plane.add(model.scene);
+  model.scene.scale.setScalar(0.85);
+  model.scene.traverse((o) => o.isMesh && (o.castShadow = false));
+  const prop = model.scene.getObjectByName('prop');
+  plane.visible = false;
+  scene.add(plane);
+
+  // the banner cloth: canvas text on a finely divided strip, rippled in the vertex shader
+  const L = 0.95;
+  const Hb = 0.12;
+  const c = document.createElement('canvas');
+  c.width = 1536;
+  c.height = 194;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f6f3ea';
+  g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = '#e2432f';
+  g.fillRect(0, 0, c.width, 10);
+  g.fillRect(0, c.height - 10, c.width, 10);
+  g.fillStyle = '#141414';
+  g.font = '600 92px "Instrument Sans", "Helvetica Neue", Arial, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText('OPEN TO WORK  ·  BOOK A CALL  →', c.width / 2, c.height / 2 + 4);
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const uT = { value: 0 };
+  const mat = new MeshLambertMaterial({ map: tex, side: DoubleSide });
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = uT;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uTime;').replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+      float k = uv.x; // 0 at the rope, 1 at the free end
+      float w = sin(uv.x * 11.0 - uTime * 7.5);
+      transformed.y += w * 0.014 * (0.25 + k);
+      transformed.z += cos(uv.x * 11.0 - uTime * 7.5) * 0.03 * k;`
+    );
+  };
+  const banner = new Mesh(new PlaneGeometry(L, Hb, 64, 6), mat);
+  banner.visible = false;
+  scene.add(banner);
+  const ropeGeo = new BufferGeometry().setAttribute('position', new BufferAttribute(new Float32Array(6), 3));
+  const rope = new Line(ropeGeo, new LineBasicMaterial({ color: 0x6b6b66 }));
+  rope.visible = false;
+  scene.add(rope);
+
+  const right = new Vector3();
+  const up = new Vector3();
+  const fwd = new Vector3();
+  const p = new Vector3();
+  const tgt = new Vector3();
+  const tail = new Vector3();
+  let next = FIRST;
+  let t0 = -1;
+  const show = (on) => (plane.visible = banner.visible = rope.visible = on);
+  return {
+    plane,
+    banner,
+    // returns true while flying
+    update(now, paused) {
+      if (t0 < 0) {
+        if (now < next || paused) return false;
+        t0 = now;
+        show(true);
+      }
+      const t = (now - t0) / DUR;
+      if (t >= 1) {
+        t0 = -1;
+        next = now + EVERY;
+        show(false);
+        return false;
+      }
+      right.set(1, 0, 0).applyQuaternion(camera.quaternion);
+      up.set(0, 1, 0).applyQuaternion(camera.quaternion);
+      fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
+      // across the upper sky, far behind the planet (an ortho camera keeps its size)
+      const x = 1.45 - 2.9 * t;
+      p.set(x, 0.66 + Math.sin(now * 0.0016) * 0.035, 0.6).unproject(camera);
+      plane.position.copy(p);
+      plane.up.copy(up);
+      tgt.copy(p).addScaledVector(right, -1).addScaledVector(fwd, -0.45); // nose turned a little toward us
+      plane.lookAt(tgt);
+      plane.rotateZ(Math.sin(now * 0.0021) * 0.08);
+      if (prop) prop.rotation.z += 0.9;
+      // the banner trails to the right, facing the viewer
+      tail.copy(p).addScaledVector(right, 0.17);
+      banner.quaternion.copy(camera.quaternion);
+      banner.position.copy(tail).addScaledVector(right, 0.08 + L / 2).addScaledVector(up, -0.015);
+      const a = ropeGeo.attributes.position;
+      a.setXYZ(0, tail.x, tail.y, tail.z);
+      tgt.copy(banner.position).addScaledVector(right, -L / 2);
+      a.setXYZ(1, tgt.x, tgt.y, tgt.z);
+      a.needsUpdate = true;
+      uT.value = now / 1000;
+      return true;
+    },
+    hit(ray) {
+      return banner.visible && ray.intersectObject(banner, false).length > 0;
+    },
+  };
 }
