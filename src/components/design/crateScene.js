@@ -15,9 +15,7 @@ import {
   HemisphereLight,
   PlaneGeometry,
   SphereGeometry,
-  BufferAttribute,
   Mesh,
-  MeshStandardMaterial,
   MeshLambertMaterial,
   InstancedMesh,
   DoubleSide,
@@ -95,27 +93,17 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + 'crate.glb');
   draco.dispose();
   const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
-  const sphere = new SphereGeometry(R, 160, 120);
-  {
-    // patchy turf colour, so the bare part of the planet reads as grass too, not plastic
-    const p = sphere.attributes.position;
-    const col = new Float32Array(p.count * 3);
-    const a = new Color('#2f561b');
-    const b = new Color('#4d7a27');
-    const t = new Color();
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i) * 9, y = p.getY(i) * 9, z = p.getZ(i) * 9;
-      const nz = Math.sin(x + Math.sin(z * 1.3)) * Math.sin(z - Math.cos(y * 1.7)) * 0.5 + Math.sin(x * 2.7 + y * 3.1 - z * 2.3) * 0.25;
-      t.copy(a).lerp(b, 0.5 + nz * 0.6);
-      col.set([t.r, t.g, t.b], i * 3);
-    }
-    sphere.setAttribute('color', new BufferAttribute(col, 3));
-  }
-  const planet = new Mesh(sphere, new MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 }));
+  const fine = window.matchMedia('(pointer: fine)').matches;
+  // the bare planet: dark soil-green, only seen at the very roots
+  const planet = new Mesh(new SphereGeometry(R, 160, 120), new MeshLambertMaterial({ color: 0x1e3a12 }));
   planet.position.y = -R + 0.012; // the crate settles a little into the grass
   planet.receiveShadow = true;
   rig.add(planet);
-  const grass = makeGrass(planet.position, R, window.matchMedia('(pointer: fine)').matches ? 64000 : 22000);
+  // lush turf over the whole visible planet, right up to the crate's walls
+  const turf = makeTurf(R, planet.position.y, fine ? 18 : 10);
+  for (const m of turf.meshes) rig.add(m);
+  // longer wispy blades on top, for the silhouette the reference has
+  const grass = makeGrass(planet.position, R, fine ? 30000 : 9000);
   rig.add(grass.mesh);
 
 
@@ -321,6 +309,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       if (!drop.landed && p >= 0.62) {
         drop.landed = true;
         grass.impact(now / 1000);
+        turf.impact(now / 1000);
         scatter();
         kick(1);
       }
@@ -349,6 +338,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     // the wind never stops, so the scene keeps drawing while the page is visible
     if (!reducedMotion) {
       grass.tick(now / 1000);
+      turf.tick(now / 1000);
       moving = true;
     }
     renderer.render(scene, camera);
@@ -461,6 +451,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', wake);
       grass.dispose();
+      turf.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
       el.removeEventListener('pointerdown', onDown);
@@ -512,7 +503,7 @@ function makeGrass(center, R, count) {
       );
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying float vH;')
-      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= mix(0.38, 1.0, vH);');
+      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= mix(0.45, 1.1, vH);');
   };
 
   const mesh = new InstancedMesh(blade, mat, count);
@@ -525,10 +516,10 @@ function makeGrass(center, R, count) {
   const yaw = new Quaternion();
   const sc = new Vector3();
   const up = new Vector3(0, 1, 0);
-  const deep = new Color('#24461a');
-  const light = new Color('#6c9a2c');
+  const deep = new Color('#3d7a1c');
+  const light = new Color('#b5dc5c');
   const c = new Color();
-  const CAP = (50 * Math.PI) / 180; // blades over the top 50 degrees, thinning out; the planet's own green beyond
+  const CAP = (80 * Math.PI) / 180; // blades over everything the camera can see of the planet
   const cosCap = Math.cos(CAP);
   let n = 0;
   for (let tries = 0; n < count && tries < count * 4; tries++) {
@@ -538,12 +529,10 @@ function makeGrass(center, R, count) {
     const ph = Math.random() * Math.PI * 2;
     dir.set(st * Math.cos(ph), ct, st * Math.sin(ph));
     pos.copy(dir).multiplyScalar(R).add(center);
-    if (Math.abs(pos.x) < 0.232 && Math.abs(pos.z) < 0.167) continue; // under the crate
-    const th = Math.acos(ct) / CAP; // 0 at the top, 1 at the cap's edge
-    if (Math.random() > (1 - Math.min(1, Math.max(0, (th - 0.35) / 0.65))) ** 1.6) continue;
-    const h = (0.016 + Math.random() * 0.022) * (1 - Math.min(0.6, Math.max(0, (th - 0.6) * 1.5)));
+    if (Math.abs(pos.x) < 0.22 && Math.abs(pos.z) < 0.155) continue; // inside the crate's footprint only
+    const h = 0.028 + Math.random() * 0.03;
     q.setFromUnitVectors(up, dir).multiply(yaw.setFromAxisAngle(up, Math.random() * Math.PI * 2));
-    sc.set(0.0022 + Math.random() * 0.0018, h, 1);
+    sc.set(0.0016 + Math.random() * 0.0014, h, 1);
     m4.compose(pos, q, sc);
     mesh.setMatrixAt(n, m4);
     mesh.setColorAt(n, c.copy(deep).lerp(light, Math.random() * 0.85));
@@ -559,6 +548,77 @@ function makeGrass(center, R, count) {
     dispose: () => {
       blade.dispose();
       mat.dispose();
+    },
+  };
+}
+
+// Turf: the sphere drawn again in thin shells, each a little further out. Every shell keeps only
+// the fragments where a strand of grass reaches that height (a hash per tiny cell of the
+// surface), so stacked together they read as dense, soft grass: dark at the roots, lime at the
+// tips. Wind and the landing ring lean the upper shells. One sphere per shell, shared geometry.
+function makeTurf(R, offsetY, layers) {
+  const H = 0.03; // grass height, metres
+  const geo = new SphereGeometry(R, 200, 110, 0, Math.PI * 2, 0, (100 * Math.PI) / 180);
+  const shared = { uTime: { value: 0 }, uImpact: { value: new Vector4(0, 0, -100, 0) } };
+  const meshes = [];
+  for (let i = 1; i <= layers; i++) {
+    const t = i / layers;
+    const mat = new MeshLambertMaterial({ color: 0xffffff });
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, shared, { uT: { value: t } });
+      const head = `uniform float uT;\nuniform float uTime;\nuniform vec4 uImpact;\nvarying vec3 vSurf;\nvarying vec3 vRig;`;
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + head).replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+        vSurf = normalize(position) * ${R.toFixed(3)};
+        vec3 nrm = normalize(position);
+        transformed += nrm * uT * ${H};
+        vec3 w = vec3(sin(uTime * 1.3 + vSurf.x * 2.1 + vSurf.z * 1.4), 0.0, sin(uTime * 1.05 + vSurf.z * 2.3 - vSurf.x * 0.7)) * 0.55;
+        vec3 rp = transformed + vec3(0.0, ${offsetY.toFixed(4)}, 0.0);
+        vec2 d = rp.xz - uImpact.xy;
+        float dist = length(d);
+        float age = uTime - uImpact.z;
+        float ring = age > 0.0 ? exp(-pow((dist - age * 0.9) / 0.09, 2.0)) * exp(-age * 1.6) * uImpact.w : 0.0;
+        w.xz += (d / max(dist, 1e-4)) * ring * 4.0;
+        w -= nrm * dot(w, nrm);
+        transformed += w * uT * uT * ${(H * 0.6).toFixed(4)};
+        vRig = transformed + vec3(0.0, ${offsetY.toFixed(4)}, 0.0);`
+      );
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + head + `
+        float hash13(vec3 p) { p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }`).replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        // no grass inside the crate itself (its floor sits just below the tips)
+        if (abs(vRig.x) < 0.218 && abs(vRig.z) < 0.153 && vRig.y > -0.01) discard;
+        // a warped grid, so the strands never line up into rings
+        vec3 q = vSurf * 340.0 + vec3(sin(vSurf.y * 37.0 + vSurf.z * 11.0), sin(vSurf.z * 41.0 - vSurf.x * 13.0), sin(vSurf.x * 43.0 + vSurf.y * 17.0)) * 2.3;
+        vec3 cell = floor(q);
+        float r = hash13(cell);
+        float h = 0.35 + 0.65 * r;
+        if (uT > h) discard;
+        vec3 lp = fract(q) - 0.5;
+        if (length(lp) > 0.62 * (1.0 - uT / h) + 0.06) discard;
+        float k = uT / h;
+        vec3 root = vec3(0.025, 0.075, 0.012);
+        vec3 tip = mix(vec3(0.20, 0.50, 0.04), vec3(0.42, 0.62, 0.08), hash13(cell + 7.0));
+        // broad light and dark patches across the field, as in a real lawn
+        float patch = 0.8 + 0.28 * sin(vSurf.x * 6.3 + sin(vSurf.z * 4.1) * 1.7) * sin(vSurf.z * 5.2 - vSurf.x * 2.3);
+        diffuseColor.rgb = mix(root, tip * patch, smoothstep(0.0, 1.0, k)) * (0.6 + 0.4 * uT);`
+      );
+    };
+    const m = new Mesh(geo, mat);
+    m.position.y = offsetY;
+    m.receiveShadow = true;
+    m.renderOrder = i;
+    meshes.push(m);
+  }
+  return {
+    meshes,
+    tick: (time) => (shared.uTime.value = time),
+    impact: (time) => shared.uImpact.value.set(0, 0, time, 1),
+    dispose: () => {
+      geo.dispose();
+      meshes.forEach((m) => m.material.dispose());
     },
   };
 }
