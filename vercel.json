@@ -1,9 +1,37 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/go/(.*)", "destination": "/api" },
-    { "source": "/design", "destination": "/design.html" },
-    { "source": "/design/(.*)", "destination": "/design.html" },
-    { "source": "/((?!api).*)", "destination": "/index.html" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/go/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/design",
+      "destination": "/design.html"
+    },
+    {
+      "source": "/design/(.*)",
+      "destination": "/design.html"
+    },
+    {
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "abhishek-manjhi-design.vercel.app"
+        }
+      ],
+      "destination": "/design",
+      "permanent": false
+    }
   ]
 }
