@@ -15,6 +15,9 @@ import {
   HemisphereLight,
   PlaneGeometry,
   SphereGeometry,
+  IcosahedronGeometry,
+  CircleGeometry,
+  MeshStandardMaterial,
   Mesh,
   MeshLambertMaterial,
   MeshBasicMaterial,
@@ -36,6 +39,7 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { World, Body, Box, Sphere as CSphere, Vec3, Material as CMaterial, ContactMaterial } from 'cannon-es';
 
 const BASE = '/design/home/';
@@ -151,10 +155,11 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const turf = makeTurf(R, planet.position.y, fine ? 24 : 12, crateInv, aboutInv);
   for (const m of turf.meshes) ground.add(m);
   // longer wispy blades on top, for the silhouette the reference has
-  const grass = makeGrass(planet.position, R, fine ? 48000 : 14000, crateInv, aboutInv, new Vector3(0, 1, 0), 80);
+  const grass = makeGrass(planet.position, R, fine ? 70000 : 18000, crateInv, aboutInv, new Vector3(0, 1, 0), 80);
   ground.add(grass.mesh);
   const grass2 = makeGrass(planet.position, R, fine ? 20000 : 7000, crateInv, aboutInv, new Vector3(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z), 45);
   ground.add(grass2.mesh);
+  ground.add(makeDetails(planet.position, R));
   // the About camera: stands on the far side, upright to the planet there
   const aboutHolder = new Group();
   // on the actual surface there: the planet's centre sits 1.2 cm above the pivot, so offset by that
@@ -703,7 +708,7 @@ function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg, sample) {
         float bh = length(instanceMatrix[1].xyz);
         float wave = sin(dot(root.xz, vec2(0.8, 0.6)) * 7.0 - uTime * 1.5) * 0.5 + 0.5;
         vec2 bdir = normalize(vec2(fract(sin(dot(root.xz, vec2(12.9898, 78.233))) * 43758.5453) - 0.5, fract(sin(dot(root.xz, vec2(39.35, 11.13))) * 24634.63) - 0.5) + 1e-4);
-        vec2 push = bdir * 0.45 + vec2(0.8, 0.6) * (0.15 + 0.55 * wave) + vec2(sin(uTime * 3.1 + root.x * 13.0), sin(uTime * 2.7 + root.z * 11.0)) * 0.06;
+        vec2 push = bdir * 0.8 + vec2(0.8, 0.6) * (0.12 + 0.45 * wave) + vec2(sin(uTime * 3.1 + root.x * 13.0), sin(uTime * 2.7 + root.z * 11.0)) * 0.06;
         vec2 d = root.xz - uImpact.xy;
         float dist = length(d);
         float age = uTime - uImpact.z;
@@ -715,7 +720,7 @@ function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg, sample) {
       );
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying float vH;\nvarying vec3 vRig;\nuniform mat4 uCrateInv;\nuniform mat4 uAboutInv;\n' + ABOUT_TRIM)
-      .replace('#include <color_fragment>', '#include <color_fragment>\nvec3 cl = (uCrateInv * vec4(vRig, 1.0)).xyz;\nif (abs(cl.x) < 0.218 && abs(cl.z) < 0.153 && cl.y > -0.06 && cl.y < 0.21) discard;\nif (aboutTrim(vRig) > 0.5) discard;\ndiffuseColor.rgb *= mix(0.45, 1.1, vH);');
+      .replace('#include <color_fragment>', '#include <color_fragment>\nvec3 cl = (uCrateInv * vec4(vRig, 1.0)).xyz;\nif (abs(cl.x) < 0.218 && abs(cl.z) < 0.153 && cl.y > -0.06 && cl.y < 0.21) discard;\nif (aboutTrim(vRig) > 0.5) discard;\ndiffuseColor.rgb *= mix(0.5, 1.18, vH);');
   };
 
   const mesh = new InstancedMesh(blade, mat, count);
@@ -728,9 +733,14 @@ function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg, sample) {
   const yaw = new Quaternion();
   const sc = new Vector3();
   const up = new Vector3(0, 1, 0);
-  const deep = new Color('#3c9a1e');
-  const light = new Color('#9ee04a');
+  // four greens, deep to yellow-lime, like a sunlit lawn
+  const tones = ['#3a901c', '#5db62c', '#8fd640', '#c4ec5e'].map((h) => new Color(h));
   const c = new Color();
+  // blades grow in clumps: each clump is a centre on the cap, its blades scattered round it
+  const clump = new Vector3();
+  let clumpLeft = 0;
+  const tangentA = new Vector3();
+  const tangentB = new Vector3();
   const CAP = (capDeg * Math.PI) / 180; // a cap of blades around `axis`
   const cosCap = Math.cos(CAP);
   const toAxis = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), axis);
@@ -744,15 +754,25 @@ function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg, sample) {
     if (sample) {
       h = sample(pos, dir); // a hand-placed tuft: the sampler gives the spot, the up direction and the height
     } else {
-      dir.set(st * Math.cos(ph), ct, st * Math.sin(ph)).applyQuaternion(toAxis);
+      if (clumpLeft <= 0) {
+        clump.set(st * Math.cos(ph), ct, st * Math.sin(ph)).applyQuaternion(toAxis);
+        clumpLeft = 6 + Math.floor(Math.random() * 12);
+      }
+      clumpLeft--;
+      tangentA.set(0, 1, 0).cross(clump).normalize();
+      tangentB.copy(clump).cross(tangentA);
+      const rr = Math.sqrt(Math.random()) * 0.011;
+      const aa = Math.random() * Math.PI * 2;
+      dir.copy(clump).addScaledVector(tangentA, Math.cos(aa) * rr).addScaledVector(tangentB, Math.sin(aa) * rr).normalize();
       pos.copy(dir).multiplyScalar(R + hills(dir.x, dir.y, dir.z)).add(center);
-      h = 0.026 + Math.random() * 0.026;
+      h = 0.03 + Math.random() * 0.034;
     }
     q.setFromUnitVectors(up, dir).multiply(yaw.setFromAxisAngle(up, Math.random() * Math.PI * 2));
-    sc.set(0.0012 + Math.random() * 0.001, h, 1);
+    sc.set(0.0016 + Math.random() * 0.0016, h, 1);
     m4.compose(pos, q, sc);
     mesh.setMatrixAt(n, m4);
-    mesh.setColorAt(n, c.copy(deep).lerp(light, Math.random() * 0.85));
+    const t = Math.random() * 3;
+    mesh.setColorAt(n, c.copy(tones[Math.floor(t)]).lerp(tones[Math.min(3, Math.floor(t) + 1)], t % 1));
     n++;
   }
   mesh.count = n;
@@ -816,15 +836,17 @@ function makeTurf(R, offsetY, layers, crateInv, aboutInv) {
         vec3 q = vSurf * 300.0; // strands about two pixels wide: finer ones alias into ripples
         vec3 cell = floor(q);
         float r = hash13(cell);
-        float h = 0.35 + 0.65 * r;
+        // tufts: strands are taller in clumps and shorter between them, so the turf is bumpy, not flat
+        float tuft = 0.62 + 0.38 * sin(vSurf.x * 41.0 + sin(vSurf.z * 37.0) * 2.0) * sin(vSurf.z * 43.0 - vSurf.x * 13.0);
+        float h = (0.35 + 0.65 * r) * tuft;
         if (uT > h) discard;
         // each strand sits at its own random spot in its cell, so no rows or rings ever line up
         vec3 jit = vec3(hash13(cell + 1.7), hash13(cell + 3.1), hash13(cell + 5.3)) - 0.5;
         vec3 lp = fract(q) - 0.5 - jit * 0.55;
         if (length(lp) > 0.7 * (1.0 - uT / h) + 0.08) discard;
         float k = uT / h;
-        vec3 root = vec3(0.03, 0.16, 0.012);
-        vec3 tip = mix(vec3(0.16, 0.66, 0.03), vec3(0.32, 0.80, 0.05), hash13(cell + 7.0));
+        vec3 root = vec3(0.05, 0.22, 0.016);
+        vec3 tip = mix(vec3(0.24, 0.78, 0.03), vec3(0.52, 0.90, 0.07), hash13(cell + 7.0));
         // broad light and dark patches across the field, as in a real lawn
         float lawn = 0.8 + 0.28 * sin(vSurf.x * 6.3 + sin(vSurf.z * 4.1) * 1.7) * sin(vSurf.z * 5.2 - vSurf.x * 2.3);
         diffuseColor.rgb = mix(root, tip * lawn, smoothstep(0.0, 1.0, k)) * (0.6 + 0.4 * uT);
@@ -846,4 +868,95 @@ function makeTurf(R, offsetY, layers, crateInv, aboutInv) {
       meshes.forEach((m) => m.material.dispose());
     },
   };
+}
+
+// Stones and daisies scattered over the planet, as in the owner's reference: a few smooth pale
+// pebbles half-sunk in the grass, and small white daisies with yellow centres standing just above
+// it. Kept clear of the crate's spot and the About camera's spot.
+function makeDetails(center, R) {
+  const group = new Group();
+  const dir = new Vector3();
+  const about = new Vector3(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z);
+  const up = new Vector3(0, 1, 0);
+  // a random spot on a cap of `deg` degrees round `axis`, avoiding the two busy spots
+  const spot = (axis, deg) => {
+    const q = new Quaternion().setFromUnitVectors(up, axis);
+    for (let k = 0; k < 40; k++) {
+      const ct = 1 - Math.random() * (1 - Math.cos((deg * Math.PI) / 180));
+      const st = Math.sqrt(1 - ct * ct);
+      const ph = Math.random() * Math.PI * 2;
+      dir.set(st * Math.cos(ph), ct, st * Math.sin(ph)).applyQuaternion(q);
+      if (dir.y > 0.85 && Math.abs(dir.x) < 0.34 && Math.abs(dir.z) < 0.28) continue; // the crate
+      if (dir.angleTo(about) < 0.42) continue; // the camera and its prints
+      return dir.clone();
+    }
+    return null;
+  };
+  const place = (o, d, lift) => {
+    o.position.copy(d).multiplyScalar(R + hills(d.x, d.y, d.z) + lift).add(center);
+    o.quaternion.setFromUnitVectors(up, d);
+  };
+
+  // pebbles: a squashed, softly dented sphere each
+  const stoneMat = new MeshStandardMaterial({ color: 0xa9a499, roughness: 0.9, metalness: 0 });
+  for (let k = 0; k < 9; k++) {
+    const d = spot(k < 6 ? up : about, k < 6 ? 55 : 40);
+    if (!d) continue;
+    const g = new IcosahedronGeometry(1, 3);
+    const p = g.attributes.position;
+    const seed = Math.random() * 10;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      const n = 1 + 0.08 * Math.sin(x * 3.1 + seed) * Math.sin(y * 2.7 - seed) + 0.05 * Math.sin(z * 5.3 + seed * 2);
+      p.setXYZ(i, x * n, y * n, z * n);
+    }
+    g.computeVertexNormals();
+    const size = 0.025 + Math.random() * 0.035;
+    const m = new Mesh(g, stoneMat);
+    m.scale.set(size * (1 + Math.random() * 0.5), size * 0.55, size);
+    place(m, d, -size * 0.12); // half-sunk
+    m.rotateY(Math.random() * Math.PI);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    group.add(m);
+  }
+
+  // daisies: eight petals and a yellow heart, on a short stalk just above the grass tips
+  const petals = [];
+  for (let k = 0; k < 8; k++) {
+    const pg = new CircleGeometry(1, 10);
+    pg.scale(0.22, 1, 1);
+    pg.translate(0, 0.62, 0);
+    pg.rotateZ((k / 8) * Math.PI * 2);
+    petals.push(pg);
+  }
+  const petalGeo = mergeGeometries(petals);
+  petalGeo.rotateX(-Math.PI / 2);
+  const heartGeo = new SphereGeometry(0.3, 10, 6);
+  heartGeo.scale(1, 0.5, 1);
+  const N = 160;
+  const petalMesh = new InstancedMesh(petalGeo, new MeshLambertMaterial({ color: 0xfbfaf4, side: DoubleSide }), N);
+  const heartMesh = new InstancedMesh(heartGeo, new MeshLambertMaterial({ color: 0xf2c230 }), N);
+  const o = new Group();
+  let n = 0;
+  for (let k = 0; k < N; k++) {
+    const d = spot(k < 115 ? up : about, k < 115 ? 70 : 45);
+    if (!d) continue;
+    place(o, d, 0.034 + Math.random() * 0.012);
+    o.rotateY(Math.random() * Math.PI * 2);
+    o.rotateX((Math.random() - 0.5) * 0.5);
+    o.scale.setScalar(0.006 + Math.random() * 0.004);
+    o.updateMatrix();
+    petalMesh.setMatrixAt(n, o.matrix);
+    heartMesh.setMatrixAt(n, o.matrix);
+    n++;
+  }
+  petalMesh.count = heartMesh.count = n;
+  for (const m of [petalMesh, heartMesh]) {
+    m.instanceMatrix.needsUpdate = true;
+    m.receiveShadow = true;
+    m.frustumCulled = false;
+    group.add(m);
+  }
+  return group;
 }
