@@ -16,6 +16,7 @@ import Tracker from './pages/Tracker.jsx';
 import Access from './pages/Access.jsx';
 import DesignIndex from './pages/DesignIndex.jsx';
 import DesignHome from './pages/DesignHome.jsx';
+import DesignCase from './pages/DesignCase.jsx';
 import DesignDetail from './pages/DesignDetail.jsx';
 import { api } from './lib/api.js';
 
@@ -78,6 +79,14 @@ export default function App() {
   // The design front door is a full-screen page of its own: no site header, footer, splash or banners.
   if (pathname === '/design' || pathname === '/design/') {
     return <DesignHome />;
+  }
+  // case studies get the same standalone look: cover, sticky index, image-led column
+  if (pathname.startsWith('/design/') && !pathname.startsWith('/design/all') && !/\.\w+$/.test(pathname)) {
+    return (
+      <Routes>
+        <Route path="/design/:slug" element={<DesignCase />} />
+      </Routes>
+    );
   }
 
   return (
