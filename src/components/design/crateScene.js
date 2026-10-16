@@ -35,8 +35,34 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { World, Body, Box, Sphere as CSphere, Vec3, Material as CMaterial, ContactMaterial } from 'cannon-es';
 
 const BASE = '/design/home/';
+
+// Rolling hills over the planet: height above the sphere for a unit direction, in metres.
+// Flat where the crate lands, so it sits level. Used by the planet, the turf and the blades alike.
+function hills(x, y, z) {
+  let h =
+    0.034 * Math.sin(x * 9.0 + 1.3) * Math.cos(z * 8.0 - 0.4) +
+    0.022 * Math.sin(x * 15.0 + z * 11.0 + 0.7) * Math.sin(z * 14.0 - x * 6.0) +
+    0.012 * Math.sin(x * 29.0 - z * 23.0) * Math.cos(x * 21.0 + z * 27.0 + y * 9.0);
+  h = 0.03 + h;
+  const c = Math.hypot(x / 0.3, z / 0.23);
+  const t = Math.min(1, Math.max(0, (c - 1) / 0.9));
+  return h * t * t * (3 - 2 * t);
+}
+function hillySphere(R, ws, hs, thetaLength) {
+  const g = new SphereGeometry(R, ws, hs, 0, Math.PI * 2, 0, thetaLength);
+  const p = g.attributes.position;
+  const d = new Vector3();
+  for (let i = 0; i < p.count; i++) {
+    d.set(p.getX(i), p.getY(i), p.getZ(i)).normalize();
+    d.multiplyScalar(R + hills(d.x, d.y, d.z));
+    p.setXYZ(i, d.x, d.y, d.z);
+  }
+  g.computeVertexNormals();
+  return g;
+}
 // Same pop as the Blender stills: up 10 cm, 2 cm toward the viewer, a 9° lean back,
 // and the cover card slides 7.5 cm out of its folder.
 const LIFT = 0.1;
@@ -95,16 +121,21 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
   const fine = window.matchMedia('(pointer: fine)').matches;
   // the bare planet: dark soil-green, only seen at the very roots
-  const planet = new Mesh(new SphereGeometry(R, 160, 120), new MeshLambertMaterial({ color: 0x1e3a12 }));
+  const planet = new Mesh(hillySphere(R, 220, 120, (110 * Math.PI) / 180), new MeshLambertMaterial({ color: 0x1f5a14 }));
   planet.position.y = -R + 0.012; // the crate settles a little into the grass
   planet.receiveShadow = true;
-  rig.add(planet);
+  // planet, turf and blades share one group pivoting on the planet's top (where the crate sits),
+  // so the Work view can shrink the planet into a small world and leave white space for text
+  const ground = new Group();
+  rig.add(ground);
+  ground.add(planet);
   // lush turf over the whole visible planet, right up to the crate's walls
-  const turf = makeTurf(R, planet.position.y, fine ? 18 : 10);
-  for (const m of turf.meshes) rig.add(m);
+  const crateInv = { value: new Matrix4() }; // rig space -> crate space, to hide grass inside the crate only
+  const turf = makeTurf(R, planet.position.y, fine ? 24 : 12, crateInv);
+  for (const m of turf.meshes) ground.add(m);
   // longer wispy blades on top, for the silhouette the reference has
-  const grass = makeGrass(planet.position, R, fine ? 30000 : 9000);
-  rig.add(grass.mesh);
+  const grass = makeGrass(planet.position, R, fine ? 48000 : 14000, crateInv);
+  ground.add(grass.mesh);
 
 
   scene.add(rig);
@@ -197,62 +228,79 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   let settled = false;
   let raf = 0;
   let last = 0;
-  let drop = { t: -1, h: 0, landed: false }; // the fall from above the window
-  const DROP_MS = 1050;
-
-  const axisZ = new Vector3(0, 0, 1);
-  const tiltZ = new Quaternion();
-  const G = 5; // softer than real gravity: at this scale 9.8 is over before the eye catches it
-  // Throw every folder up out of the crate; each gets its own speed and spin, like loose files.
-  const kick = (power) => {
-    folders.forEach((F, i) => {
-      if (!F) return;
-      const r = Math.sin(i * 12.9898 + power * 78.233) * 43758.5453;
-      const rnd = r - Math.floor(r); // a fixed pseudo-random 0..1 per folder
-      F.vy = power * (1.1 + 0.45 * rnd); // 12-24 cm out of the crate
-      F.wx = power * (rnd > 0.5 ? 1 : -1) * (2.2 + 2.4 * rnd);
-      F.wz = power * (i % 2 ? 1 : -1) * (1.4 + 1.6 * rnd);
-    });
-  };
-  // One physics step: gravity, a bounce off the crate floor that loses most of its energy,
-  // and a damped spring that rights the tilt.
-  const physics = (F, dt) => {
-    F.vy -= G * dt;
-    F.py += F.vy * dt;
-    if (F.py <= 0) {
-      F.py = 0;
-      F.vy = F.vy < -0.25 ? -F.vy * 0.32 : 0;
-      F.wx += F.vy ? (F.rx > 0 ? -1 : 1) * 0.6 : 0; // landing knocks the tilt a little
+  // ---------------------------------------------------------------- physics
+  // A real rigid-body simulation (cannon-es), in the rig's own space: the planet is a solid
+  // sphere, the crate a solid box (floor and four walls), each folder its own thin body. The
+  // crate falls from above the window, lands, and the folders bounce off its floor and walls and
+  // each other, ending up a little messy inside it.
+  // Scrolling to the Work pose blends everything from where the simulation left it to the tidy row.
+  const world = new World({ gravity: new Vec3(0, -4, 0), allowSleep: true }); // floaty enough to read
+  world.solver.iterations = 16;
+  const mGround = new CMaterial('ground');
+  const mCrate = new CMaterial('crate');
+  const mFolder = new CMaterial('folder');
+  world.addContactMaterial(new ContactMaterial(mGround, mCrate, { friction: 0.8, restitution: 0.15 }));
+  world.addContactMaterial(new ContactMaterial(mCrate, mFolder, { friction: 0.45, restitution: 0.18 }));
+  world.addContactMaterial(new ContactMaterial(mFolder, mFolder, { friction: 0.25, restitution: 0.2 }));
+  const planetBody = new Body({ mass: 0, material: mGround, shape: new CSphere(R) });
+  planetBody.position.set(0, -R, 0); // its top at the crate's floor
+  world.addBody(planetBody);
+  const CW = 0.44, CD = 0.31, CH = 0.205, CT = 0.017; // the crate, as built in build.py
+  const WALL = CH;
+  // The crate itself always lands the same clean way: straight down, level, centred. It can only
+  // move up and down (a bounce); only the folders inside are free to scatter.
+  const crateBody = new Body({ mass: 3, material: mCrate, angularDamping: 0.4 });
+  crateBody.linearFactor.set(0, 1, 0);
+  crateBody.angularFactor.set(0, 0, 0);
+  crateBody.addShape(new Box(new Vec3(CW / 2, CT / 2, CD / 2)), new Vec3(0, CT / 2, 0));
+  for (const z of [CD / 2 - CT / 2, -(CD / 2 - CT / 2)]) crateBody.addShape(new Box(new Vec3(CW / 2, WALL / 2, CT / 2)), new Vec3(0, WALL / 2, z));
+  for (const x of [CW / 2 - CT / 2, -(CW / 2 - CT / 2)]) crateBody.addShape(new Box(new Vec3(CT / 2, WALL / 2, CD / 2)), new Vec3(x, WALL / 2, 0));
+  world.addBody(crateBody);
+  for (const F of folders) {
+    if (!F) continue;
+    F.body = new Body({ mass: 0.15, material: mFolder, linearDamping: 0.04, angularDamping: 0.3 });
+    F.body.addShape(new Box(new Vec3(0.186, 0.1325, 0.0065)), new Vec3(0, 0.1325, 0)); // origin at its foot, like the model
+    world.addBody(F.body);
+  }
+  let drop = { t: -1, started: false, landed: false };
+  crateBody.addEventListener('collide', (ev) => {
+    if (ev.body !== planetBody || drop.landed) return;
+    drop.landed = true;
+    const t = performance.now() / 1000;
+    grass.impact(t);
+    turf.impact(t);
+    // the jolt: a small extra hop and twist for each folder, so they settle a little messy
+    for (const F of folders) {
+      if (!F) continue;
+      F.body.wakeUp();
+      F.body.velocity.y += 0.08 + Math.random() * 0.17;
+      F.body.angularVelocity.set((Math.random() * 2 - 1) * 0.9, (Math.random() * 2 - 1) * 0.35, (Math.random() * 2 - 1) * 0.6);
     }
-    // in the air a folder tumbles freely; back in its slot the crate walls snap it upright
-    const air = F.py > 0;
-    for (const [a, w] of [['rx', 'wx'], ['rz', 'wz']]) {
-      F[w] += ((air ? -22 : -150) * F[a] - (air ? 1.2 : 7) * F[w]) * dt;
-      F[a] += F[w] * dt;
-    }
-    return F.py > 0 || Math.abs(F.vy) > 1e-3 || Math.abs(F.rx) + Math.abs(F.wx) + Math.abs(F.rz) + Math.abs(F.wz) > 1e-3;
+  });
+  const v3 = new Vector3();
+  const q3 = new Quaternion();
+  const invQ = new Quaternion();
+  const ident = new Quaternion();
+  const zero = new Vector3();
+  // where folder F sits relative to the crate in the simulation, in the crate's own space
+  const simLocal = (F, outP, outQ) => {
+    invQ.set(crateBody.quaternion.x, crateBody.quaternion.y, crateBody.quaternion.z, crateBody.quaternion.w).invert();
+    outP.set(F.body.position.x - crateBody.position.x, F.body.position.y - crateBody.position.y, F.body.position.z - crateBody.position.z).applyQuaternion(invQ);
+    outQ.set(F.body.quaternion.x, F.body.quaternion.y, F.body.quaternion.z, F.body.quaternion.w).premultiply(invQ);
   };
-  // Scatter: after each landing every folder settles a little out of place (higher, leaning,
-  // shifted, twisted), different every time. Scrolling to the Work pose tidies them up.
-  const axisY = new Vector3(0, 1, 0);
-  const twist = new Quaternion();
-  let messIn = 0; // 0 before the first landing, eases to 1 as the folders come down scattered
-  const scatter = () =>
-    folders.forEach((F) => {
-      if (!F) return;
-      const r = () => Math.random() * 2 - 1;
-      F.mess = { x: r() * 0.014, y: Math.random() * 0.045, rx: r() * 0.12, rz: r() * 0.1, ry: r() * 0.07 };
-    });
-  const apply = (F, m) => {
+  const apply = (F, tidy) => {
     const e = F.f;
-    const M = F.mess || { x: 0, y: 0, rx: 0, rz: 0, ry: 0 };
-    F.root.position.set(F.pos.x + M.x * m, F.pos.y + LIFT * e + F.py + M.y * m, F.pos.z + FORWARD * e);
-    // the crate walls hold a folder upright until it is clear of the rim, then it may tumble
-    const out = Math.min(1, F.py / 0.13);
-    lean.setFromAxisAngle(axisX, LEAN * e + F.rx * out + M.rx * m);
-    F.root.quaternion.copy(F.quat).multiply(lean);
-    F.root.quaternion.multiply(tiltZ.setFromAxisAngle(axisZ, F.rz * out + M.rz * m));
-    if (M.ry) F.root.quaternion.multiply(twist.setFromAxisAngle(axisY, M.ry * m));
+    if (drop.started && tidy < 1) {
+      simLocal(F, v3, q3);
+      F.root.position.lerpVectors(v3, F.pos, tidy);
+      F.root.quaternion.slerpQuaternions(q3, F.quat, tidy);
+    } else {
+      F.root.position.copy(F.pos);
+      F.root.quaternion.copy(F.quat);
+    }
+    F.root.position.y += LIFT * e;
+    F.root.position.z += FORWARD * e;
+    F.root.quaternion.multiply(lean.setFromAxisAngle(axisX, LEAN * e));
     for (const L of F.lift) L.o.position.y = L.y + CARD_OUT * e;
   };
 
@@ -263,14 +311,9 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     rig.position.copy(camDown).multiplyScalar(down);
     rig.rotation.y = TURN * (1 - e);
     rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
+    ground.scale.setScalar(1 - 0.45 * e); // the Work view: a small planet, white all round it
     key.position.copy(rig.position).add(keyOff);
     key.target.position.copy(rig.position);
-  };
-  // Fall: accelerate down (gravity), land at 62%, one small bounce, settle.
-  const fall = (p) => {
-    if (p < 0.62) return 1 - (p / 0.62) ** 2;
-    const b = (p - 0.62) / 0.38;
-    return Math.sin(b * Math.PI) * 0.07 * (1 - b);
   };
   const readScroll = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -282,7 +325,6 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     el.style.pointerEvents = now ? 'auto' : 'none';
     if (now && !arrived) {
       arrived = true;
-      if (!reducedMotion) kick(0.35); // a light jostle as it settles in the Work pose
       setTimeout(() => onIntroDone?.(), reducedMotion ? 0 : 450);
     }
     if (!now) {
@@ -303,37 +345,27 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     arrive(progress > 0.985);
 
     if (drop.t >= 0 && now >= drop.t) {
-      const p = Math.min(1, (now - drop.t) / DROP_MS);
-      const y = fall(p);
-      body.position.y = drop.h * y;
-      if (!drop.landed && p >= 0.62) {
-        drop.landed = true;
-        grass.impact(now / 1000);
-        turf.impact(now / 1000);
-        scatter();
-        kick(1);
-      }
-      if (p < 1) moving = true;
-      else drop.t = -2;
-    } else if (drop.t >= 0) moving = true; // waiting for the headline to finish
-
-    // the scatter fades in as the folders land, and fades out as the scroll reaches the Work pose
-    if (drop.landed && messIn < 1) {
-      messIn = Math.min(1, messIn + dt / 450);
-      moving = true;
+      drop.started = true;
+      world.step(1 / 180, dt / 1000, 10);
     }
-    const mess = messIn * (1 - ease(progress));
+    if (drop.t >= 0) moving = true; // waiting for the headline, or simulating
+    const tidy = reducedMotion || !drop.started ? 1 : ease(progress);
+    if (drop.started && tidy < 1) {
+      body.position.lerpVectors(v3.set(crateBody.position.x, crateBody.position.y, crateBody.position.z), zero, tidy);
+      body.quaternion.slerpQuaternions(q3.set(crateBody.quaternion.x, crateBody.quaternion.y, crateBody.quaternion.z, crateBody.quaternion.w), ident, tidy);
+    } else if (drop.started || drop.t < 0) {
+      body.position.set(0, 0, 0);
+      body.quaternion.identity();
+    }
     const k = 1 - Math.exp(-dt / 70);
     for (const F of folders) {
       if (!F) continue;
-      // fixed small steps, so the bounces look the same at any frame rate
-      for (let n = Math.ceil(dt / 8), h = dt / 1000 / n; n > 0; n--) if (physics(F, h)) moving = true;
       const d = F.want - F.f;
       if (Math.abs(d) > 0.001) {
         F.f += d * k;
         moving = true;
       } else F.f = F.want;
-      apply(F, mess);
+      apply(F, tidy);
     }
     // the wind never stops, so the scene keeps drawing while the page is visible
     if (!reducedMotion) {
@@ -341,6 +373,9 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       turf.tick(now / 1000);
       moving = true;
     }
+    body.updateMatrix();
+    ground.updateMatrix();
+    crateInv.value.copy(body.matrix).invert().multiply(ground.matrix); // ground space -> crate space
     renderer.render(scene, camera);
     if (moving) wake();
     else last = 0;
@@ -412,11 +447,25 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     },
     // The crate falls in from above the window at `at` (a performance.now() time).
     playDrop(at) {
-      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, get drop() { return drop; }, get folders() { return folders; } };
+      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; } };
       if (reducedMotion) return wake();
-      // high enough that the crate starts fully above the window, whatever the pose
-      drop = { t: at, h: ((window.innerHeight + land.size) * u) / 0.78, landed: false };
-      body.position.y = drop.h;
+      // start fully above the window, level, everything at rest
+      const h = (window.innerHeight + land.size) * u / 0.78 / 1.25;
+      crateBody.position.set(0, h, 0);
+      crateBody.quaternion.set(0, 0, 0, 1);
+      crateBody.velocity.setZero();
+      crateBody.angularVelocity.setZero();
+      for (const F of folders) {
+        if (!F) continue;
+        v3.copy(F.pos).applyQuaternion(q3.set(crateBody.quaternion.x, crateBody.quaternion.y, crateBody.quaternion.z, crateBody.quaternion.w));
+        F.body.position.set(v3.x + crateBody.position.x, v3.y + crateBody.position.y, v3.z + crateBody.position.z);
+        const fq = q3.clone().multiply(F.quat);
+        F.body.quaternion.set(fq.x, fq.y, fq.z, fq.w);
+        F.body.velocity.setZero();
+        F.body.angularVelocity.setZero();
+      }
+      drop = { t: at, started: false, landed: false };
+      body.position.set(0, h, 0); // hidden above until it starts
       wake();
     },
     // where folder i's cover card is on screen right now, as 4 points in viewport px
@@ -474,7 +523,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
 // Grass blades: one instanced, tapered strip per blade, standing out of the planet's top cap,
 // thinning toward the cap's edge and none under the crate. Wind and the landing shockwave bend each
 // blade in the vertex shader (more at the tip), so thousands of blades cost one draw call.
-function makeGrass(center, R, count) {
+function makeGrass(center, R, count, crateInv) {
   const blade = new PlaneGeometry(1, 1, 1, 4);
   blade.translate(0, 0.5, 0);
   const p = blade.attributes.position;
@@ -482,28 +531,32 @@ function makeGrass(center, R, count) {
   const uniforms = { uTime: { value: 0 }, uImpact: { value: new Vector4(0, 0, -100, 0) } };
   const mat = new MeshLambertMaterial({ side: DoubleSide });
   mat.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, uniforms);
+    Object.assign(sh.uniforms, uniforms, { uCrateInv: crateInv });
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform vec4 uImpact;\nvarying float vH;')
+      .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform vec4 uImpact;\nvarying float vH;\nvarying vec3 vRig;')
       .replace(
         '#include <begin_vertex>',
         `#include <begin_vertex>
         vH = position.y;
         vec3 root = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
         float k = position.y * position.y;
-        float gust = sin(uTime * 1.3 + root.x * 2.1 + root.z * 1.4);
-        float sway = gust * 0.7 + sin(uTime * 2.9 + root.x * 5.3 - root.z * 4.1) * 0.3;
-        vec2 push = vec2(0.9, 0.35) * sway;
+        // each blade arcs over in its own direction, and the same rolling wind waves bend it
+        float bh = length(instanceMatrix[1].xyz);
+        float wave = sin(dot(root.xz, vec2(0.8, 0.6)) * 7.0 - uTime * 1.5) * 0.5 + 0.5;
+        vec2 bdir = normalize(vec2(fract(sin(dot(root.xz, vec2(12.9898, 78.233))) * 43758.5453) - 0.5, fract(sin(dot(root.xz, vec2(39.35, 11.13))) * 24634.63) - 0.5) + 1e-4);
+        vec2 push = bdir * 0.45 + vec2(0.8, 0.6) * (0.15 + 0.55 * wave) + vec2(sin(uTime * 3.1 + root.x * 13.0), sin(uTime * 2.7 + root.z * 11.0)) * 0.06;
         vec2 d = root.xz - uImpact.xy;
         float dist = length(d);
         float age = uTime - uImpact.z;
         float ring = age > 0.0 ? exp(-pow((dist - age * 0.9) / 0.09, 2.0)) * exp(-age * 1.6) * uImpact.w : 0.0;
-        push += (d / max(dist, 1e-4)) * ring * 5.0;
-        transformed += inverse(mat3(instanceMatrix)) * vec3(push.x, 0.0, push.y) * k * 0.008;`
+        push += (d / max(dist, 1e-4)) * ring * 1.2;
+        transformed += inverse(mat3(instanceMatrix)) * vec3(push.x, 0.0, push.y) * k * bh;
+        transformed.y -= k * length(push) * 0.3; // a bent blade droops instead of stretching
+        vRig = (instanceMatrix * vec4(transformed, 1.0)).xyz;`
       );
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vH;')
-      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= mix(0.45, 1.1, vH);');
+      .replace('#include <common>', '#include <common>\nvarying float vH;\nvarying vec3 vRig;\nuniform mat4 uCrateInv;')
+      .replace('#include <color_fragment>', '#include <color_fragment>\nvec3 cl = (uCrateInv * vec4(vRig, 1.0)).xyz;\nif (abs(cl.x) < 0.218 && abs(cl.z) < 0.153 && cl.y > -0.06 && cl.y < 0.21) discard;\ndiffuseColor.rgb *= mix(0.45, 1.1, vH);');
   };
 
   const mesh = new InstancedMesh(blade, mat, count);
@@ -516,8 +569,8 @@ function makeGrass(center, R, count) {
   const yaw = new Quaternion();
   const sc = new Vector3();
   const up = new Vector3(0, 1, 0);
-  const deep = new Color('#3d7a1c');
-  const light = new Color('#b5dc5c');
+  const deep = new Color('#3c9a1e');
+  const light = new Color('#9ee04a');
   const c = new Color();
   const CAP = (80 * Math.PI) / 180; // blades over everything the camera can see of the planet
   const cosCap = Math.cos(CAP);
@@ -528,11 +581,10 @@ function makeGrass(center, R, count) {
     const st = Math.sqrt(1 - ct * ct);
     const ph = Math.random() * Math.PI * 2;
     dir.set(st * Math.cos(ph), ct, st * Math.sin(ph));
-    pos.copy(dir).multiplyScalar(R).add(center);
-    if (Math.abs(pos.x) < 0.22 && Math.abs(pos.z) < 0.155) continue; // inside the crate's footprint only
-    const h = 0.028 + Math.random() * 0.03;
+    pos.copy(dir).multiplyScalar(R + hills(dir.x, dir.y, dir.z)).add(center);
+    const h = 0.026 + Math.random() * 0.026;
     q.setFromUnitVectors(up, dir).multiply(yaw.setFromAxisAngle(up, Math.random() * Math.PI * 2));
-    sc.set(0.0016 + Math.random() * 0.0014, h, 1);
+    sc.set(0.0012 + Math.random() * 0.001, h, 1);
     m4.compose(pos, q, sc);
     mesh.setMatrixAt(n, m4);
     mesh.setColorAt(n, c.copy(deep).lerp(light, Math.random() * 0.85));
@@ -556,24 +608,27 @@ function makeGrass(center, R, count) {
 // the fragments where a strand of grass reaches that height (a hash per tiny cell of the
 // surface), so stacked together they read as dense, soft grass: dark at the roots, lime at the
 // tips. Wind and the landing ring lean the upper shells. One sphere per shell, shared geometry.
-function makeTurf(R, offsetY, layers) {
-  const H = 0.03; // grass height, metres
-  const geo = new SphereGeometry(R, 200, 110, 0, Math.PI * 2, 0, (100 * Math.PI) / 180);
+function makeTurf(R, offsetY, layers, crateInv) {
+  const H = 0.036; // grass height, metres
+  const geo = hillySphere(R, 240, 130, (100 * Math.PI) / 180);
   const shared = { uTime: { value: 0 }, uImpact: { value: new Vector4(0, 0, -100, 0) } };
   const meshes = [];
   for (let i = 1; i <= layers; i++) {
     const t = i / layers;
     const mat = new MeshLambertMaterial({ color: 0xffffff });
     mat.onBeforeCompile = (sh) => {
-      Object.assign(sh.uniforms, shared, { uT: { value: t } });
-      const head = `uniform float uT;\nuniform float uTime;\nuniform vec4 uImpact;\nvarying vec3 vSurf;\nvarying vec3 vRig;`;
+      Object.assign(sh.uniforms, shared, { uT: { value: t }, uCrateInv: crateInv });
+      const head = `uniform float uT;\nuniform float uTime;\nuniform vec4 uImpact;\nuniform mat4 uCrateInv;\nvarying vec3 vSurf;\nvarying vec3 vRig;\nvarying float vWave;`;
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + head).replace(
         '#include <begin_vertex>',
         `#include <begin_vertex>
         vSurf = normalize(position) * ${R.toFixed(3)};
         vec3 nrm = normalize(position);
         transformed += nrm * uT * ${H};
-        vec3 w = vec3(sin(uTime * 1.3 + vSurf.x * 2.1 + vSurf.z * 1.4), 0.0, sin(uTime * 1.05 + vSurf.z * 2.3 - vSurf.x * 0.7)) * 0.55;
+        // wind as slow waves rolling across the field, plus a light flutter
+        float wave = sin(dot(vSurf.xz, vec2(0.8, 0.6)) * 7.0 - uTime * 1.5) * 0.5 + 0.5;
+        vWave = wave;
+        vec3 w = vec3(0.8, 0.0, 0.6) * (0.2 + 0.8 * wave) + vec3(sin(uTime * 2.3 + vSurf.x * 9.0), 0.0, sin(uTime * 2.0 + vSurf.z * 8.0)) * 0.1;
         vec3 rp = transformed + vec3(0.0, ${offsetY.toFixed(4)}, 0.0);
         vec2 d = rp.xz - uImpact.xy;
         float dist = length(d);
@@ -588,22 +643,25 @@ function makeTurf(R, offsetY, layers) {
         float hash13(vec3 p) { p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }`).replace(
         '#include <color_fragment>',
         `#include <color_fragment>
-        // no grass inside the crate itself (its floor sits just below the tips)
-        if (abs(vRig.x) < 0.218 && abs(vRig.z) < 0.153 && vRig.y > -0.01) discard;
-        // a warped grid, so the strands never line up into rings
-        vec3 q = vSurf * 340.0 + vec3(sin(vSurf.y * 37.0 + vSurf.z * 11.0), sin(vSurf.z * 41.0 - vSurf.x * 13.0), sin(vSurf.x * 43.0 + vSurf.y * 17.0)) * 2.3;
+        // grass everywhere, even where the crate will land; only hidden inside the crate itself
+        vec3 cl = (uCrateInv * vec4(vRig, 1.0)).xyz;
+        if (abs(cl.x) < 0.218 && abs(cl.z) < 0.153 && cl.y > -0.06 && cl.y < 0.21) discard;
+        vec3 q = vSurf * 300.0; // strands about two pixels wide: finer ones alias into ripples
         vec3 cell = floor(q);
         float r = hash13(cell);
         float h = 0.35 + 0.65 * r;
         if (uT > h) discard;
-        vec3 lp = fract(q) - 0.5;
-        if (length(lp) > 0.62 * (1.0 - uT / h) + 0.06) discard;
+        // each strand sits at its own random spot in its cell, so no rows or rings ever line up
+        vec3 jit = vec3(hash13(cell + 1.7), hash13(cell + 3.1), hash13(cell + 5.3)) - 0.5;
+        vec3 lp = fract(q) - 0.5 - jit * 0.55;
+        if (length(lp) > 0.7 * (1.0 - uT / h) + 0.08) discard;
         float k = uT / h;
-        vec3 root = vec3(0.025, 0.075, 0.012);
-        vec3 tip = mix(vec3(0.20, 0.50, 0.04), vec3(0.42, 0.62, 0.08), hash13(cell + 7.0));
+        vec3 root = vec3(0.03, 0.16, 0.012);
+        vec3 tip = mix(vec3(0.16, 0.66, 0.03), vec3(0.32, 0.80, 0.05), hash13(cell + 7.0));
         // broad light and dark patches across the field, as in a real lawn
-        float patch = 0.8 + 0.28 * sin(vSurf.x * 6.3 + sin(vSurf.z * 4.1) * 1.7) * sin(vSurf.z * 5.2 - vSurf.x * 2.3);
-        diffuseColor.rgb = mix(root, tip * patch, smoothstep(0.0, 1.0, k)) * (0.6 + 0.4 * uT);`
+        float lawn = 0.8 + 0.28 * sin(vSurf.x * 6.3 + sin(vSurf.z * 4.1) * 1.7) * sin(vSurf.z * 5.2 - vSurf.x * 2.3);
+        diffuseColor.rgb = mix(root, tip * lawn, smoothstep(0.0, 1.0, k)) * (0.6 + 0.4 * uT);
+        diffuseColor.rgb *= 0.93 + 0.17 * vWave * uT; // the sheen where a wave bends the grass`
       );
     };
     const m = new Mesh(geo, mat);
