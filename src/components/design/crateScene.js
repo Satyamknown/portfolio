@@ -67,14 +67,23 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   scene.add(new HemisphereLight(0xffffff, 0xcfd8e2, 0.5));
 
 
-  // Nothing under the crate but the page: a soft pre-blurred shadow image (public/design/home/shadow.png),
-  // cast away from the key light. Cheaper than a live shadow map on a full-window canvas.
-  const shadowTex = await new TextureLoader().loadAsync(BASE + 'shadow.png');
-  shadowTex.colorSpace = SRGBColorSpace;
-  const shadowMat = new MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 1, toneMapped: false });
-  const shadow = new Mesh(new PlaneGeometry(0.86, 0.72), shadowMat);
+  // The ground: a soft pool of floor slightly darker than the page (ground.png), and on it the
+  // crate's real shadow, baked in Blender with the same lights (build.py --shadow): a camera
+  // straight down at a shadow catcher, 1.4 m square centred under the crate. Baked, not a live
+  // shadow map, so the full-window canvas stays smooth.
+  const loader = new TextureLoader();
+  const [groundTex, shadowTex] = await Promise.all([loader.loadAsync(BASE + 'ground.png'), loader.loadAsync(BASE + 'ground-shadow.png')]);
+  for (const t of [groundTex, shadowTex]) t.colorSpace = SRGBColorSpace;
+  const flat = (map) => new MeshBasicMaterial({ map, transparent: true, depthWrite: false, toneMapped: false });
+  const ground = new Mesh(new PlaneGeometry(1.5, 1.5), flat(groundTex));
+  ground.rotation.x = -Math.PI / 2;
+  ground.renderOrder = -2;
+  rig.add(ground);
+  const shadowMat = flat(shadowTex);
+  const shadow = new Mesh(new PlaneGeometry(1.4, 1.4), shadowMat);
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.set(0.07, 0.001, -0.035);
+  shadow.position.y = 0.0005;
+  shadow.renderOrder = -1;
   rig.add(shadow);
 
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
@@ -415,6 +424,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', wake);
       shadowTex.dispose();
+      groundTex.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
       el.removeEventListener('pointerdown', onDown);
