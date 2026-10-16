@@ -13,12 +13,18 @@ import {
   OrthographicCamera,
   DirectionalLight,
   HemisphereLight,
-  Mesh,
   PlaneGeometry,
+  SphereGeometry,
+  BufferAttribute,
+  Mesh,
   MeshStandardMaterial,
-  ShadowMaterial,
+  MeshLambertMaterial,
+  InstancedMesh,
+  DoubleSide,
+  Vector4,
+  Matrix4,
+  Color,
   VSMShadowMap,
-  TextureLoader,
   PMREMGenerator,
   Raycaster,
   Vector2,
@@ -82,29 +88,36 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   scene.add(new HemisphereLight(0xffffff, 0xcfd8e2, 0.5));
 
 
-  // The ground: a real lit floor under the crate that takes the crate's real-time shadow, so the
-  // shadow follows the fall, the bouncing folders and the scroll. Its edge fades into the page
-  // (ground-mask.png is only an opacity mask; the shading comes from the lights).
-  const groundMask = await new TextureLoader().loadAsync(BASE + 'ground-mask.png');
-  const ground = new Mesh(
-    new PlaneGeometry(1.5, 1.5),
-    new MeshStandardMaterial({ color: 0xe6e3dc, roughness: 1, metalness: 0, alphaMap: groundMask, transparent: true, depthWrite: false })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  ground.renderOrder = -1;
-  rig.add(ground);
-  // The same real-time shadow again, on a shadow-only layer just above the floor, to deepen it.
-  const deepen = new Mesh(new PlaneGeometry(1.5, 1.5), new ShadowMaterial({ opacity: 0.22, alphaMap: groundMask, transparent: true, depthWrite: false }));
-  deepen.rotation.x = -Math.PI / 2;
-  deepen.position.y = 0.0006;
-  deepen.receiveShadow = true;
-  deepen.renderOrder = -1;
-  rig.add(deepen);
-
+  // The ground: a big round grass planet the crate lands on, with live grass blades over its
+  // visible top. They sway in the wind and are flattened outward by the landing. The crate's
+  // real-time shadow falls on both.
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
   const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + 'crate.glb');
   draco.dispose();
+  const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
+  const sphere = new SphereGeometry(R, 160, 120);
+  {
+    // patchy turf colour, so the bare part of the planet reads as grass too, not plastic
+    const p = sphere.attributes.position;
+    const col = new Float32Array(p.count * 3);
+    const a = new Color('#2f561b');
+    const b = new Color('#4d7a27');
+    const t = new Color();
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i) * 9, y = p.getY(i) * 9, z = p.getZ(i) * 9;
+      const nz = Math.sin(x + Math.sin(z * 1.3)) * Math.sin(z - Math.cos(y * 1.7)) * 0.5 + Math.sin(x * 2.7 + y * 3.1 - z * 2.3) * 0.25;
+      t.copy(a).lerp(b, 0.5 + nz * 0.6);
+      col.set([t.r, t.g, t.b], i * 3);
+    }
+    sphere.setAttribute('color', new BufferAttribute(col, 3));
+  }
+  const planet = new Mesh(sphere, new MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 }));
+  planet.position.y = -R + 0.012; // the crate settles a little into the grass
+  planet.receiveShadow = true;
+  rig.add(planet);
+  const grass = makeGrass(planet.position, R, window.matchMedia('(pointer: fine)').matches ? 64000 : 22000);
+  rig.add(grass.mesh);
+
 
   scene.add(rig);
   const src = gltf.scene;
@@ -307,6 +320,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       body.position.y = drop.h * y;
       if (!drop.landed && p >= 0.62) {
         drop.landed = true;
+        grass.impact(now / 1000);
         scatter();
         kick(1);
       }
@@ -331,6 +345,11 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
         moving = true;
       } else F.f = F.want;
       apply(F, mess);
+    }
+    // the wind never stops, so the scene keeps drawing while the page is visible
+    if (!reducedMotion) {
+      grass.tick(now / 1000);
+      moving = true;
     }
     renderer.render(scene, camera);
     if (moving) wake();
@@ -441,7 +460,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', wake);
-      groundMask.dispose();
+      grass.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
       el.removeEventListener('pointerdown', onDown);
@@ -461,3 +480,85 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   };
 }
 
+// Grass blades: one instanced, tapered strip per blade, standing out of the planet's top cap,
+// thinning toward the cap's edge and none under the crate. Wind and the landing shockwave bend each
+// blade in the vertex shader (more at the tip), so thousands of blades cost one draw call.
+function makeGrass(center, R, count) {
+  const blade = new PlaneGeometry(1, 1, 1, 4);
+  blade.translate(0, 0.5, 0);
+  const p = blade.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setX(i, p.getX(i) * (1 - p.getY(i) * 0.92)); // taper to a point
+  const uniforms = { uTime: { value: 0 }, uImpact: { value: new Vector4(0, 0, -100, 0) } };
+  const mat = new MeshLambertMaterial({ side: DoubleSide });
+  mat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, uniforms);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform vec4 uImpact;\nvarying float vH;')
+      .replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+        vH = position.y;
+        vec3 root = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        float k = position.y * position.y;
+        float gust = sin(uTime * 1.3 + root.x * 2.1 + root.z * 1.4);
+        float sway = gust * 0.7 + sin(uTime * 2.9 + root.x * 5.3 - root.z * 4.1) * 0.3;
+        vec2 push = vec2(0.9, 0.35) * sway;
+        vec2 d = root.xz - uImpact.xy;
+        float dist = length(d);
+        float age = uTime - uImpact.z;
+        float ring = age > 0.0 ? exp(-pow((dist - age * 0.9) / 0.09, 2.0)) * exp(-age * 1.6) * uImpact.w : 0.0;
+        push += (d / max(dist, 1e-4)) * ring * 5.0;
+        transformed += inverse(mat3(instanceMatrix)) * vec3(push.x, 0.0, push.y) * k * 0.008;`
+      );
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vH;')
+      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= mix(0.38, 1.0, vH);');
+  };
+
+  const mesh = new InstancedMesh(blade, mat, count);
+  mesh.receiveShadow = true;
+  mesh.frustumCulled = false;
+  const pos = new Vector3();
+  const dir = new Vector3();
+  const m4 = new Matrix4();
+  const q = new Quaternion();
+  const yaw = new Quaternion();
+  const sc = new Vector3();
+  const up = new Vector3(0, 1, 0);
+  const deep = new Color('#24461a');
+  const light = new Color('#6c9a2c');
+  const c = new Color();
+  const CAP = (50 * Math.PI) / 180; // blades over the top 50 degrees, thinning out; the planet's own green beyond
+  const cosCap = Math.cos(CAP);
+  let n = 0;
+  for (let tries = 0; n < count && tries < count * 4; tries++) {
+    // uniform over the cap
+    const ct = 1 - Math.random() * (1 - cosCap);
+    const st = Math.sqrt(1 - ct * ct);
+    const ph = Math.random() * Math.PI * 2;
+    dir.set(st * Math.cos(ph), ct, st * Math.sin(ph));
+    pos.copy(dir).multiplyScalar(R).add(center);
+    if (Math.abs(pos.x) < 0.232 && Math.abs(pos.z) < 0.167) continue; // under the crate
+    const th = Math.acos(ct) / CAP; // 0 at the top, 1 at the cap's edge
+    if (Math.random() > (1 - Math.min(1, Math.max(0, (th - 0.35) / 0.65))) ** 1.6) continue;
+    const h = (0.016 + Math.random() * 0.022) * (1 - Math.min(0.6, Math.max(0, (th - 0.6) * 1.5)));
+    q.setFromUnitVectors(up, dir).multiply(yaw.setFromAxisAngle(up, Math.random() * Math.PI * 2));
+    sc.set(0.0022 + Math.random() * 0.0018, h, 1);
+    m4.compose(pos, q, sc);
+    mesh.setMatrixAt(n, m4);
+    mesh.setColorAt(n, c.copy(deep).lerp(light, Math.random() * 0.85));
+    n++;
+  }
+  mesh.count = n;
+  mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  return {
+    mesh,
+    tick: (t) => (uniforms.uTime.value = t),
+    impact: (t) => uniforms.uImpact.value.set(0, 0, t, 1),
+    dispose: () => {
+      blade.dispose();
+      mat.dispose();
+    },
+  };
+}
