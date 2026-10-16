@@ -17,6 +17,30 @@ export default function DesignDetail() {
 
   useDesignHead(study ? `${study.title} · Design · Abhishek Manjhi` : 'Design work · Abhishek Manjhi, Design Lead');
 
+  // Arriving from a folder in the /design crate: its black cover filled the screen, so start
+  // under the same black and fade it away once the case study is in.
+  useEffect(() => {
+    let flag = null;
+    try {
+      flag = sessionStorage.getItem('dz-takeover');
+      sessionStorage.removeItem('dz-takeover');
+    } catch {
+      return undefined;
+    }
+    if (!flag) return undefined;
+    const veil = document.createElement('div');
+    veil.setAttribute('aria-hidden', 'true');
+    veil.style.cssText = 'position:fixed;inset:0;z-index:60;background:#0a0a0a;opacity:1;transition:opacity 520ms ease;pointer-events:none';
+    document.body.appendChild(veil);
+    const t1 = setTimeout(() => (veil.style.opacity = '0'), 160);
+    const t2 = setTimeout(() => veil.remove(), 800);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      veil.remove();
+    };
+  }, []);
+
   useEffect(() => {
     setLoaded(false);
     setError(null);

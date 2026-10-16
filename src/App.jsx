@@ -15,6 +15,7 @@ import NotFound from './pages/NotFound.jsx';
 import Tracker from './pages/Tracker.jsx';
 import Access from './pages/Access.jsx';
 import DesignIndex from './pages/DesignIndex.jsx';
+import DesignHome from './pages/DesignHome.jsx';
 import DesignDetail from './pages/DesignDetail.jsx';
 import { api } from './lib/api.js';
 
@@ -74,6 +75,11 @@ export default function App() {
     );
   }
 
+  // The design front door is a full-screen page of its own: no site header, footer, splash or banners.
+  if (pathname === '/design' || pathname === '/design/') {
+    return <DesignHome />;
+  }
+
   return (
     <>
       {showSplash && <Splash onComplete={handleSplashComplete} />}
@@ -82,7 +88,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/work" element={<Work />} />
           <Route path="/work/:slug" element={<WorkDetail />} />
-          <Route path="/design" element={<DesignIndex />} />
+          <Route path="/design/all" element={<DesignIndex />} />
           <Route path="/design/:slug" element={<DesignDetail />} />
           <Route path="/writing" element={<Writing />} />
           <Route path="/writing/:slug" element={<WritingDetail />} />
