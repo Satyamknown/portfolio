@@ -204,14 +204,27 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     }
     return F.py > 0 || Math.abs(F.vy) > 1e-3 || Math.abs(F.rx) + Math.abs(F.wx) + Math.abs(F.rz) + Math.abs(F.wz) > 1e-3;
   };
-  const apply = (F) => {
+  // Scatter: after each landing every folder settles a little out of place (higher, leaning,
+  // shifted, twisted), different every time. Scrolling to the Work pose tidies them up.
+  const axisY = new Vector3(0, 1, 0);
+  const twist = new Quaternion();
+  let messIn = 0; // 0 before the first landing, eases to 1 as the folders come down scattered
+  const scatter = () =>
+    folders.forEach((F) => {
+      if (!F) return;
+      const r = () => Math.random() * 2 - 1;
+      F.mess = { x: r() * 0.014, y: Math.random() * 0.045, rx: r() * 0.12, rz: r() * 0.1, ry: r() * 0.07 };
+    });
+  const apply = (F, m) => {
     const e = F.f;
-    F.root.position.set(F.pos.x, F.pos.y + LIFT * e + F.py, F.pos.z + FORWARD * e);
+    const M = F.mess || { x: 0, y: 0, rx: 0, rz: 0, ry: 0 };
+    F.root.position.set(F.pos.x + M.x * m, F.pos.y + LIFT * e + F.py + M.y * m, F.pos.z + FORWARD * e);
     // the crate walls hold a folder upright until it is clear of the rim, then it may tumble
     const out = Math.min(1, F.py / 0.13);
-    lean.setFromAxisAngle(axisX, LEAN * e + F.rx * out);
+    lean.setFromAxisAngle(axisX, LEAN * e + F.rx * out + M.rx * m);
     F.root.quaternion.copy(F.quat).multiply(lean);
-    if (F.rz) F.root.quaternion.multiply(tiltZ.setFromAxisAngle(axisZ, F.rz * out));
+    F.root.quaternion.multiply(tiltZ.setFromAxisAngle(axisZ, F.rz * out + M.rz * m));
+    if (M.ry) F.root.quaternion.multiply(twist.setFromAxisAngle(axisY, M.ry * m));
     for (const L of F.lift) L.o.position.y = L.y + CARD_OUT * e;
   };
 
@@ -266,12 +279,19 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       shadowMat.opacity = 1 - Math.min(1, Math.max(0, y)) * 0.85;
       if (!drop.landed && p >= 0.62) {
         drop.landed = true;
+        scatter();
         kick(1);
       }
       if (p < 1) moving = true;
       else drop.t = -2;
     } else if (drop.t >= 0) moving = true; // waiting for the headline to finish
 
+    // the scatter fades in as the folders land, and fades out as the scroll reaches the Work pose
+    if (drop.landed && messIn < 1) {
+      messIn = Math.min(1, messIn + dt / 450);
+      moving = true;
+    }
+    const mess = messIn * (1 - ease(progress));
     const k = 1 - Math.exp(-dt / 70);
     for (const F of folders) {
       if (!F) continue;
@@ -282,7 +302,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
         F.f += d * k;
         moving = true;
       } else F.f = F.want;
-      apply(F);
+      apply(F, mess);
     }
     renderer.render(scene, camera);
     if (moving) wake();
