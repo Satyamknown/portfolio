@@ -157,7 +157,7 @@ function Crate({ onSettled }) {
       const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       const docTop = r.top + window.scrollY;
       const size = r.height;
-      c.setLayout({ cx: r.left + r.width / 2, cy: docTop + size / 2 - maxScroll, size }, window.innerHeight * 0.5 + size * 0.3);
+      c.setLayout({ cx: r.left + r.width / 2, cy: docTop + size / 2 - maxScroll, size }, window.innerHeight * 0.5 + size * 0.4);
       c.setProgress(window.scrollY / maxScroll);
     };
     const onScroll = () => {

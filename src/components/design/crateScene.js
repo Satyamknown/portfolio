@@ -164,7 +164,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const lean = new Quaternion();
   const axisX = new Vector3(1, 0, 0);
   const LEAN = (-9 * Math.PI) / 180;
-  const TURN = (34 * Math.PI) / 180; // hero pose: the sticker side faces the viewer
+  const TURN = (12 * Math.PI) / 180; // hero pose: turned a little more to the front, so the stickers read
   let progress = reducedMotion ? 1 : 0; // 0 = hero pose, 1 = Work pose
   let settled = false;
   let raf = 0;
@@ -187,7 +187,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     const drop = (hero.cy - land.cy) * u * (1 - e);
     rig.position.copy(camDown).multiplyScalar(drop);
     rig.rotation.y = TURN * (1 - e);
-    rig.scale.setScalar(1 + 0.12 * (1 - e));
+    rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
     key.position.copy(rig.position).add(keyOff);
     key.target.position.copy(rig.position);
   };
