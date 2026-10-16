@@ -124,8 +124,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   const planet = new Mesh(hillySphere(R, 220, 120, (110 * Math.PI) / 180), new MeshLambertMaterial({ color: 0x1f5a14 }));
   planet.position.y = -R + 0.012; // the crate settles a little into the grass
   planet.receiveShadow = true;
-  // planet, turf and blades share one group pivoting on the planet's top (where the crate sits),
-  // so the Work view can shrink the planet into a small world and leave white space for text
+  // planet, turf and blades share one group
   const ground = new Group();
   rig.add(ground);
   ground.add(planet);
@@ -218,6 +217,10 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     wake();
   };
   const camDown = new Vector3(0, -1, 0).applyQuaternion(camera.quaternion);
+  const camRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+  const axisUp = new Vector3(0, 1, 0);
+  const yawQ = new Quaternion();
+  const TILT = (-24 * Math.PI) / 180; // camera elevation goes from about 39 to 15 degrees
 
   // ---------------------------------------------------------------- motion
   const lean = new Quaternion();
@@ -309,9 +312,10 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     const e = ease(progress);
     const down = (hero.cy - land.cy) * u * (1 - e);
     rig.position.copy(camDown).multiplyScalar(down);
-    rig.rotation.y = TURN * (1 - e);
+    // Work view: a lower camera angle (the scene tips toward the viewer), so the planet becomes a
+    // horizon under the crate and the space above it stays white for project text
+    rig.quaternion.setFromAxisAngle(camRight, TILT * e).multiply(yawQ.setFromAxisAngle(axisUp, TURN * (1 - e)));
     rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
-    ground.scale.setScalar(1 - 0.45 * e); // the Work view: a small planet, white all round it
     key.position.copy(rig.position).add(keyOff);
     key.target.position.copy(rig.position);
   };
@@ -374,8 +378,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       moving = true;
     }
     body.updateMatrix();
-    ground.updateMatrix();
-    crateInv.value.copy(body.matrix).invert().multiply(ground.matrix); // ground space -> crate space
+    crateInv.value.copy(body.matrix).invert();
     renderer.render(scene, camera);
     if (moving) wake();
     else last = 0;
