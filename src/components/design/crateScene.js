@@ -16,6 +16,7 @@ import {
   Mesh,
   PlaneGeometry,
   MeshStandardMaterial,
+  ShadowMaterial,
   VSMShadowMap,
   TextureLoader,
   PMREMGenerator,
@@ -93,6 +94,13 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   ground.receiveShadow = true;
   ground.renderOrder = -1;
   rig.add(ground);
+  // The same real-time shadow again, on a shadow-only layer just above the floor, to deepen it.
+  const deepen = new Mesh(new PlaneGeometry(1.5, 1.5), new ShadowMaterial({ opacity: 0.22, alphaMap: groundMask, transparent: true, depthWrite: false }));
+  deepen.rotation.x = -Math.PI / 2;
+  deepen.position.y = 0.0006;
+  deepen.receiveShadow = true;
+  deepen.renderOrder = -1;
+  rig.add(deepen);
 
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
   const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(BASE + 'crate.glb');
