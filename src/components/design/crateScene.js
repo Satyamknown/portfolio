@@ -207,14 +207,24 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     const h = window.innerHeight;
     renderer.setSize(w, h, false);
     u = FRAME_H / land.size;
+    frustum();
+    wake();
+  };
+  // A project open: the crate slides left so the project panel has the right side.
+  let shift = 0;
+  let shiftWant = 0;
+  let focused = false;
+  const frustum = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const cx = land.cx - shift * w * 0.23;
     Object.assign(camera, {
-      left: -land.cx * u,
-      right: (w - land.cx) * u,
+      left: -cx * u,
+      right: (w - cx) * u,
       top: SHIFT_Y + land.cy * u,
       bottom: SHIFT_Y - (h - land.cy) * u,
     });
     camera.updateProjectionMatrix();
-    wake();
   };
   const camDown = new Vector3(0, -1, 0).applyQuaternion(camera.quaternion);
   const camRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
@@ -345,6 +355,11 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     let moving = false;
 
     progress = reducedMotion ? 1 : Math.min(1, Math.max(0, readScroll()));
+    if (Math.abs(shiftWant - shift) > 0.001) {
+      shift += (shiftWant - shift) * (reducedMotion ? 1 : 1 - Math.exp(-dt / 160));
+      frustum();
+      moving = true;
+    }
     place();
     arrive(progress > 0.985);
 
@@ -400,7 +415,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   };
   let hover = -1;
   const onMove = (e) => {
-    if (e.pointerType !== 'mouse' || !settled) return;
+    if (e.pointerType !== 'mouse' || !settled || focused) return;
     const i = pick(e);
     if (i !== hover) {
       hover = i;
@@ -440,6 +455,16 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     // which folder is up (-1 = none); several can be easing at once, only one is wanted
     setTarget(i) {
       folders.forEach((F, k) => F && (F.want = k === i ? 1 : 0));
+      wake();
+    },
+    // a project panel is open (crate slides left, hover pauses) or closed
+    setFocus(on) {
+      focused = on;
+      shiftWant = on && window.innerWidth > 1100 ? 1 : 0;
+      if (on) {
+        hover = -1;
+        renderer.domElement.style.cursor = '';
+      }
       wake();
     },
     // where the crate sits in the Work pose and in the hero pose, in window px
