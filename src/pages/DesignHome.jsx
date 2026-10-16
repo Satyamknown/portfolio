@@ -235,15 +235,12 @@ function ProjectPanel({ i, onClose, onOpenCase, onGo }) {
 // from the case studies and the resume.
 const ABOUT = {
   lines: [
-    "I'm a product designer at Rsquare Web Studio in Thane, India. I joined as a UI/UX intern in 2022 and now lead product design there.",
-    'Most of my work is B2B SaaS and websites for clients in Canada, the UK and India. I like the hard part: who can do what, in what order, and what happens when something goes wrong. Then I stay with the product until the live build matches the design.',
+    "I'm a product designer at Rsquare Web Studio in Thane, India, working on B2B SaaS and websites for clients in Canada, the UK and India. I joined as an intern in 2022 and now lead product design.",
   ],
   rows: [
     ['Based in', 'Thane, India'],
-    ['Now', 'Product Design Lead, Rsquare Web Studio (Oct 2025 – now)'],
-    ['Before', 'Product Designer (2022 – 2025), UI/UX Designer Intern (2022)'],
-    ['Education', 'B.E. Computer Engineering, University of Mumbai (2024)'],
-    ['Tools', 'Figma, Blender, Spline, Rive, LottieFiles, Claude'],
+    ['Now', 'Product Design Lead, Rsquare Web Studio'],
+    ['Education', 'B.E. Computer Engineering, University of Mumbai'],
   ],
 };
 
@@ -255,21 +252,21 @@ function AboutPanel({ onClose }) {
   }, [onClose]);
   return (
     <aside className="dh-panel dh-panel--about" aria-labelledby="dh-about-title">
-      <div className="dh-panel-top" style={{ '--d': '900ms' }}>
+      <div className="dh-panel-top" style={{ '--d': '60ms' }}>
         <span className="dh-panel-kicker">About</span>
         <button type="button" className="dh-panel-close" aria-label="Close About" onClick={onClose}>
           ×
         </button>
       </div>
-      <h2 id="dh-about-title" className="dh-panel-name" style={{ '--d': '980ms' }}>
+      <h2 id="dh-about-title" className="dh-panel-name" style={{ '--d': '120ms' }}>
         Abhishek Manjhi
       </h2>
       {ABOUT.lines.map((t, k) => (
-        <p key={k} className="dh-panel-line" style={{ '--d': `${1060 + k * 90}ms` }}>
+        <p key={k} className="dh-panel-line" style={{ '--d': `${190 + k * 80}ms` }}>
           {t}
         </p>
       ))}
-      <dl className="dh-panel-rows" style={{ '--d': '1240ms' }}>
+      <dl className="dh-panel-rows" style={{ '--d': '280ms' }}>
         {ABOUT.rows.map(([k, v]) => (
           <div key={k}>
             <dt>{k}</dt>
@@ -277,7 +274,7 @@ function AboutPanel({ onClose }) {
           </div>
         ))}
       </dl>
-      <div className="dh-panel-end dh-panel-end--two" style={{ '--d': '1320ms' }}>
+      <div className="dh-panel-end dh-panel-end--two" style={{ '--d': '360ms' }}>
         <Link to="/contact">
           Get in touch <span aria-hidden="true">↗</span>
         </Link>

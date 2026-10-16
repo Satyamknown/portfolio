@@ -157,7 +157,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   ground.add(grass2.mesh);
   // the About camera: stands on the far side, upright to the planet there
   const aboutHolder = new Group();
-  aboutHolder.position.set(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z).multiplyScalar(R + 0.012);
+  // on the actual surface there: the planet's centre sits 1.2 cm above the pivot, so offset by that
+  aboutHolder.position.set(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z).multiplyScalar(R).add(new Vector3(0, planet.position.y + R, 0));
   // upright on the planet there, front and right side to the viewer once it comes round, like the crate
   aboutHolder.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), -ABOUT_A);
   pivot.add(aboutHolder);
@@ -166,17 +167,38 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
   for (const o of [...camModel.scene.children]) if (!/^print-/.test(o.name)) o.position.y -= 0.02;
   const mePrint = camModel.scene.getObjectByName('print-me');
   const Y = new Vector3(0, 1, 0);
-  const X = new Vector3(1, 0, 0);
   const lay = (name, x, z, deg, y = 0.004) => {
     const o = camModel.scene.getObjectByName(name);
     o.position.set(x, y, z);
     o.quaternion.setFromAxisAngle(Y, (deg * Math.PI) / 180);
   };
-  // standing: tipped 15 degrees back from upright, turned to face the viewer, its foot in the grass
-  mePrint.position.set(-0.13, 0.116, 0.3);
-  mePrint.quaternion.setFromAxisAngle(Y, (38 * Math.PI) / 180).multiply(new Quaternion().setFromAxisAngle(X, (75 * Math.PI) / 180));
-  lay('print-a', 0.12, 0.33, 20); // these two must match the grass trim in ABOUT_TRIM
-  lay('print-b', 0.31, 0.27, -12, 0.006);
+  // all three prints lie in the grass in front of the camera, the owner's beside Stratalite
+  // (positions must match the grass trim in ABOUT_TRIM)
+  lay('print-me', -0.13, 0.33, 8, 0.007);
+  lay('print-a', 0.1, 0.37, 20);
+  lay('print-b', 0.3, 0.29, -12, 0.0055);
+  // a dense tuft of grass round the camera's base, so it stands in the grass instead of on it
+  scene.add(rig);
+  rig.updateMatrixWorld(true);
+  const toGround = new Matrix4().copy(ground.matrixWorld).invert().multiply(aboutHolder.matrixWorld);
+  const upG = new Vector3(ABOUT_DIR.x, ABOUT_DIR.y, ABOUT_DIR.z);
+  const tuft = (pos, dir) => {
+    {
+      // round the base: pick a side of the 0.34 x 0.30 footprint, just outside it
+      const side = Math.floor(Math.random() * 4);
+      const t = Math.random() - 0.5;
+      const out = 0.004 + Math.random() * 0.03;
+      if (side === 0) pos.set(t * 0.36, 0, 0.15 + out);
+      else if (side === 1) pos.set(t * 0.36, 0, -0.15 - out);
+      else if (side === 2) pos.set(0.17 + out, 0, t * 0.32);
+      else pos.set(-0.17 - out, 0, t * 0.32);
+    }
+    pos.applyMatrix4(toGround);
+    dir.copy(upG);
+    return 0.03 + Math.random() * 0.032;
+  };
+  const tufts = makeGrass(planet.position, R, fine ? 3000 : 1200, crateInv, aboutInv, upG, 1, tuft);
+  ground.add(tufts.mesh);
   camModel.scene.traverse((o) => {
     if (!o.isMesh) return;
     o.castShadow = true;
@@ -468,6 +490,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     if (!reducedMotion) {
       grass.tick(now / 1000);
       grass2.tick(now / 1000);
+      tufts.tick(now / 1000);
       turf.tick(now / 1000);
       moving = true;
     }
@@ -542,8 +565,8 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
     setAbout(on) {
       aboutWant = on ? 1 : 0;
       this.setFocus(on);
-      // About text sits on the left, so the camera goes right
-      if (on) shiftWant = window.innerWidth > 1100 ? -0.82 : 0;
+      // About text sits on the right (like a project), so the camera scene goes left
+      if (on) shiftWant = window.innerWidth > 1100 ? 0.98 : 0;
       wake();
     },
     setFocus(on) {
@@ -617,6 +640,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, reduced
       window.removeEventListener('scroll', wake);
       grass.dispose();
       grass2.dispose();
+      tufts.dispose();
       turf.dispose();
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerleave', onLeave);
@@ -650,14 +674,15 @@ float printMask(vec3 a, vec2 c, float th) {
 float aboutTrim(vec3 p) {
   vec3 a = (uAboutInv * vec4(p, 1.0)).xyz;
   if (abs(a.y) > 0.12) return 0.0;
-  // the two prints lying flat (the owner's own stands up, its foot in the grass)
-  return max(printMask(a, vec2(0.12, 0.33), 0.3491), printMask(a, vec2(0.31, 0.27), -0.2094));
+  float m = printMask(a, vec2(-0.13, 0.33), 0.1396);
+  m = max(m, printMask(a, vec2(0.1, 0.37), 0.3491));
+  return max(m, printMask(a, vec2(0.3, 0.29), -0.2094));
 }`;
 
 // Grass blades: one instanced, tapered strip per blade, standing out of the planet's top cap,
 // thinning toward the cap's edge and none under the crate. Wind and the landing shockwave bend each
 // blade in the vertex shader (more at the tip), so thousands of blades cost one draw call.
-function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg) {
+function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg, sample) {
   const blade = new PlaneGeometry(1, 1, 1, 4);
   blade.translate(0, 0.5, 0);
   const p = blade.attributes.position;
@@ -715,9 +740,14 @@ function makeGrass(center, R, count, crateInv, aboutInv, axis, capDeg) {
     const ct = 1 - Math.random() * (1 - cosCap);
     const st = Math.sqrt(1 - ct * ct);
     const ph = Math.random() * Math.PI * 2;
-    dir.set(st * Math.cos(ph), ct, st * Math.sin(ph)).applyQuaternion(toAxis);
-    pos.copy(dir).multiplyScalar(R + hills(dir.x, dir.y, dir.z)).add(center);
-    const h = 0.026 + Math.random() * 0.026;
+    let h;
+    if (sample) {
+      h = sample(pos, dir); // a hand-placed tuft: the sampler gives the spot, the up direction and the height
+    } else {
+      dir.set(st * Math.cos(ph), ct, st * Math.sin(ph)).applyQuaternion(toAxis);
+      pos.copy(dir).multiplyScalar(R + hills(dir.x, dir.y, dir.z)).add(center);
+      h = 0.026 + Math.random() * 0.026;
+    }
     q.setFromUnitVectors(up, dir).multiply(yaw.setFromAxisAngle(up, Math.random() * Math.PI * 2));
     sc.set(0.0012 + Math.random() * 0.001, h, 1);
     m4.compose(pos, q, sc);
