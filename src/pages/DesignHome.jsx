@@ -4,9 +4,10 @@ import useDesignHead from '../components/design/useDesignHead.js';
 import '../design-home.css';
 
 // The design portfolio's front door, one screen after another, the way it was designed on the canvas:
-// 1. the hero; scrolling fades it away,
-// 2. the crate (a live three.js copy of the Blender model) jumps up, the folders rattle and settle,
-// 3. then the tools (left) and experience (right) come in.
+// 1. the hero, with the crate (a live three.js copy of the Blender model) peeking up from the
+//    bottom half, logo side to the viewer; scrolling fades the headline away,
+// 2. the scroll carries the crate up and turns it into the isometric pose; the folders rattle and settle,
+// 3. then the caption comes in. The crate sits alone on its pedestal: no side columns.
 // three.js and the model load lazily, after the hero is on screen, so the first paint stays light.
 
 const BASE = '/design/home/';
@@ -19,33 +20,6 @@ const PROJECTS = [
   { name: 'AI in my design workflow', slug: 'ai-design-workflow' },
 ];
 
-const DESIGN_TOOLS = [
-  ['Figma', 'figma-color.svg'],
-  ['Blender', 'blender-color.svg'],
-  ['Spline', 'spline.png'],
-  ['Rive', 'rive-color.svg'],
-  ['LottieFiles', 'lottiefiles-color.svg'],
-  ['Claude', 'claude-color.svg'],
-];
-const BUILD_TOOLS = [
-  ['MongoDB', 'mongodb-color.svg'],
-  ['Express', 'express-color.svg'],
-  ['React', 'react-color.svg'],
-  ['Node.js', 'nodedotjs-color.svg'],
-];
-const EXPERIENCE = [
-  {
-    logo: 'rsquare.png',
-    org: 'Rsquare Web Studio',
-    roles: [
-      ['Product Design Lead', 'Oct 2025 – now'],
-      ['Product Designer', 'Jul 2022 – Sep 2025'],
-      ['UI/UX Designer Intern', 'Jan – Jun 2022'],
-    ],
-  },
-  { logo: 'skooltag-mark.png', org: 'Student Junction · Skooltag', roles: [['Freelance Product Designer', '2024']] },
-  { logo: 'mu.png', org: 'University of Mumbai', roles: [['B.E. Computer Engineering', '2024']] },
-];
 
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -116,47 +90,11 @@ function Hero() {
       ) : (
         <span className="dh-dot dh-dot--float" aria-hidden="true" />
       )}
-      <div className="dh-corners">
-        <span>Thane, India</span>
-        <span>©2026</span>
-      </div>
     </section>
   );
 }
 
-function Tools() {
-  const row = (list) =>
-    list.map(([name, file]) => <img key={name} src={BASE + file} alt={name} title={name} width="44" height="44" />);
-  return (
-    <div className="dh-tools dh-reveal" aria-label="Tools I use">
-      <div className="dh-tools-grid">{row(DESIGN_TOOLS)}</div>
-      <div className="dh-tools-grid dh-tools-grid--build">{row(BUILD_TOOLS)}</div>
-    </div>
-  );
-}
 
-function Experience() {
-  return (
-    <div className="dh-exp" id="about">
-      {EXPERIENCE.map((e, k) => (
-        <section key={e.org} className="dh-exp-item dh-reveal" style={{ '--d': `${120 + k * 90}ms` }}>
-          <img src={BASE + e.logo} alt="" width="36" height="36" />
-          <div>
-            <h3>{e.org}</h3>
-            <ul>
-              {e.roles.map(([r, d]) => (
-                <li key={r}>
-                  <span>{r}</span>
-                  <span className="dh-muted">{d}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      ))}
-    </div>
-  );
-}
 
 function Crate({ onSettled }) {
   const fine = useFinePointer();
@@ -206,54 +144,58 @@ function Crate({ onSettled }) {
   const openRef = useRef(open);
   openRef.current = open;
 
-  // Load three.js and the model once the page has painted; play the jump when the crate is in view.
+  // Load three.js and the model right after the page paints. The scroll then drives the crate
+  // from its hero pose to its Work pose; the Work pose is wherever .dh-box sits in the layout.
   useEffect(() => {
     let alive = true;
-    let seen = false;
-    let played = false;
-    const play = () => {
-      if (!played && seen && api.current) {
-        played = true;
-        api.current.playIntro();
-      }
+    let raf = 0;
+    const layout = () => {
+      const c = api.current;
+      const b = wrap.current?.querySelector('.dh-box');
+      if (!c || !b) return;
+      const r = b.getBoundingClientRect();
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const docTop = r.top + window.scrollY;
+      const size = r.height;
+      c.setLayout({ cx: r.left + r.width / 2, cy: docTop + size / 2 - maxScroll, size }, window.innerHeight * 0.5 + size * 0.3);
+      c.setProgress(window.scrollY / maxScroll);
     };
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          seen = true;
-          play();
-        }
-      },
-      { threshold: 0.45 }
-    );
-    io.observe(wrap.current);
-    const start = () =>
-      import('../components/design/crateScene.js')
-        .then(({ createCrate }) =>
-          createCrate(host.current, {
-            reducedMotion: reducedMotion(),
-            onHover: (i) => setTarget(i),
-            onClick: (i, pointer) => (pointer === 'mouse' ? openRef.current(i) : setTarget(i)),
-            onIntroDone: () => onSettled(),
-          })
-        )
-        .then((c) => {
-          if (!alive) return c.dispose();
-          api.current = c;
-          setReady(true);
-          play();
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        api.current?.setProgress(window.scrollY / maxScroll);
+      });
+    };
+    import('../components/design/crateScene.js')
+      .then(({ createCrate }) =>
+        createCrate(host.current, {
+          reducedMotion: reducedMotion(),
+          onHover: (i) => setTarget(i),
+          onClick: (i, pointer) => (pointer === 'mouse' ? openRef.current(i) : setTarget(i)),
+          onIntroDone: () => onSettled(),
         })
-        .catch(() => {
-          if (alive) {
-            setFailed(true);
-            onSettled();
-          }
-        });
-    const id = 'requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 300);
+      )
+      .then((c) => {
+        if (!alive) return c.dispose();
+        api.current = c;
+        layout();
+        setReady(true);
+      })
+      .catch(() => {
+        if (alive) {
+          setFailed(true);
+          onSettled();
+        }
+      });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', layout);
     return () => {
       alive = false;
-      io.disconnect();
-      'cancelIdleCallback' in window ? cancelIdleCallback(id) : clearTimeout(id);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', layout);
       api.current?.dispose();
       api.current = null;
     };
@@ -296,8 +238,9 @@ function Crate({ onSettled }) {
             height="1100"
           />
         )}
-        <div ref={host} className="dh-gl-host" role="img" aria-label="A blue crate of manila folders, one per project, with company stickers on its sides" />
       </div>
+      {/* the 3D layer covers the window; .dh-box above only marks where the crate lands */}
+      <div ref={host} className={`dh-gl-host ${ready ? 'is-ready' : ''}`} role="img" aria-label="A blue crate of manila folders, one per project, with company stickers on its sides" />
 
       {/* keyboard and screen-reader route to the same projects */}
       <ul className="dh-sr">
@@ -376,16 +319,13 @@ export default function DesignHome() {
       </header>
       <Hero />
       <section className={`dh-screen dh-work ${settled ? 'is-settled' : ''}`} id="work">
-        <Tools />
         <Crate onSettled={onSettled} />
-        <Experience />
-        <div className="dh-corners dh-reveal" style={{ '--d': '420ms' }}>
-          <span>Selected work · {PROJECTS.length} projects</span>
-          <Link to="/design/all" className="dh-all">
-            All case studies →
-          </Link>
-        </div>
       </section>
+      {/* fixed to the corners of the window on every screen */}
+      <div className="dh-corners" aria-hidden="true">
+        <span>Thane, India</span>
+        <span>©2026</span>
+      </div>
     </div>
   );
 }
