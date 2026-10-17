@@ -89,7 +89,7 @@ const CARD_OUT = 0.075;
 const FRAME_H = 0.84; // ortho height that frames the crate, as in Blender
 const SHIFT_Y = 0.045; // headroom above the crate for a popped folder
 
-export async function createCrate(host, { onHover, onClick, onIntroDone, onBanner, onProgress, reducedMotion }) {
+export async function createCrate(host, { onHover, onClick, onIntroDone, onBanner, onProgress, sfx, reducedMotion }) {
   // rig = the scroll pose. Inside it the whole little world turns on the planet's centre (pivot):
   // the crate (body) on top, the planet and grass (ground), and the About camera on the far side.
   const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
@@ -326,7 +326,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     camera.updateProjectionMatrix();
   };
   const camDown = new Vector3(0, -1, 0).applyQuaternion(camera.quaternion);
-  const flyer = makeFlyer(planeModel, scene, camera, renderer);
+  const flyer = makeFlyer(planeModel, scene, camera, renderer, sfx);
   const camRight = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
   const axisUp = new Vector3(0, 1, 0);
   const yawQ = new Quaternion();
@@ -415,12 +415,18 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     F.body = new Body({ mass: 0.15, material: mFolder, linearDamping: 0.04, angularDamping: 0.3 });
     F.body.addShape(new Box(new Vec3(0.186, 0.1325, 0.0065)), new Vec3(0, 0.1325, 0)); // origin at its foot, like the model
     world.addBody(F.body);
+    // folders knocking on the crate and on each other: a rattle, louder the harder the knock
+    F.body.addEventListener('collide', (ev) => {
+      const v = Math.abs(ev.contact.getImpactVelocityAlongNormal());
+      if (v > 0.12) sfx?.rattle(Math.min(1, v * 1.4));
+    });
   }
   let drop = { t: -1, started: false, landed: false };
   crateBody.addEventListener('collide', (ev) => {
     if (ev.body !== planetBody || drop.landed) return;
     drop.landed = true;
     const t = performance.now() / 1000;
+    sfx?.thud(1);
     grass.impact(t);
     turf.impact(t);
     // the jolt: a small extra hop and twist for each folder, so they settle a little messy
@@ -553,6 +559,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     }
     // now and then, after the visitor has been here a while, the plane crosses the sky
     if (flyer.update(now, focused, hireWant === 1, reducedMotion, progress)) moving = true;
+    else sfx?.engine(0);
     if (flight) {
       updateFlight(now);
       moving = true;
@@ -639,16 +646,26 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
   return {
     // which folder is up (-1 = none); several can be easing at once, only one is wanted
     setTarget(i) {
+      if (i >= 0 && folders[i] && folders[i].want !== 1) sfx?.pop();
       folders.forEach((F, k) => F && (F.want = k === i ? 1 : 0));
       wake();
     },
     // a project panel is open (crate slides left, hover pauses) or closed
     // Hire me: the planet rolls over, the plane flies in and hovers, the form takes the right side
     setHire(on) {
+      if ((on ? 1 : 0) !== hireWant) sfx?.whoosh(1.7, 0.8); // the planet rolling
       hireWant = on ? 1 : 0;
       this.setFocus(on);
-      // far left, so the planet stops short of the form and its fade
-      if (on) shiftWant = window.innerWidth > 1100 ? 1.9 : 0;
+      // far left, so the planet stops short of the form and its fade. How far depends on the window's
+      // shape: the planet's right edge sits at about 1.15 h/w - 0.106 of the width at shift 1.9
+      // (measured), each unit of shift moves it 0.23 of the width, and the form's fade begins where
+      // the panel does (min(640px, 46vw) from the right)
+      if (on) {
+        const w = window.innerWidth;
+        const edge = 1.15 * (window.innerHeight / w) - 0.106;
+        const room = 1 - Math.min(640, 0.46 * w) / w - 0.03;
+        shiftWant = w > 1100 ? Math.min(2.8, 1.9 + Math.max(0, (edge - room) / 0.23)) : 0;
+      }
       wake();
     },
     // Hire me form: 0-3 fields filled, the plane comes closer with each
@@ -667,6 +684,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
       wake();
     },
     setAbout(on) {
+      if ((on ? 1 : 0) !== aboutWant) sfx?.whoosh(1.7, 0.8);
       aboutWant = on ? 1 : 0;
       this.setFocus(on);
       // About text sits on the right (like a project), so the camera scene goes left
@@ -717,6 +735,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     flyCover(i) {
       const F = folders[i];
       if (!F?.cover) return Promise.resolve();
+      sfx?.whoosh(1.5, 1.2);
       scene.updateMatrixWorld(true);
       const g = new Group();
       F.cover.matrixWorld.decompose(g.position, g.quaternion, new Vector3());
@@ -1093,7 +1112,7 @@ function makeDetails(center, R) {
 // left: the first time after the visitor has been on the page a while, then every so often. The
 // banner is a small cloth simulation (verlet points held by springs): its front edge hangs on the two
 // tow ropes and the airflow streams it back, with a gust rippling down its length. Click: Contact.
-function makeFlyer(model, scene, camera, renderer) {
+function makeFlyer(model, scene, camera, renderer, sfx) {
   const FIRST = 8500; // ms after the page opens before the first pass
   const EVERY = 45000;
   const DUR = 13000;
@@ -1356,6 +1375,7 @@ function makeFlyer(model, scene, camera, renderer) {
           // until it fills the window and the page goes white (DesignHome shows the thank-you)
           const u = Math.min(1, (now - slam.t0) / 950);
           const a = u * u * u;
+          sfx?.engine(1, 1 + a * 0.9); // it screams in as it comes at the screen
           const big = (3.2 * halfW()) / 0.36;
           hx = slam.from[0] + (0 - slam.from[0]) * a;
           hy = slam.from[1] + (-0.05 - slam.from[1]) * a;
@@ -1383,6 +1403,7 @@ function makeFlyer(model, scene, camera, renderer) {
           return false;
         }
         face = hf;
+        if (!slam) sfx?.engine(0.45 + 0.4 * hf, 1 + 0.15 * hf);
         fly.scale.setScalar(hs);
         p.set(still ? 0 : x, hy + Math.sin(now * 0.0019) * 0.03 * hs, 0.6).unproject(camera);
       } else {
@@ -1405,6 +1426,8 @@ function makeFlyer(model, scene, camera, renderer) {
           return false;
         }
         dir = -1;
+        // the propeller, louder as it nears the middle of the window, faint while it's tiny
+        sfx?.engine(passS * Math.max(0, 1 - Math.abs(1.55 - 3.4 * t) / 1.7), 1);
         p.set(1.55 - 3.4 * t, passY + Math.sin(now * 0.0016) * 0.03 * passS, 0.6).unproject(camera);
       }
       if (dir !== lastDir) {

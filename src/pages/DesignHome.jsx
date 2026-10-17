@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useDesignHead from '../components/design/useDesignHead.js';
 import useDrawer from '../components/design/useDrawer.js';
 import DesignNotices from '../components/design/DesignNotices.jsx';
+import sound from '../components/design/sound.js';
 import { api } from '../lib/api.js';
 import { emailCompose, profile } from '../data/site.js';
 import '../design-home.css';
@@ -513,7 +514,10 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire, entered, onP
     setWhite('sending');
     setTimeout(() => setSlamming(false), 1000);
   }, []);
-  const sent = useCallback(() => setWhite('sent'), []);
+  const sent = useCallback(() => {
+    setWhite('sent');
+    sound.chime();
+  }, []);
   const sendFailed = useCallback(() => setWhite(''), []); // back to the form, which shows the error
   // closing the thank-you goes back to Hire me: the plane flies in again, the form says it's sent
   const closeThanks = useCallback(() => {
@@ -544,6 +548,7 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire, entered, onP
           onIntroDone: () => onSettled(),
           onBanner: () => navRef.current('/contact'),
           onProgress: (f) => loadRef.current.onProgress?.(f),
+          sfx: sound,
         })
       )
       .then((c) => {
@@ -771,18 +776,51 @@ function Thanks({ sent, onClose }) {
 
 // Everything the front door needs (three.js, the crate, camera and plane models, every shader and
 // texture, the fonts) loads behind this screen, so nothing pops in after the visitor arrives.
-function Loader({ value, out }) {
+// Once everything is in, the loader ends on Enter: browsers only allow sound after a click, and
+// the crate's drop is the first thing that makes one.
+function Loader({ value, out, ready, onEnter }) {
   const pct = Math.round(value * 100);
+  const enter = useRef(null);
+  useEffect(() => {
+    if (ready) enter.current?.focus({ preventScroll: true });
+  }, [ready]);
   return (
-    <div className={`dh-loader ${out ? 'is-out' : ''}`} role="progressbar" aria-label="Loading" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+    <div className={`dh-loader ${out ? 'is-out' : ''}`} role={ready ? 'dialog' : 'progressbar'} aria-label="Loading" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
       <div className="dh-loader-in">
         <span className="dh-loader-name">Abhishek Manjhi</span>
         <span className="dh-loader-bar" aria-hidden="true">
           <i style={{ transform: `scaleX(${value})` }} />
         </span>
-        <span className="dh-loader-pct">{pct}%</span>
+        {ready ? (
+          <div className="dh-loader-go">
+            <button ref={enter} type="button" className="dh-loader-enter" onClick={() => onEnter(true)}>
+              Enter
+            </button>
+            <button type="button" className="dh-loader-quiet" onClick={() => onEnter(false)}>
+              Enter without sound
+            </button>
+          </div>
+        ) : (
+          <span className="dh-loader-pct">{pct}%</span>
+        )}
       </div>
     </div>
+  );
+}
+
+// bottom right, beside the year: sound on or off, remembered
+function SoundToggle() {
+  const [on, setOn] = useState(sound.on);
+  useEffect(() => sound.subscribe(setOn), []);
+  return (
+    <button type="button" className="dh-sound" aria-pressed={on} onClick={() => sound.set(!on)}>
+      <span className={`dh-sound-bars ${on ? 'is-on' : ''}`} aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      Sound {on ? 'on' : 'off'}
+    </button>
   );
 }
 
@@ -791,6 +829,14 @@ export default function DesignHome() {
   const [loadP, setLoadP] = useState(0.04);
   const [loaded, setLoaded] = useState(false);
   const [entered, setEntered] = useState(false);
+  const [canEnter, setCanEnter] = useState(false);
+  const onEnter = useCallback((withSound) => {
+    if (withSound) {
+      if (!sound.on) sound.set(true);
+      sound.unlock();
+    } else sound.set(false);
+    setEntered(true);
+  }, []);
   const [loaderGone, setLoaderGone] = useState(false);
   const onProgress = useCallback((f) => setLoadP((p) => Math.max(p, 0.08 + f * 0.84)), []);
   const onLoaded = useCallback(() => setLoaded(true), []);
@@ -801,7 +847,7 @@ export default function DesignHome() {
     const t0 = performance.now();
     setLoadP(1);
     Promise.race([document.fonts?.ready || Promise.resolve(), new Promise((r) => setTimeout(r, 2500))]).then(() => {
-      setTimeout(() => alive && setEntered(true), Math.max(0, 450 - (performance.now() - t0)));
+      setTimeout(() => alive && setCanEnter(true), Math.max(0, 450 - (performance.now() - t0)));
     });
     return () => {
       alive = false;
@@ -839,7 +885,7 @@ export default function DesignHome() {
   };
   return (
     <>
-    {!loaderGone && <Loader value={loadP} out={entered} />}
+    {!loaderGone && <Loader value={loadP} out={entered} ready={canEnter} onEnter={onEnter} />}
     <DesignNotices ready={entered} />
     <div className={`dh ${entered ? '' : 'is-loading'}`}>
       <header className="dh-head">
@@ -863,9 +909,12 @@ export default function DesignHome() {
         <Crate onSettled={onSettled} about={about} onCloseAbout={closeAbout} hire={hire} onCloseHire={closeHire} entered={entered} onProgress={onProgress} onLoaded={onLoaded} />
       </section>
       {/* fixed to the corners of the window on every screen */}
-      <div className="dh-corners" aria-hidden="true">
-        <span>Thane, India</span>
-        <span>©2026</span>
+      <div className="dh-corners">
+        <span aria-hidden="true">Thane, India</span>
+        <span className="dh-corner-r">
+          <SoundToggle />
+          <span aria-hidden="true">©2026</span>
+        </span>
       </div>
     </div>
     </>
