@@ -1237,11 +1237,11 @@ function makeFlyer(model, scene, camera, renderer) {
   // [x, y, size, face]
   const hoverGoal = (lv) => {
     const wide = window.innerWidth > 1100;
-    const span = wide ? 0.98 : 1.7; // NDC width of the empty side
+    const span = wide ? 0.98 : 0.95; // NDC width of the empty side (phones: a small plane above the drawer)
     const cx = wide ? -0.5 : 0;
     const f = [0.12, 0.42, 0.66, 0.86][lv];
     const s = ([0.24, 0.32, 0.42, 0.54][lv] * span * halfW()) / 0.36; // the plane's own width on screen
-    return [cx + ((0.45 * s) / halfW()) * (1 - f), [0.48, 0.4, 0.32, 0.24][lv], s, f];
+    return [cx + ((0.45 * s) / halfW()) * (1 - f), wide ? [0.48, 0.4, 0.32, 0.24][lv] : [0.66, 0.63, 0.6, 0.57][lv], s, f];
   };
   const swapTex = () => {
     clothMat.map = clothMat.emissiveMap = lastDir > 0 ? texR : tex;
@@ -1389,7 +1389,7 @@ function makeFlyer(model, scene, camera, renderer) {
         if (t0 < 0) {
           if (next < 0 || now < next || paused || still) return false;
           // over the headline it stays tiny and high, out of the way of the words
-          passS = scroll < 0.5 ? 0.3 : 1;
+          passS = (scroll < 0.5 ? 0.3 : 1) * (window.innerWidth > 760 ? 1 : 0.6); // smaller still on phones
           passY = scroll < 0.5 ? 0.8 : 0.66;
           fly.scale.setScalar(passS);
           t0 = now;

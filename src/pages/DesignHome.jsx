@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useDesignHead from '../components/design/useDesignHead.js';
+import useDrawer from '../components/design/useDrawer.js';
+import DesignNotices from '../components/design/DesignNotices.jsx';
 import { api } from '../lib/api.js';
 import { emailCompose, profile } from '../data/site.js';
 import '../design-home.css';
@@ -92,6 +94,60 @@ const PROJECTS = [
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// A mouse wheel moves the page in ~100 px jumps, and the hero and the crate followed each jump, so
+// the motion stuttered. Here the wheel sets where the page should be and the page glides there
+// (critically damped, the same speed at any frame rate), so the headline and the crate move with
+// exactly as much scroll as was given, just smoothly. Touch keeps its own native momentum, and
+// keys, the scrollbar and panels that scroll themselves are left alone.
+function useSmoothWheel(off) {
+  const offRef = useRef(off);
+  offRef.current = off;
+  useEffect(() => {
+    if (reducedMotion() || !window.matchMedia('(pointer: fine)').matches) return undefined;
+    let target = window.scrollY;
+    let cur = target;
+    let raf = 0;
+    let last = 0;
+    const max = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const tick = (now) => {
+      const dt = Math.min(64, last ? now - last : 16);
+      last = now;
+      cur += (target - cur) * (1 - Math.exp(-dt / 95));
+      if (Math.abs(target - cur) < 0.5) cur = target;
+      window.scrollTo({ top: cur, behavior: 'instant' });
+      raf = cur !== target ? requestAnimationFrame(tick) : 0;
+      if (!raf) last = 0;
+    };
+    const wheel = (e) => {
+      if (offRef.current || e.ctrlKey || e.defaultPrevented) return;
+      if (e.target.closest?.('.dh-panel, .dh-thanks, .dn')) return;
+      const d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
+      if (!d || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      if (!raf) target = cur = window.scrollY;
+      target = Math.max(0, Math.min(max(), target + d));
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    // someone else moved the page (keys, scrollbar, a jump to Work): follow it, don't fight it
+    const scroll = () => {
+      if (Math.abs(window.scrollY - cur) < 2) return; // our own glide
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        last = 0;
+      }
+      target = cur = window.scrollY;
+    };
+    window.addEventListener('wheel', wheel, { passive: false });
+    window.addEventListener('scroll', scroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('wheel', wheel);
+      window.removeEventListener('scroll', scroll);
+    };
+  }, []);
+}
+
 function useFinePointer() {
   const q = '(hover: hover) and (pointer: fine)';
   const [fine, setFine] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches);
@@ -170,6 +226,7 @@ const TOUR = PROJECTS.map((_, k) => PROJECTS.length - 1 - k);
 // The project panel: opens on the right when a folder is clicked, written like a short CV entry.
 // Previous and next step through the folders; Esc closes, the arrow keys step.
 function ProjectPanel({ i, onClose, onOpenCase, onGo }) {
+  const drawer = useDrawer(onClose, i);
   const p = PROJECTS[i];
   const at = TOUR.indexOf(i);
   const prev = TOUR[(at - 1 + TOUR.length) % TOUR.length];
@@ -184,7 +241,8 @@ function ProjectPanel({ i, onClose, onOpenCase, onGo }) {
     return () => window.removeEventListener('keydown', key);
   }, [onClose, onGo, next, prev]);
   return (
-    <aside className="dh-panel" key={i} aria-labelledby="dh-panel-title">
+    <aside className="dh-panel" key={i} ref={drawer} aria-labelledby="dh-panel-title">
+      <div className="dh-drawer-grab" aria-hidden="true" />
       <div className="dh-panel-top">
         <span className="dh-panel-kicker">{p.kicker}</span>
         <button type="button" className="dh-panel-close" aria-label="Close project" onClick={onClose}>
@@ -247,13 +305,15 @@ const ABOUT = {
 };
 
 function AboutPanel({ onClose }) {
+  const drawer = useDrawer(onClose);
   useEffect(() => {
     const key = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
   }, [onClose]);
   return (
-    <aside className="dh-panel dh-panel--about" aria-labelledby="dh-about-title">
+    <aside className="dh-panel dh-panel--about" ref={drawer} aria-labelledby="dh-about-title">
+      <div className="dh-drawer-grab" aria-hidden="true" />
       <div className="dh-panel-top" style={{ '--d': '60ms' }}>
         <span className="dh-panel-kicker">About</span>
         <button type="button" className="dh-panel-close" aria-label="Close About" onClick={onClose}>
@@ -292,6 +352,7 @@ function AboutPanel({ onClose }) {
 // so it arrives the same way), beside the planet while the banner plane hovers over it.
 const EMPTY_FORM = { name: '', email: '', message: '', website: '' };
 function HirePanel({ onClose, onLevel, onSlam, onSent, onFail }) {
+  const drawer = useDrawer(onClose);
   const [data, setData] = useState(EMPTY_FORM);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
@@ -324,7 +385,14 @@ function HirePanel({ onClose, onLevel, onSlam, onSent, onFail }) {
     }
   };
   return (
-    <aside className="dh-panel dh-panel--about dh-panel--hire" aria-labelledby="dh-hire-title">
+    <aside
+      className="dh-panel dh-panel--about dh-panel--hire"
+      ref={drawer}
+      aria-labelledby="dh-hire-title"
+      // phones: typing needs the room, so the drawer opens full height once a field is in use
+      onFocusCapture={(e) => e.currentTarget.classList.add('is-full')}
+    >
+      <div className="dh-drawer-grab" aria-hidden="true" />
       <div className="dh-panel-top" style={{ '--d': '60ms' }}>
         <span className="dh-panel-kicker">Hire me</span>
         <button type="button" className="dh-panel-close" aria-label="Close" onClick={onClose}>
@@ -539,6 +607,7 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire, entered, onP
   // While a project is open the page holds the Work view: it never slides back to the hero under
   // the panel. Scrolling up just closes the panel (and stays on the crate); after that it scrolls.
   const held = panel >= 0 || about || hire;
+  useSmoothWheel(held || !entered);
   const closeHeld = about ? onCloseAbout : hire ? onCloseHire : closePanel;
   useEffect(() => {
     if (!held) return undefined;
@@ -641,28 +710,26 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire, entered, onP
           </span>
         </p>
       ) : (
-        <div className="dh-swipe dh-reveal">
-          <div className="dh-swipe-row">
-            <button type="button" className="dh-arrow" aria-label="Previous project" onClick={() => step(-1)}>
-              ‹
+        // phones: the same white pill as on desktop, with arrows either side; the name opens the panel
+        <div className="dh-caption dh-pill dh-mpill dh-reveal">
+          <button type="button" className="dh-mpill-arrow" aria-label="Previous project" onClick={() => step(-1)}>
+            ‹
+          </button>
+          {shown ? (
+            <button type="button" className="dh-mpill-open" onClick={() => setPanel(target)}>
+              {shown.name}
+              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                <path d="M3 11 11 3M5 3h6v6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
-            <div className="dh-swipe-name" aria-live="polite">
-              {shown ? shown.name : 'Swipe or tap a folder'}
-            </div>
-            <button type="button" className="dh-arrow" aria-label="Next project" onClick={() => step(1)}>
-              ›
-            </button>
-          </div>
-          <div className="dh-dots" aria-hidden="true">
-            {PROJECTS.map((p, i) => (
-              <span key={p.name} className={i === target ? 'is-on' : ''} />
-            ))}
-          </div>
-          {shown && (
-            <button type="button" className="dh-open" onClick={() => setPanel(target)}>
-              Open {shown.name} →
-            </button>
+          ) : (
+            <span className="dh-mpill-hint" aria-live="polite">
+              Swipe or tap a folder
+            </span>
           )}
+          <button type="button" className="dh-mpill-arrow" aria-label="Next project" onClick={() => step(1)}>
+            ›
+          </button>
         </div>
       )}
 
@@ -773,6 +840,7 @@ export default function DesignHome() {
   return (
     <>
     {!loaderGone && <Loader value={loadP} out={entered} />}
+    <DesignNotices ready={entered} />
     <div className={`dh ${entered ? '' : 'is-loading'}`}>
       <header className="dh-head">
         <Link to="/design" className="dh-name">

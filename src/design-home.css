@@ -890,3 +890,164 @@
     animation-delay: 0ms;
   }
 }
+
+/* phones: the folder pill, white like the desktop one, with arrows either side */
+.dh-mpill {
+  gap: 4px;
+  padding: 5px;
+  max-width: calc(100vw - 40px);
+  box-sizing: border-box;
+}
+.dh-mpill-arrow {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--dh-ink);
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dh-mpill-open,
+.dh-mpill-hint {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dh-mpill-open {
+  min-height: 42px;
+  border: 0;
+  background: none;
+  color: var(--dh-ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.dh-mpill-hint {
+  color: var(--dh-grey);
+}
+
+/* the grab bar only shows where a panel is a drawer */
+.dh-drawer-grab {
+  display: none;
+}
+@media (max-width: 1100px) {
+  /* one 20px gutter for the name, the Hire me button, the corners and the drawers */
+  .dh-head {
+    padding: 18px 20px;
+  }
+  .dh-head .dh-hire-btn {
+    margin: -9px 0;
+    padding: 9px 14px;
+  }
+  .dh-corners {
+    inset: auto 20px 18px;
+  }
+  .dh-work {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .dh-panel,
+  .dh-panel--about {
+    height: 60svh;
+    max-height: none;
+    padding: 10px 20px 36px;
+    transition: height 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    overscroll-behavior: contain;
+  }
+  .dh-panel.is-full {
+    height: 92svh;
+  }
+  .dh-panel.is-dragging {
+    transition: none;
+  }
+  .dh-drawer-grab {
+    display: block;
+    flex: none;
+    align-self: stretch;
+    height: 26px;
+    margin: 0 -20px 4px;
+    touch-action: none;
+    cursor: grab;
+    animation: none !important;
+  }
+  .dh-drawer-grab::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 10px auto 0;
+    border-radius: 4px;
+    background: #d6d4cc;
+  }
+}
+
+/* cookies, then (phones) the desktop nudge: one small white pill under the header */
+.dn {
+  position: fixed;
+  top: 92px;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  margin: 0 auto; /* centred without a transform: the rise animation owns transform */
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  box-sizing: border-box;
+  padding: 8px 8px 8px 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 6px 24px rgba(20, 40, 15, 0.14), 0 1px 2px rgba(20, 40, 15, 0.08);
+  color: #141414;
+  font-family: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  animation: dh-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 400ms both;
+}
+.dn p {
+  margin: 0;
+}
+.dn-btn {
+  flex: none;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #141414;
+  color: #f7f7f5;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.dn-x {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+@media (max-width: 1100px) {
+  .dn {
+    top: 70px;
+    left: 20px;
+    right: 20px;
+    width: auto;
+    border-radius: 18px;
+  }
+}

@@ -4,6 +4,7 @@ import { designApi } from '../lib/designApi.js';
 import Markdown from '../components/Markdown.jsx';
 import AccessMatrix from '../components/design/AccessMatrix.jsx';
 import useDesignHead from '../components/design/useDesignHead.js';
+import DesignNotices from '../components/design/DesignNotices.jsx';
 import '../design.css';
 import '../design-home.css';
 import '../design-case.css';
@@ -271,6 +272,8 @@ export default function DesignCase() {
           )}
         </main>
       </div>
+
+      <DesignNotices />
 
       <footer className="dc-foot">
         <span>Abhishek Manjhi · Lead product designer</span>
