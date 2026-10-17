@@ -89,7 +89,7 @@ const CARD_OUT = 0.075;
 const FRAME_H = 0.84; // ortho height that frames the crate, as in Blender
 const SHIFT_Y = 0.045; // headroom above the crate for a popped folder
 
-export async function createCrate(host, { onHover, onClick, onIntroDone, onBanner, reducedMotion }) {
+export async function createCrate(host, { onHover, onClick, onIntroDone, onBanner, onProgress, reducedMotion }) {
   // rig = the scroll pose. Inside it the whole little world turns on the planet's centre (pivot):
   // the crate (body) on top, the planet and grass (ground), and the About camera on the far side.
   const R = 1.0; // the planet's radius, metres (the crate is 0.44 wide)
@@ -143,7 +143,21 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
   // real-time shadow falls on both.
   const draco = new DRACOLoader().setDecoderPath(BASE + 'draco/');
   const loader = new GLTFLoader().setDRACOLoader(draco);
-  const [gltf, camModel, planeModel] = await Promise.all([loader.loadAsync(BASE + 'crate.glb'), loader.loadAsync(BASE + 'camera.glb'), loader.loadAsync(BASE + 'plane.glb')]);
+  // every model loads before the page opens (the loader shows the share that has arrived)
+  const got = [0, 0, 0];
+  const tell = () => onProgress?.((got[0] + got[1] + got[2]) / 3);
+  const load = (name, k) =>
+    loader
+      .loadAsync(BASE + name, (e) => {
+        if (e.total) got[k] = Math.min(0.95, e.loaded / e.total);
+        tell();
+      })
+      .then((m) => {
+        got[k] = 1;
+        tell();
+        return m;
+      });
+  const [gltf, camModel, planeModel] = await Promise.all([load('crate.glb', 0), load('camera.glb', 1), load('plane.glb', 2)]);
   draco.dispose();
   const fine = window.matchMedia('(pointer: fine)').matches;
   // the bare planet: dark soil-green, only seen at the very roots
@@ -538,7 +552,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
       apply(F, tidy);
     }
     // now and then, after the visitor has been here a while, the plane crosses the sky
-    if (flyer.update(now, focused, hireWant === 1, reducedMotion)) moving = true;
+    if (flyer.update(now, focused, hireWant === 1, reducedMotion, progress)) moving = true;
     if (flight) {
       updateFlight(now);
       moving = true;
@@ -611,7 +625,15 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
   resize();
   place();
   el.style.pointerEvents = 'none';
-  renderer.compile(scene, camera);
+  // compile every shader and upload every texture now, while the loader is up, so nothing pops in
+  // later (the plane and the About side included, though they are out of sight)
+  flyer.show(true);
+  scene.traverse((o) => {
+    for (const m of [].concat(o.material || [])) for (const t of [m.map, m.emissiveMap, m.normalMap, m.roughnessMap, m.alphaMap]) t && renderer.initTexture(t);
+  });
+  if (renderer.compileAsync) await renderer.compileAsync(scene, camera);
+  else renderer.compile(scene, camera);
+  flyer.show(false);
   renderer.render(scene, camera);
 
   return {
@@ -625,7 +647,23 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     setHire(on) {
       hireWant = on ? 1 : 0;
       this.setFocus(on);
-      if (on) shiftWant = window.innerWidth > 1100 ? 0.9 : 0;
+      // far left, so the planet stops short of the form and its fade
+      if (on) shiftWant = window.innerWidth > 1100 ? 1.9 : 0;
+      wake();
+    },
+    // Hire me form: 0-3 fields filled, the plane comes closer with each
+    setHireLevel(n) {
+      flyer.setLevel(n);
+      wake();
+    },
+    // the form was sent: the plane turns to the visitor and flies straight at the screen
+    slam() {
+      flyer.slam(performance.now());
+      wake();
+    },
+    // the thank-you closed: the plane flies back in over the Hire me view
+    planeBack() {
+      flyer.back();
       wake();
     },
     setAbout(on) {
@@ -653,6 +691,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     // The crate falls in from above the window at `at` (a performance.now() time).
     playDrop(at) {
       if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; }, get aboutP() { return aboutP; }, get hireP() { return hireP; }, flyer, camera, renderer, scene };
+      flyer.arm(performance.now());
       if (reducedMotion) return wake();
       // start fully above the window, level, everything at rest
       const h = (window.innerHeight + land.size) * u / 0.78 / 1.25;
@@ -1055,7 +1094,7 @@ function makeDetails(center, R) {
 // banner is a small cloth simulation (verlet points held by springs): its front edge hangs on the two
 // tow ropes and the airflow streams it back, with a gust rippling down its length. Click: Contact.
 function makeFlyer(model, scene, camera, renderer) {
-  const FIRST = 14000; // ms on the page before the first pass
+  const FIRST = 8500; // ms after the page opens before the first pass
   const EVERY = 45000;
   const DUR = 13000;
   const plane = new Group();
@@ -1071,15 +1110,19 @@ function makeFlyer(model, scene, camera, renderer) {
     prop.add(disc);
   }
   plane.visible = false;
-  scene.add(plane);
+  // plane, ropes and banner live in one group that sits on the plane and carries its size: tiny
+  // over the headline, closer and closer as the Hire me form fills in. The cloth is simulated in
+  // the group's own space, so changing its size never tears the cloth.
+  const fly = new Group();
+  fly.add(plane);
+  scene.add(fly);
 
   // the cloth's look: cream fabric, red dashed stitching, grommets, a swallowtail end. Drawn twice:
   // with the ropes on the left (flying left, tail streaming right) and on the right (hovering,
   // facing right); either way the words read normally.
   const L = 0.82;
   const H = 0.14;
-  const label = 'HIRE ME FOR WORK  ↗';
-  const drawCloth = (ropesRight) => {
+  const drawCloth = (ropesRight, label = 'HIRE ME FOR WORK  ↗') => {
     const c = document.createElement('canvas');
     c.width = 2048;
     c.height = 324;
@@ -1142,7 +1185,7 @@ function makeFlyer(model, scene, camera, renderer) {
   const banner = new Mesh(geo, clothMat);
   banner.frustumCulled = false;
   banner.visible = false;
-  scene.add(banner);
+  fly.add(banner);
   const uv0 = Array.from({ length: geo.attributes.uv.count }, (_, k) => geo.attributes.uv.getX(k));
   const P = []; // current
   const Q = []; // previous
@@ -1157,7 +1200,7 @@ function makeFlyer(model, scene, camera, renderer) {
   const ropes = new LineSegments(ropeGeo, new LineBasicMaterial({ color: 0x8a6a3c }));
   ropes.frustumCulled = false;
   ropes.visible = false;
-  scene.add(ropes);
+  fly.add(ropes);
 
   const right = new Vector3();
   const up = new Vector3();
@@ -1171,13 +1214,39 @@ function makeFlyer(model, scene, camera, renderer) {
   const tmp = new Vector3();
   const flatR = new Vector3();
   const flatV = new Vector3();
-  let next = FIRST;
+  let next = -1;
   let t0 = -1;
   let last = 0;
   let hov = 0; // 0 off, 1 hovering, 2 leaving
   let h0 = 0;
   let lastDir = 0;
   let relay = false;
+  let passS = 1; // this flyby's size
+  let passY = 0.66;
+  let level = 0;
+  let hs = 0.8; // hover size and place (NDC), eased toward the form's level
+  let hx = 0.08;
+  let hy = 0.5;
+  let hf = 0.15; // how far it has turned to face the visitor: 0 side-on, 1 nose at the screen
+  let face = 0;
+  let gone = false; // flown into the screen; it stays away until Hire me closes
+  let slam = null; // { t0, from: [x, y, s, f] }
+  const halfW = () => (camera.right - camera.left) / (2 * camera.zoom);
+  // Where the hover goes for each field of the Hire me form filled in (0-3): over the empty side
+  // of the window, turning a little more to face the visitor and coming a little closer each time.
+  // [x, y, size, face]
+  const hoverGoal = (lv) => {
+    const wide = window.innerWidth > 1100;
+    const span = wide ? 0.98 : 1.7; // NDC width of the empty side
+    const cx = wide ? -0.5 : 0;
+    const f = [0.12, 0.42, 0.66, 0.86][lv];
+    const s = ([0.24, 0.32, 0.42, 0.54][lv] * span * halfW()) / 0.36; // the plane's own width on screen
+    return [cx + ((0.45 * s) / halfW()) * (1 - f), [0.48, 0.4, 0.32, 0.24][lv], s, f];
+  };
+  const swapTex = () => {
+    clothMat.map = clothMat.emissiveMap = lastDir > 0 ? texR : tex;
+    clothMat.needsUpdate = true;
+  };
   const show = (on) => (plane.visible = banner.visible = ropes.visible = on);
   const trailV = new Vector3(); // the way the banner streams: behind the plane
   const pins = () => {
@@ -1239,12 +1308,29 @@ function makeFlyer(model, scene, camera, renderer) {
     plane,
     banner,
     // returns true while flying. `hire`: fly in and hover over the planet (the Hire me view)
-    update(now, paused, hire, still) {
+    show,
+    // the first pass counts from when the page opens, not from when the models loaded
+    arm(now) {
+      if (next < 0) next = now + FIRST;
+    },
+    setLevel(n) {
+      level = Math.max(0, Math.min(3, n | 0));
+    },
+    slam(now) {
+      if (hov !== 1) return;
+      slam = { t0: now, from: [hx, hy, hs, hf] };
+    },
+    back() {
+      gone = false;
+    },
+    update(now, paused, hire, still, scroll = 1) {
       right.set(1, 0, 0).applyQuaternion(camera.quaternion);
       up.set(0, 1, 0).applyQuaternion(camera.quaternion);
       fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
       view.copy(fwd).negate();
       let dir; // -1 flying left (the flyby), +1 flying right (hovering, facing the form)
+      if (!hire) gone = false;
+      if (gone) return false;
       if (hire || hov > 0) {
         // Hire me: in from the left, then a slow hover over the planet; out to the right after
         if (hire && hov === 0) {
@@ -1262,17 +1348,50 @@ function makeFlyer(model, scene, camera, renderer) {
         dir = 1;
         const k = Math.min(1, (now - h0) / 1800);
         const e = hov === 1 ? 1 - Math.pow(1 - k, 3) : k * k;
-        const x = hov === 1 ? -1.6 + 1.68 * e : 0.08 + 1.9 * e;
+        const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+        const [gx, gy, gs, gf] = hoverGoal(level);
+        const ease = 1 - Math.exp(-dt / 0.5);
+        if (slam) {
+          // Sent: it turns square to the visitor and flies straight at them, faster and faster,
+          // until it fills the window and the page goes white (DesignHome shows the thank-you)
+          const u = Math.min(1, (now - slam.t0) / 950);
+          const a = u * u * u;
+          const big = (3.2 * halfW()) / 0.36;
+          hx = slam.from[0] + (0 - slam.from[0]) * a;
+          hy = slam.from[1] + (-0.05 - slam.from[1]) * a;
+          hs = slam.from[2] + (big - slam.from[2]) * a;
+          hf = slam.from[3] + (1 - slam.from[3]) * Math.min(1, u * 2.2);
+          if (u >= 1) {
+            slam = null;
+            gone = true;
+            hov = 0;
+            [hx, hy, hs, hf] = hoverGoal(0);
+            show(false);
+            return false;
+          }
+        } else {
+          hx += (gx - hx) * ease;
+          hy += (gy - hy) * ease;
+          hs += (gs - hs) * ease;
+          hf += (gf - hf) * ease;
+        }
+        const x = hov === 1 ? -1.6 + (hx + 1.6) * e : hx + 1.9 * e;
         if (hov === 2 && k >= 1) {
           hov = 0;
           show(false);
           next = now + EVERY;
           return false;
         }
-        p.set(still ? 0 : x, 0.5 + Math.sin(now * 0.0019) * 0.03, 0.6).unproject(camera);
+        face = hf;
+        fly.scale.setScalar(hs);
+        p.set(still ? 0 : x, hy + Math.sin(now * 0.0019) * 0.03 * hs, 0.6).unproject(camera);
       } else {
         if (t0 < 0) {
-          if (now < next || paused || still) return false;
+          if (next < 0 || now < next || paused || still) return false;
+          // over the headline it stays tiny and high, out of the way of the words
+          passS = scroll < 0.5 ? 0.3 : 1;
+          passY = scroll < 0.5 ? 0.8 : 0.66;
+          fly.scale.setScalar(passS);
           t0 = now;
           last = now;
           relay = true;
@@ -1286,31 +1405,36 @@ function makeFlyer(model, scene, camera, renderer) {
           return false;
         }
         dir = -1;
-        p.set(1.55 - 3.4 * t, 0.66 + Math.sin(now * 0.0016) * 0.03, 0.6).unproject(camera);
+        p.set(1.55 - 3.4 * t, passY + Math.sin(now * 0.0016) * 0.03 * passS, 0.6).unproject(camera);
       }
       if (dir !== lastDir) {
         lastDir = dir;
-        clothMat.map = clothMat.emissiveMap = dir > 0 ? texR : tex;
-        clothMat.needsUpdate = true;
+        swapTex();
         const uv = geo.attributes.uv;
         for (let k = 0; k < uv.count; k++) uv.setX(k, dir > 0 ? 1 - uv0[k] : uv0[k]);
         uv.needsUpdate = true;
         relay = true;
       }
-      trailV.copy(right).multiplyScalar(-dir);
-      plane.position.copy(p);
+      fly.position.copy(p);
       // it flies level with the ground (not square to the screen), so the camera looks down onto it
       // from above and both wings show; the nose is turned a little toward the viewer
       plane.up.set(0, 1, 0);
       flatR.set(right.x, 0, right.z).normalize();
       flatV.set(view.x, 0, view.z).normalize();
-      tgt.copy(p).addScaledVector(flatR, dir).addScaledVector(flatV, 0.35);
+      // side-on it points along the screen, nose turned a little toward the viewer; facing them it
+      // points at the camera itself (pitching up to it); the banner always streams out behind
+      const f = hov > 0 ? face : 0;
+      tmp.copy(flatV).lerp(view, f * 0.75).normalize();
+      tgt.copy(flatR).multiplyScalar(dir * (1 - f)).addScaledVector(tmp, 0.35 + f * 2.6).normalize();
+      if (hov > 0) trailV.copy(tgt).negate();
+      else trailV.copy(right).multiplyScalar(-dir);
+      tgt.add(p);
       plane.lookAt(tgt);
       plane.rotateZ(Math.sin(now * 0.0021) * 0.08 + 0.05 * -dir);
       if (prop) prop.rotation.z += 0.42;
-      plane.updateMatrixWorld(true);
-      if (tow) tow.getWorldPosition(towW);
-      else towW.copy(p).addScaledVector(trailV, 0.17);
+      fly.updateMatrixWorld(true);
+      if (tow) fly.worldToLocal(tow.getWorldPosition(towW));
+      else towW.copy(trailV).multiplyScalar(0.17);
       pins();
       if (relay) {
         lay();

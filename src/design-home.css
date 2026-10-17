@@ -758,3 +758,135 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* the loader: the page's own ground, the name, a thin bar in the crate's blue */
+.dh-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: #f7f7f5;
+  color: #141414;
+  font-family: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  transition: opacity 650ms ease, visibility 0s linear 650ms;
+}
+.dh-loader.is-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.dh-loader-in {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.dh-loader-name {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dh-loader-bar {
+  width: 168px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #e6e4dc;
+}
+.dh-loader-bar i {
+  display: block;
+  height: 100%;
+  background: #4f9fdc;
+  transform-origin: left;
+  transition: transform 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.dh-loader-pct {
+  font-size: 12px;
+  color: #6b6b66;
+  font-variant-numeric: tabular-nums;
+}
+/* the headline waits behind the loader, then rises as it fades */
+.dh.is-loading *,
+.dh.is-loading *::before,
+.dh.is-loading *::after {
+  animation-play-state: paused !important;
+}
+/* sent: the plane flies at the visitor over the form, then the window goes white and clears */
+.dh-gl-host.is-slam {
+  z-index: 40;
+}
+.dh-thanks {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 0 24px;
+  background: #fff;
+  color: var(--dh-ink);
+  animation: dh-white-in 380ms ease 600ms both;
+}
+@keyframes dh-white-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.dh-thanks-in {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.dh-thanks-in > * {
+  margin: 0;
+  animation: dh-rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both;
+}
+.dh-thanks-kicker {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dh-grey);
+}
+/* the same size as the hero headline */
+.dh-thanks-line {
+  max-width: 720px;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  --d: 90ms;
+}
+.dh-thanks-note {
+  font-size: 16px;
+  color: var(--dh-grey);
+  --d: 180ms;
+}
+@media (max-width: 720px) {
+  .dh-thanks-line {
+    font-size: 26px;
+  }
+}
+.dh-thanks-close {
+  position: absolute;
+  top: 28px;
+  right: 40px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dh-thanks {
+    animation-delay: 0ms;
+  }
+}

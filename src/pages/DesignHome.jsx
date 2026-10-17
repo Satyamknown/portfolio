@@ -291,11 +291,17 @@ function AboutPanel({ onClose }) {
 // Hire me: the same form and actions as the contact page (it posts to the same appointments API,
 // so it arrives the same way), beside the planet while the banner plane hovers over it.
 const EMPTY_FORM = { name: '', email: '', message: '', website: '' };
-function HirePanel({ onClose }) {
+function HirePanel({ onClose, onLevel, onSlam, onSent, onFail }) {
   const [data, setData] = useState(EMPTY_FORM);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
   const set = (k) => (e) => setData((d) => ({ ...d, [k]: e.target.value }));
+  // each field filled brings the plane a little closer
+  const level = ['name', 'email', 'message'].filter((k) => data[k].trim()).length;
+  useEffect(() => {
+    onLevel(level);
+  }, [level, onLevel]);
+  useEffect(() => () => onLevel(0), [onLevel]);
   useEffect(() => {
     const key = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', key);
@@ -305,11 +311,14 @@ function HirePanel({ onClose }) {
     e.preventDefault();
     setStatus('sending');
     setError(null);
+    onSlam(); // the plane rushes at the screen straight away; its thank-you waits for the reply
     try {
       await api.submitAppointment(data);
+      onSent();
       setStatus('sent');
       setData(EMPTY_FORM);
     } catch (err) {
+      onFail();
       setStatus('error');
       setError(err.message);
     }
@@ -342,7 +351,7 @@ function HirePanel({ onClose }) {
       </div>
       {status === 'sent' ? (
         <p className="dh-hire-sent" role="status" style={{ '--d': '0ms' }}>
-          Thank you. I&rsquo;ll get back to you within a day.
+          Your form has been submitted. You&rsquo;ll get a call back soon.
         </p>
       ) : (
         <form className="dh-hire-form" onSubmit={submit} style={{ '--d': '300ms' }}>
@@ -382,7 +391,7 @@ function HirePanel({ onClose }) {
   );
 }
 
-function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
+function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire, entered, onProgress, onLoaded }) {
   const fine = useFinePointer();
   const navigate = useNavigate();
   const host = useRef(null);
@@ -423,6 +432,26 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
   openRef.current = open;
   const navRef = useRef(navigate);
   navRef.current = navigate;
+  const loadRef = useRef({ onProgress, onLoaded });
+  loadRef.current = { onProgress, onLoaded };
+  const [slamming, setSlamming] = useState(false);
+  // after Send: the window goes white and, once the form has gone through, says so ('' | sending | sent)
+  const [white, setWhite] = useState('');
+  const hireLevel = useCallback((n) => api.current?.setHireLevel(n), []);
+  const slam = useCallback(() => {
+    api.current?.slam();
+    // over the form while it comes at the visitor, then the white takes the window
+    setSlamming(true);
+    setWhite('sending');
+    setTimeout(() => setSlamming(false), 1000);
+  }, []);
+  const sent = useCallback(() => setWhite('sent'), []);
+  const sendFailed = useCallback(() => setWhite(''), []); // back to the form, which shows the error
+  // closing the thank-you goes back to Hire me: the plane flies in again, the form says it's sent
+  const closeThanks = useCallback(() => {
+    setWhite('');
+    api.current?.planeBack();
+  }, []);
 
   // Load three.js and the model right after the page paints. The scroll then drives the crate
   // from its hero pose to its Work pose; the Work pose is wherever .dh-box sits in the layout.
@@ -446,20 +475,21 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
           onClick: (i, pointer) => (pointer === 'mouse' || panelRef.current >= 0 ? setPanel(i) : setTarget(i)),
           onIntroDone: () => onSettled(),
           onBanner: () => navRef.current('/contact'),
+          onProgress: (f) => loadRef.current.onProgress?.(f),
         })
       )
       .then((c) => {
         if (!alive) return c.dispose();
         api.current = c;
         layout();
-        // the crate falls in once the headline has finished rising (about 1.1 s after load)
-        c.playDrop(Math.max(performance.now() + 120, 1150));
         setReady(true);
+        loadRef.current.onLoaded?.();
       })
       .catch(() => {
         if (alive) {
           setFailed(true);
           onSettled();
+          loadRef.current.onLoaded?.();
         }
       });
     window.addEventListener('resize', layout);
@@ -471,6 +501,10 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
     };
   }, [onSettled]);
 
+  // the crate falls in once the loader has gone and the headline has risen (about 1.1 s)
+  useEffect(() => {
+    if (ready && entered) api.current?.playDrop(performance.now() + 1150);
+  }, [ready, entered]);
   useEffect(() => {
     api.current?.setTarget(target);
   }, [target, ready]);
@@ -571,7 +605,7 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
         )}
       </div>
       {/* the 3D layer covers the window; .dh-box above only marks where the crate lands */}
-      <div ref={host} className={`dh-gl-host ${ready ? 'is-ready' : ''} ${flying ? 'is-flying' : ''}`} role="img" aria-label="A blue crate of manila folders, one per project, with company stickers on its sides" />
+      <div ref={host} className={`dh-gl-host ${ready ? 'is-ready' : ''} ${flying ? 'is-flying' : ''} ${slamming ? 'is-slam' : ''}`} role="img" aria-label="A blue crate of manila folders, one per project, with company stickers on its sides" />
 
       {/* keyboard and screen-reader route to the same projects */}
       <ul className="dh-sr">
@@ -592,7 +626,8 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
 
       {panel >= 0 && !flying && <ProjectPanel i={panel} onClose={closePanel} onOpenCase={open} onGo={setPanel} />}
       {about && <AboutPanel onClose={onCloseAbout} />}
-      {hire && <HirePanel onClose={onCloseHire} />}
+      {hire && <HirePanel onClose={onCloseHire} onLevel={hireLevel} onSlam={slam} onSent={sent} onFail={sendFailed} />}
+      {white && <Thanks sent={white === 'sent'} onClose={closeThanks} />}
 
       {held ? null : fine ? (
         <p className="dh-caption dh-pill dh-reveal" aria-live="polite">
@@ -635,8 +670,85 @@ function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
   );
 }
 
+// The page after the Hire me form goes through: white, one line, a close button.
+function Thanks({ sent, onClose }) {
+  const close = useRef(null);
+  useEffect(() => {
+    if (!sent) return undefined;
+    close.current?.focus({ preventScroll: true });
+    const key = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, [sent, onClose]);
+  return (
+    <div className={`dh-thanks ${sent ? 'is-sent' : ''}`} role="dialog" aria-modal="true" aria-labelledby="dh-thanks-line">
+      {sent && (
+        <>
+          <button ref={close} type="button" className="dh-thanks-close" aria-label="Close" onClick={onClose}>
+            ×
+          </button>
+          <div className="dh-thanks-in" role="status">
+            <p className="dh-thanks-kicker">Request received</p>
+            <p id="dh-thanks-line" className="dh-thanks-line">
+              Abhishek is on his way.
+              <br />
+              Phone in one hand, coffee in the other.
+            </p>
+            <p className="dh-thanks-note">Your form is in. Expect a call back soon.</p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// Everything the front door needs (three.js, the crate, camera and plane models, every shader and
+// texture, the fonts) loads behind this screen, so nothing pops in after the visitor arrives.
+function Loader({ value, out }) {
+  const pct = Math.round(value * 100);
+  return (
+    <div className={`dh-loader ${out ? 'is-out' : ''}`} role="progressbar" aria-label="Loading" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+      <div className="dh-loader-in">
+        <span className="dh-loader-name">Abhishek Manjhi</span>
+        <span className="dh-loader-bar" aria-hidden="true">
+          <i style={{ transform: `scaleX(${value})` }} />
+        </span>
+        <span className="dh-loader-pct">{pct}%</span>
+      </div>
+    </div>
+  );
+}
+
 export default function DesignHome() {
   useDesignHead('Abhishek Manjhi · Lead product designer');
+  const [loadP, setLoadP] = useState(0.04);
+  const [loaded, setLoaded] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [loaderGone, setLoaderGone] = useState(false);
+  const onProgress = useCallback((f) => setLoadP((p) => Math.max(p, 0.08 + f * 0.84)), []);
+  const onLoaded = useCallback(() => setLoaded(true), []);
+  // open the page once the models are in and the fonts are ready (and not in a flash)
+  useEffect(() => {
+    if (!loaded) return undefined;
+    let alive = true;
+    const t0 = performance.now();
+    setLoadP(1);
+    Promise.race([document.fonts?.ready || Promise.resolve(), new Promise((r) => setTimeout(r, 2500))]).then(() => {
+      setTimeout(() => alive && setEntered(true), Math.max(0, 450 - (performance.now() - t0)));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [loaded]);
+  useEffect(() => {
+    if (!entered) {
+      document.documentElement.style.overflow = 'hidden';
+      return undefined;
+    }
+    document.documentElement.style.overflow = '';
+    const t = setTimeout(() => setLoaderGone(true), 800);
+    return () => clearTimeout(t);
+  }, [entered]);
   const [settled, setSettled] = useState(false);
   const onSettled = useCallback(() => setSettled(true), []);
   const [about, setAbout] = useState(false);
@@ -659,7 +771,9 @@ export default function DesignHome() {
     setHire(true);
   };
   return (
-    <div className="dh">
+    <>
+    {!loaderGone && <Loader value={loadP} out={entered} />}
+    <div className={`dh ${entered ? '' : 'is-loading'}`}>
       <header className="dh-head">
         <Link to="/design" className="dh-name">
           Abhishek Manjhi
@@ -678,7 +792,7 @@ export default function DesignHome() {
       </header>
       <Hero />
       <section className={`dh-screen dh-work ${settled ? 'is-settled' : ''}`} id="work">
-        <Crate onSettled={onSettled} about={about} onCloseAbout={closeAbout} hire={hire} onCloseHire={closeHire} />
+        <Crate onSettled={onSettled} about={about} onCloseAbout={closeAbout} hire={hire} onCloseHire={closeHire} entered={entered} onProgress={onProgress} onLoaded={onLoaded} />
       </section>
       {/* fixed to the corners of the window on every screen */}
       <div className="dh-corners" aria-hidden="true">
@@ -686,5 +800,6 @@ export default function DesignHome() {
         <span>©2026</span>
       </div>
     </div>
+    </>
   );
 }

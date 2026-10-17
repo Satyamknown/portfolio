@@ -2,6 +2,10 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// The dev API (npm run dev:api) listens on 5001 unless PORT says otherwise; API_PORT points the
+// proxy at the same place.
+const api = `http://127.0.0.1:${process.env.API_PORT || 5001}`
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -17,8 +21,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://127.0.0.1:5001',
-      '/go/': 'http://127.0.0.1:5001'
+      '/api': api,
+      '/go/': api
     }
   }
 })

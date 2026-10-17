@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,6 +11,7 @@ const port = process.env.PORT || 5001;
 // Data lives in .localdb/ and survives restarts. Production always uses MONGODB_URI.
 if (!process.env.MONGODB_URI) {
   const { MongoMemoryServer } = await import('mongodb-memory-server');
+  fs.mkdirSync(path.join(root, '.localdb'), { recursive: true }); // a fresh checkout has none yet
   const mongod = await MongoMemoryServer.create({
     instance: { dbPath: path.join(root, '.localdb'), storageEngine: 'wiredTiger', dbName: 'portfolio' }
   });
