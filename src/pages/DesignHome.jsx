@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useDesignHead from '../components/design/useDesignHead.js';
+import { api } from '../lib/api.js';
+import { emailCompose, profile } from '../data/site.js';
 import '../design-home.css';
 
 // The design portfolio's front door, one screen after another, the way it was designed on the canvas:
@@ -286,7 +288,101 @@ function AboutPanel({ onClose }) {
   );
 }
 
-function Crate({ onSettled, about, onCloseAbout }) {
+// Hire me: the same form and actions as the contact page (it posts to the same appointments API,
+// so it arrives the same way), beside the planet while the banner plane hovers over it.
+const EMPTY_FORM = { name: '', email: '', message: '', website: '' };
+function HirePanel({ onClose }) {
+  const [data, setData] = useState(EMPTY_FORM);
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState(null);
+  const set = (k) => (e) => setData((d) => ({ ...d, [k]: e.target.value }));
+  useEffect(() => {
+    const key = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, [onClose]);
+  const submit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    setError(null);
+    try {
+      await api.submitAppointment(data);
+      setStatus('sent');
+      setData(EMPTY_FORM);
+    } catch (err) {
+      setStatus('error');
+      setError(err.message);
+    }
+  };
+  return (
+    <aside className="dh-panel dh-panel--about dh-panel--hire" aria-labelledby="dh-hire-title">
+      <div className="dh-panel-top" style={{ '--d': '60ms' }}>
+        <span className="dh-panel-kicker">Hire me</span>
+        <button type="button" className="dh-panel-close" aria-label="Close" onClick={onClose}>
+          ×
+        </button>
+      </div>
+      <h2 id="dh-hire-title" className="dh-panel-name" style={{ '--d': '120ms' }}>
+        Let&rsquo;s work together
+      </h2>
+      <p className="dh-panel-line" style={{ '--d': '180ms' }}>
+        Tell me about the role or the project. I usually reply within a day.
+      </p>
+      <div className="dh-hire-links" style={{ '--d': '240ms' }}>
+        <a href="tel:+918828447664">Call me</a>
+        <a href={emailCompose} target="_blank" rel="noreferrer">
+          Email me <span aria-hidden="true">↗</span>
+        </a>
+        <a href={profile.linkedin} target="_blank" rel="noreferrer">
+          LinkedIn <span aria-hidden="true">↗</span>
+        </a>
+        <a href="/design/resume.pdf" download="Abhishek-Manjhi-Resume-Design.pdf">
+          Resume <span aria-hidden="true">↓</span>
+        </a>
+      </div>
+      {status === 'sent' ? (
+        <p className="dh-hire-sent" role="status" style={{ '--d': '0ms' }}>
+          Thank you. I&rsquo;ll get back to you within a day.
+        </p>
+      ) : (
+        <form className="dh-hire-form" onSubmit={submit} style={{ '--d': '300ms' }}>
+          {error && <p className="dh-hire-error">{error}</p>}
+          <div className="dh-hire-pair">
+            <label>
+              Name
+              <input required name="name" value={data.name} onChange={set('name')} autoComplete="name" />
+            </label>
+            <label>
+              Email
+              <input required type="email" name="email" value={data.email} onChange={set('email')} autoComplete="email" />
+            </label>
+          </div>
+          <label>
+            What&rsquo;s this about
+            <textarea required name="message" rows={4} value={data.message} onChange={set('message')} placeholder="Role, company, what you'd like to talk through…" />
+          </label>
+          {/* honeypot: hidden from people, bots fill every field */}
+          <div className="hp-field" aria-hidden="true">
+            <label>
+              Website
+              <input tabIndex={-1} autoComplete="off" value={data.website} onChange={set('website')} />
+            </label>
+          </div>
+          <div className="dh-hire-actions">
+            <button type="submit" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Request a time →'}
+            </button>
+            <a href={emailCompose} target="_blank" rel="noreferrer">
+              Or email me directly <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </form>
+      )}
+    </aside>
+  );
+}
+
+function Crate({ onSettled, about, onCloseAbout, hire, onCloseHire }) {
   const fine = useFinePointer();
   const navigate = useNavigate();
   const host = useRef(null);
@@ -380,10 +476,19 @@ function Crate({ onSettled, about, onCloseAbout }) {
   }, [target, ready]);
   // the open project stays lifted; the crate slides left to make room for the panel
   useEffect(() => {
-    if (about) return;
+    if (about || hire) return;
     api.current?.setFocus(panel >= 0);
     if (panel >= 0) setTarget(panel);
-  }, [panel, ready, about]);
+  }, [panel, ready, about, hire]);
+  // Hire me: the planet rolls over and the banner plane comes to hover over it
+  useEffect(() => {
+    if (!ready) return;
+    if (hire) {
+      setPanel(-1);
+      setTarget(-1);
+    }
+    api.current?.setHire(hire);
+  }, [hire, ready]);
   // About: the planet rolls round to the instant camera
   useEffect(() => {
     if (!ready) return;
@@ -399,8 +504,8 @@ function Crate({ onSettled, about, onCloseAbout }) {
   }, []);
   // While a project is open the page holds the Work view: it never slides back to the hero under
   // the panel. Scrolling up just closes the panel (and stays on the crate); after that it scrolls.
-  const held = panel >= 0 || about;
-  const closeHeld = about ? onCloseAbout : closePanel;
+  const held = panel >= 0 || about || hire;
+  const closeHeld = about ? onCloseAbout : hire ? onCloseHire : closePanel;
   useEffect(() => {
     if (!held) return undefined;
     const html = document.documentElement;
@@ -487,6 +592,7 @@ function Crate({ onSettled, about, onCloseAbout }) {
 
       {panel >= 0 && !flying && <ProjectPanel i={panel} onClose={closePanel} onOpenCase={open} onGo={setPanel} />}
       {about && <AboutPanel onClose={onCloseAbout} />}
+      {hire && <HirePanel onClose={onCloseHire} />}
 
       {held ? null : fine ? (
         <p className="dh-caption dh-pill dh-reveal" aria-live="polite">
@@ -535,12 +641,22 @@ export default function DesignHome() {
   const onSettled = useCallback(() => setSettled(true), []);
   const [about, setAbout] = useState(false);
   const closeAbout = useCallback(() => setAbout(false), []);
+  const [hire, setHire] = useState(false);
+  const closeHire = useCallback(() => setHire(false), []);
   // About and Work both live on the Work screen: jump there, then roll the planet (or roll it back)
   const toWork = (e, openAbout) => {
     e.preventDefault();
     const max = document.documentElement.scrollHeight - window.innerHeight;
     if (window.scrollY < max - 2) window.scrollTo({ top: max, behavior: openAbout ? 'auto' : 'smooth' });
+    setHire(false);
     setAbout(openAbout);
+  };
+  const toHire = (e) => {
+    e.preventDefault();
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY < max - 2) window.scrollTo({ top: max, behavior: 'auto' });
+    setAbout(false);
+    setHire(true);
   };
   return (
     <div className="dh">
@@ -556,13 +672,13 @@ export default function DesignHome() {
             About
           </a>
         </nav>
-        <Link to="/contact" className="dh-contact">
-          Contact
-        </Link>
+        <a href="#hire" className="dh-contact dh-hire-btn" onClick={toHire} aria-current={hire ? 'page' : undefined}>
+          Hire me
+        </a>
       </header>
       <Hero />
       <section className={`dh-screen dh-work ${settled ? 'is-settled' : ''}`} id="work">
-        <Crate onSettled={onSettled} about={about} onCloseAbout={closeAbout} />
+        <Crate onSettled={onSettled} about={about} onCloseAbout={closeAbout} hire={hire} onCloseHire={closeHire} />
       </section>
       {/* fixed to the corners of the window on every screen */}
       <div className="dh-corners" aria-hidden="true">

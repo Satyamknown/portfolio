@@ -656,3 +656,105 @@
 .dh-gl-host.is-flying {
   z-index: 40;
 }
+
+/* Hire me: the form beside the planet */
+.dh-hire-btn {
+  padding: 9px 16px;
+  margin: -9px -16px;
+  border-radius: 999px;
+  background: var(--dh-ink);
+  color: var(--dh-bg) !important;
+}
+.dh-hire-btn:hover {
+  background: #2c2c2a;
+}
+.dh-hire-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+.dh-hire-links a {
+  padding: 8px 14px;
+  border: 1px solid var(--dh-line);
+  border-radius: 999px;
+  font-size: 13px;
+  background: #fff;
+}
+.dh-hire-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 6px;
+}
+.dh-hire-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.dh-hire-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--dh-grey);
+}
+.dh-hire-form input,
+.dh-hire-form textarea {
+  font: inherit;
+  font-size: 15px;
+  color: var(--dh-ink);
+  padding: 12px 14px;
+  border: 1px solid var(--dh-line);
+  border-radius: 12px;
+  background: #fff;
+  resize: vertical;
+}
+.dh-hire-form input:focus,
+.dh-hire-form textarea:focus {
+  outline: 2px solid var(--dh-ink);
+  outline-offset: 1px;
+}
+.dh-hire-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 4px;
+}
+.dh-hire-actions button {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dh-ink);
+  color: var(--dh-bg);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.dh-hire-actions a {
+  font-size: 14px;
+  border-bottom: 1px solid var(--dh-ink);
+  padding-bottom: 2px;
+}
+.dh-hire-sent {
+  font-size: 16px;
+  padding: 18px 0;
+}
+.dh-hire-error {
+  margin: 0;
+  color: #b3261e;
+  font-size: 14px;
+}
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (max-width: 1100px) {
+  .dh-hire-pair {
+    grid-template-columns: 1fr;
+  }
+}

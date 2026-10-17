@@ -17,7 +17,7 @@ import {
   SphereGeometry,
   BufferGeometry,
   BufferAttribute,
-  Line,
+  LineSegments,
   LineBasicMaterial,
   CanvasTexture,
   IcosahedronGeometry,
@@ -322,6 +322,9 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
   const focusC = new Vector3();
   let aboutP = 0;
   let aboutWant = 0;
+  let hireP = 0;
+  let hireWant = 0;
+  const HIRE_ROLL = (110 * Math.PI) / 180; // Hire me: the planet rolls over to fresh grass on its other side
   // Opening a case study: the folder's cover card leaves the folder at the angle it sits, flips
   // over once, then flies to the viewer along an arc, banking like a plane, turning to face the
   // screen and growing until it fills it. Resolves when the screen is covered.
@@ -455,6 +458,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
       .setFromAxisAngle(camRight, TILT * e * (1 - a) + ABOUT_TILT * a)
       .multiply(yawQ.setFromAxisAngle(axisUp, TURN * (1 - e) * (1 - a)));
     pivot.rotation.x = ABOUT_A * a;
+    pivot.rotation.z = HIRE_ROLL * easeAbout(hireP);
     rig.scale.setScalar(1 + 0.25 * (1 - e)); // a little bigger in the hero, as in the owner's mock
     if (a > 0) {
       // closer, and centred on the owner's photo (a little toward the camera body)
@@ -494,6 +498,10 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     let moving = false;
 
     progress = reducedMotion ? 1 : Math.min(1, Math.max(0, readScroll()));
+    if (hireP !== hireWant) {
+      hireP = reducedMotion ? hireWant : Math.min(1, Math.max(0, hireP + Math.sign(hireWant - hireP) * (dt / 1700)));
+      moving = true;
+    }
     if (aboutP !== aboutWant) {
       aboutP = reducedMotion ? aboutWant : Math.min(1, Math.max(0, aboutP + Math.sign(aboutWant - aboutP) * (dt / 1700)));
       moving = true;
@@ -530,7 +538,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
       apply(F, tidy);
     }
     // now and then, after the visitor has been here a while, the plane crosses the sky
-    if (!reducedMotion && flyer.update(now, focused)) moving = true;
+    if (flyer.update(now, focused, hireWant === 1, reducedMotion)) moving = true;
     if (flight) {
       updateFlight(now);
       moving = true;
@@ -613,6 +621,13 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
       wake();
     },
     // a project panel is open (crate slides left, hover pauses) or closed
+    // Hire me: the planet rolls over, the plane flies in and hovers, the form takes the right side
+    setHire(on) {
+      hireWant = on ? 1 : 0;
+      this.setFocus(on);
+      if (on) shiftWant = window.innerWidth > 1100 ? 0.9 : 0;
+      wake();
+    },
     setAbout(on) {
       aboutWant = on ? 1 : 0;
       this.setFocus(on);
@@ -637,7 +652,7 @@ export async function createCrate(host, { onHover, onClick, onIntroDone, onBanne
     },
     // The crate falls in from above the window at `at` (a performance.now() time).
     playDrop(at) {
-      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; }, get aboutP() { return aboutP; }, flyer, camera, renderer, scene };
+      if (import.meta.env.DEV) window.__crate = { api: this, body, rig, crateBody, get drop() { return drop; }, get folders() { return folders; }, get aboutP() { return aboutP; }, get hireP() { return hireP; }, flyer, camera, renderer, scene };
       if (reducedMotion) return wake();
       // start fully above the window, level, everything at rest
       const h = (window.innerHeight + land.size) * u / 0.78 / 1.25;
@@ -1034,111 +1049,287 @@ function makeDetails(center, R) {
   return group;
 }
 
-// The plane: a small propeller plane (design-portfolio-blender/plane.py) towing a cloth banner that
-// reads "Open to work · Book a call". It crosses the sky behind the planet, right to left, the first
-// time after the visitor has been on the page a while and then every so often. The banner ripples
-// like a flag, more toward its free end; clicking it opens Contact.
+// The banner plane: a chubby cartoon fighter in the crate's blue (design-portfolio-blender/plane.py)
+// towing a cloth banner, "Hire me for work", across the sky behind the planet, right to
+// left: the first time after the visitor has been on the page a while, then every so often. The
+// banner is a small cloth simulation (verlet points held by springs): its front edge hangs on the two
+// tow ropes and the airflow streams it back, with a gust rippling down its length. Click: Contact.
 function makeFlyer(model, scene, camera, renderer) {
   const FIRST = 14000; // ms on the page before the first pass
   const EVERY = 45000;
-  const DUR = 12000;
+  const DUR = 13000;
   const plane = new Group();
   plane.add(model.scene);
-  model.scene.scale.setScalar(0.85);
+  model.scene.scale.setScalar(0.6);
   model.scene.traverse((o) => o.isMesh && (o.castShadow = false));
   const prop = model.scene.getObjectByName('prop');
+  const tow = model.scene.getObjectByName('tow');
+  // a faint disc where the blades sweep, so the propeller reads as spinning fast, not strobing
+  if (prop) {
+    const disc = new Mesh(new CircleGeometry(0.108, 48), new MeshBasicMaterial({ color: 0x3a3f46, transparent: true, opacity: 0.16, depthWrite: false, side: DoubleSide }));
+    disc.position.z = 0.053;
+    prop.add(disc);
+  }
   plane.visible = false;
   scene.add(plane);
 
-  // the banner cloth: canvas text on a finely divided strip, rippled in the vertex shader
-  const L = 0.95;
-  const Hb = 0.12;
-  const c = document.createElement('canvas');
-  c.width = 1536;
-  c.height = 194;
-  const g = c.getContext('2d');
-  g.fillStyle = '#f6f3ea';
-  g.fillRect(0, 0, c.width, c.height);
-  g.fillStyle = '#e2432f';
-  g.fillRect(0, 0, c.width, 10);
-  g.fillRect(0, c.height - 10, c.width, 10);
-  g.fillStyle = '#141414';
-  g.font = '600 92px "Instrument Sans", "Helvetica Neue", Arial, sans-serif';
-  g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  g.fillText('OPEN TO WORK  ·  BOOK A CALL  →', c.width / 2, c.height / 2 + 4);
-  const tex = new CanvasTexture(c);
-  tex.colorSpace = SRGBColorSpace;
-  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const uT = { value: 0 };
-  const mat = new MeshLambertMaterial({ map: tex, side: DoubleSide });
-  mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uTime = uT;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uTime;').replace(
-      '#include <begin_vertex>',
-      `#include <begin_vertex>
-      float k = uv.x; // 0 at the rope, 1 at the free end
-      float w = sin(uv.x * 11.0 - uTime * 7.5);
-      transformed.y += w * 0.014 * (0.25 + k);
-      transformed.z += cos(uv.x * 11.0 - uTime * 7.5) * 0.03 * k;`
-    );
+  // the cloth's look: cream fabric, red dashed stitching, grommets, a swallowtail end. Drawn twice:
+  // with the ropes on the left (flying left, tail streaming right) and on the right (hovering,
+  // facing right); either way the words read normally.
+  const L = 0.82;
+  const H = 0.14;
+  const label = 'HIRE ME FOR WORK  ↗';
+  const drawCloth = (ropesRight) => {
+    const c = document.createElement('canvas');
+    c.width = 2048;
+    c.height = 324;
+    const g = c.getContext('2d');
+    const W = c.width;
+    const X = (x) => (ropesRight ? W - x : x); // mirror the shape, never the words
+    const notch = 120;
+    const m = 26;
+    const outline = (inset) => {
+      g.beginPath();
+      g.moveTo(X(inset), inset);
+      g.lineTo(X(W - inset - (inset ? 8 : 0)), inset);
+      g.lineTo(X(W - notch - inset * 0.8), c.height / 2);
+      g.lineTo(X(W - inset - (inset ? 8 : 0)), c.height - inset);
+      g.lineTo(X(inset), c.height - inset);
+      g.closePath();
+    };
+    g.fillStyle = '#f3eee2';
+    outline(0);
+    g.fill();
+    g.strokeStyle = '#d4483a';
+    g.lineWidth = 5;
+    g.setLineDash([22, 16]);
+    outline(m);
+    g.stroke();
+    g.setLineDash([]);
+    for (const y of [m + 30, c.height - m - 30]) {
+      g.fillStyle = '#8a6a3c';
+      g.beginPath();
+      g.arc(X(44), y, 16, 0, Math.PI * 2);
+      g.fill();
+      g.fillStyle = '#f3eee2';
+      g.beginPath();
+      g.arc(X(44), y, 7, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.fillStyle = '#141414';
+    let fs = 170;
+    do {
+      g.font = `600 ${fs}px "Instrument Sans", "Helvetica Neue", Arial, sans-serif`;
+      fs -= 4;
+    } while (g.measureText(label).width > W - notch - 220 && fs > 40); // fit the cloth, never clipped
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    // the words are part of the cloth's own texture, so they bend and ripple with it
+    g.fillText(label, ropesRight ? W / 2 + notch / 2 - 30 : (W - notch) / 2 + 30, c.height / 2 + 8);
+    const t = new CanvasTexture(c);
+    t.colorSpace = SRGBColorSpace;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return t;
   };
-  const banner = new Mesh(new PlaneGeometry(L, Hb, 64, 6), mat);
+  const tex = drawCloth(false);
+  const texR = drawCloth(true);
+
+  // the cloth: NX x NY points, simulated in world space
+  const NX = 34;
+  const NY = 6;
+  const geo = new PlaneGeometry(L, H, NX - 1, NY - 1);
+  const clothMat = new MeshLambertMaterial({ map: tex, side: DoubleSide, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.32 });
+  const banner = new Mesh(geo, clothMat);
+  banner.frustumCulled = false;
   banner.visible = false;
   scene.add(banner);
-  const ropeGeo = new BufferGeometry().setAttribute('position', new BufferAttribute(new Float32Array(6), 3));
-  const rope = new Line(ropeGeo, new LineBasicMaterial({ color: 0x6b6b66 }));
-  rope.visible = false;
-  scene.add(rope);
+  const uv0 = Array.from({ length: geo.attributes.uv.count }, (_, k) => geo.attributes.uv.getX(k));
+  const P = []; // current
+  const Q = []; // previous
+  for (let k = 0; k < NX * NY; k++) {
+    P.push(new Vector3());
+    Q.push(new Vector3());
+  }
+  const id = (i, j) => j * NX + i; // PlaneGeometry order: rows top to bottom, columns left to right
+  const dx = L / (NX - 1);
+  const dy = H / (NY - 1);
+  const ropeGeo = new BufferGeometry().setAttribute('position', new BufferAttribute(new Float32Array(12), 3));
+  const ropes = new LineSegments(ropeGeo, new LineBasicMaterial({ color: 0x8a6a3c }));
+  ropes.frustumCulled = false;
+  ropes.visible = false;
+  scene.add(ropes);
 
   const right = new Vector3();
   const up = new Vector3();
   const fwd = new Vector3();
+  const view = new Vector3();
   const p = new Vector3();
   const tgt = new Vector3();
-  const tail = new Vector3();
+  const towW = new Vector3();
+  const pinTop = new Vector3();
+  const pinBot = new Vector3();
+  const tmp = new Vector3();
+  const flatR = new Vector3();
+  const flatV = new Vector3();
   let next = FIRST;
   let t0 = -1;
-  const show = (on) => (plane.visible = banner.visible = rope.visible = on);
+  let last = 0;
+  let hov = 0; // 0 off, 1 hovering, 2 leaving
+  let h0 = 0;
+  let lastDir = 0;
+  let relay = false;
+  const show = (on) => (plane.visible = banner.visible = ropes.visible = on);
+  const trailV = new Vector3(); // the way the banner streams: behind the plane
+  const pins = () => {
+    // the banner's front edge hangs a rope's length behind the tow point
+    pinTop.copy(towW).addScaledVector(trailV, 0.12).addScaledVector(up, H / 2 - 0.005);
+    pinBot.copy(towW).addScaledVector(trailV, 0.12).addScaledVector(up, -H / 2 - 0.005);
+  };
+  const lay = () => {
+    for (let j = 0; j < NY; j++)
+      for (let i = 0; i < NX; i++) {
+        P[id(i, j)].copy(pinTop).addScaledVector(trailV, i * dx).addScaledVector(up, -j * dy);
+        Q[id(i, j)].copy(P[id(i, j)]);
+      }
+  };
+  const step = (h, time) => {
+    const h2 = h * h;
+    for (let j = 0; j < NY; j++)
+      for (let i = 1; i < NX; i++) {
+        const k = id(i, j);
+        const a = P[k];
+        const b = Q[k];
+        tmp.copy(a);
+        const along = i / (NX - 1);
+        // airflow streams it back, a gust ripples down it, a little gravity
+        const gust = Math.sin(time * 7.2 - i * 0.5) * (0.4 + along);
+        a.x += (a.x - b.x) * 0.965;
+        a.y += (a.y - b.y) * 0.965;
+        a.z += (a.z - b.z) * 0.965;
+        a.addScaledVector(trailV, 3.2 * h2).addScaledVector(up, (gust * 1.1 - 0.35) * h2).addScaledVector(view, Math.cos(time * 6.1 - i * 0.45) * 0.7 * along * h2);
+        b.copy(tmp);
+      }
+    // springs along and across, a few passes
+    for (let it = 0; it < 7; it++) {
+      for (let j = 0; j < NY; j++)
+        for (let i = 0; i < NX; i++) {
+          if (i + 1 < NX) link(id(i, j), id(i + 1, j), dx, i === 0);
+          if (j + 1 < NY) link(id(i, j), id(i, j + 1), dy, i === 0);
+          // bending: every other point, so the cloth ripples but never folds over itself
+          if (i + 2 < NX) link(id(i, j), id(i + 2, j), dx * 2, i === 0);
+          if (j + 2 < NY) link(id(i, j), id(i, j + 2), dy * 2, i === 0);
+          if (i + 1 < NX && j + 1 < NY) link(id(i, j), id(i + 1, j + 1), Math.hypot(dx, dy), i === 0);
+        }
+      // the front edge is a rod between the two ropes
+      for (let j = 0; j < NY; j++) P[id(0, j)].lerpVectors(pinTop, pinBot, j / (NY - 1));
+    }
+  };
+  const link = (a, b, rest, pinnedA) => {
+    tmp.subVectors(P[b], P[a]);
+    const d = tmp.length() || 1e-6;
+    const k = (d - rest) / d;
+    if (pinnedA) P[b].addScaledVector(tmp, -k);
+    else {
+      P[a].addScaledVector(tmp, k * 0.5);
+      P[b].addScaledVector(tmp, -k * 0.5);
+    }
+  };
+
   return {
     plane,
     banner,
-    // returns true while flying
-    update(now, paused) {
-      if (t0 < 0) {
-        if (now < next || paused) return false;
-        t0 = now;
-        show(true);
-      }
-      const t = (now - t0) / DUR;
-      if (t >= 1) {
-        t0 = -1;
-        next = now + EVERY;
-        show(false);
-        return false;
-      }
+    // returns true while flying. `hire`: fly in and hover over the planet (the Hire me view)
+    update(now, paused, hire, still) {
       right.set(1, 0, 0).applyQuaternion(camera.quaternion);
       up.set(0, 1, 0).applyQuaternion(camera.quaternion);
       fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
-      // across the upper sky, far behind the planet (an ortho camera keeps its size)
-      const x = 1.45 - 2.9 * t;
-      p.set(x, 0.66 + Math.sin(now * 0.0016) * 0.035, 0.6).unproject(camera);
+      view.copy(fwd).negate();
+      let dir; // -1 flying left (the flyby), +1 flying right (hovering, facing the form)
+      if (hire || hov > 0) {
+        // Hire me: in from the left, then a slow hover over the planet; out to the right after
+        if (hire && hov === 0) {
+          hov = 1;
+          h0 = now;
+          t0 = -1;
+          last = now;
+          relay = true;
+          show(true);
+        }
+        if (!hire && hov === 1) {
+          hov = 2;
+          h0 = now;
+        }
+        dir = 1;
+        const k = Math.min(1, (now - h0) / 1800);
+        const e = hov === 1 ? 1 - Math.pow(1 - k, 3) : k * k;
+        const x = hov === 1 ? -1.6 + 1.68 * e : 0.08 + 1.9 * e;
+        if (hov === 2 && k >= 1) {
+          hov = 0;
+          show(false);
+          next = now + EVERY;
+          return false;
+        }
+        p.set(still ? 0 : x, 0.5 + Math.sin(now * 0.0019) * 0.03, 0.6).unproject(camera);
+      } else {
+        if (t0 < 0) {
+          if (now < next || paused || still) return false;
+          t0 = now;
+          last = now;
+          relay = true;
+          show(true);
+        }
+        const t = (now - t0) / DUR;
+        if (t >= 1) {
+          t0 = -1;
+          next = now + EVERY;
+          show(false);
+          return false;
+        }
+        dir = -1;
+        p.set(1.55 - 3.4 * t, 0.66 + Math.sin(now * 0.0016) * 0.03, 0.6).unproject(camera);
+      }
+      if (dir !== lastDir) {
+        lastDir = dir;
+        clothMat.map = clothMat.emissiveMap = dir > 0 ? texR : tex;
+        clothMat.needsUpdate = true;
+        const uv = geo.attributes.uv;
+        for (let k = 0; k < uv.count; k++) uv.setX(k, dir > 0 ? 1 - uv0[k] : uv0[k]);
+        uv.needsUpdate = true;
+        relay = true;
+      }
+      trailV.copy(right).multiplyScalar(-dir);
       plane.position.copy(p);
-      plane.up.copy(up);
-      tgt.copy(p).addScaledVector(right, -1).addScaledVector(fwd, -0.45); // nose turned a little toward us
+      // it flies level with the ground (not square to the screen), so the camera looks down onto it
+      // from above and both wings show; the nose is turned a little toward the viewer
+      plane.up.set(0, 1, 0);
+      flatR.set(right.x, 0, right.z).normalize();
+      flatV.set(view.x, 0, view.z).normalize();
+      tgt.copy(p).addScaledVector(flatR, dir).addScaledVector(flatV, 0.35);
       plane.lookAt(tgt);
-      plane.rotateZ(Math.sin(now * 0.0021) * 0.08);
-      if (prop) prop.rotation.z += 0.9;
-      // the banner trails to the right, facing the viewer
-      tail.copy(p).addScaledVector(right, 0.17);
-      banner.quaternion.copy(camera.quaternion);
-      banner.position.copy(tail).addScaledVector(right, 0.08 + L / 2).addScaledVector(up, -0.015);
-      const a = ropeGeo.attributes.position;
-      a.setXYZ(0, tail.x, tail.y, tail.z);
-      tgt.copy(banner.position).addScaledVector(right, -L / 2);
-      a.setXYZ(1, tgt.x, tgt.y, tgt.z);
-      a.needsUpdate = true;
-      uT.value = now / 1000;
+      plane.rotateZ(Math.sin(now * 0.0021) * 0.08 + 0.05 * -dir);
+      if (prop) prop.rotation.z += 0.42;
+      plane.updateMatrixWorld(true);
+      if (tow) tow.getWorldPosition(towW);
+      else towW.copy(p).addScaledVector(trailV, 0.17);
+      pins();
+      if (relay) {
+        lay();
+        relay = false;
+      }
+      const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+      last = now;
+      for (let n = Math.ceil(dt / 0.008), h = dt / n; n > 0; n--) step(h, now / 1000);
+      const pos = geo.attributes.position;
+      for (let k = 0; k < P.length; k++) pos.setXYZ(k, P[k].x, P[k].y, P[k].z);
+      pos.needsUpdate = true;
+      geo.computeVertexNormals();
+      geo.computeBoundingSphere();
+      const r = ropeGeo.attributes.position;
+      r.setXYZ(0, towW.x, towW.y, towW.z);
+      r.setXYZ(1, pinTop.x, pinTop.y, pinTop.z);
+      r.setXYZ(2, towW.x, towW.y, towW.z);
+      r.setXYZ(3, pinBot.x, pinBot.y, pinBot.z);
+      r.needsUpdate = true;
       return true;
     },
     hit(ray) {
