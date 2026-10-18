@@ -97,7 +97,7 @@
   if (touch) hintText.innerHTML = 'Hold the right side to run';
 
   // ---------------------------------------------------------------- assets
-  let data, bg, idle, run = [], ready = 0, total = 0;
+  let data, idle, run = [], layer = {}, ready = 0, total = 0;
   const bump = () => { ready++; bar.style.width = (100 * ready / total) + '%'; };
   const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => { bump(); ok(i); }; i.onerror = no; i.src = src; });
   let noCut = false;
@@ -111,12 +111,14 @@
 
   async function load() {
     data = await (await fetch('assets/path.json')).json();
-    total = 2 + data.run_frames;
-    const jobs = [img('assets/bg.webp').then(i => bg = i), img('assets/idle.png').then(i => idle = i)];
+    total = 5 + data.run_frames;
+    const jobs = [img('assets/idle.png').then(i => idle = i)];
+    for (const n of ['sky', 'moon', 'land', 'fore']) jobs.push(img(`assets/layer_${n}.webp`).then(i => layer[n] = i));
     for (let k = 0; k < data.run_frames; k++) jobs.push(img(`assets/run_${String(k).padStart(2, '0')}.png`).then(i => run[k] = i));
     await Promise.all(jobs);
     cvs.width = data.size[0]; cvs.height = data.size[1];           // full render size, never upscaled in the canvas
-    draw();
+    makeClouds();
+    draw(0);
     prompt.textContent = touch ? 'Touch to begin' : 'Press any key';
     loading.style.display = 'none';
     videoReady.then(() => {});
@@ -143,18 +145,91 @@
     const meta = data.sprites[running ? `run_${String(Math.floor(phase) % data.run_frames).padStart(2, '0')}.png` : 'idle.png'];
     const k = p[3] / meta.ppm;                     // her size at this point of the road
     const x = p[1], y = p[2];
-    ctx.save(); ctx.translate(x, y); ctx.scale(face * k, k);
+    ctx.save(); ctx.translate(x, y); ctx.scale(face * k, k);   // (inside the land layer's transform)
     ctx.drawImage(im, -meta.anchor[0], -meta.anchor[1]);
     ctx.restore();
   }
 
-  function draw() {
+  // ---------------------------------------------------------------- the living scene
+  // Depth layers drift apart a little as the pointer moves (and on their own, slowly); clouds and a
+  // band of mist pass through; the town's windows and the tower lamp flicker; the moon floats. All of
+  // it settles to stillness as she reaches him, so the hand-off to the film is seamless.
+  const PAR = { sky: [10, 5], moon: [16, 8], land: [28, 10], fore: [46, 14] };   // px at full tilt (x, y)
+  const S = 1.04;                       // everything drawn a touch larger so a drift never shows an edge
+  let mx = 0, my = 0, tx = 0, ty = 0, life = 1;
+  addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') { tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1; } });
+  let cloudA, cloudB;
+  function makeClouds() {   // soft wisps from fractal value noise, seamless left to right
+    const make = (w, h, seed, cells) => {
+      const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+      const im = g.createImageData(w, h); let sd = seed;
+      const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+      const octaves = [cells, cells * 2, cells * 4].map(n => ({ n, v: Array.from({ length: n * Math.ceil(n * h / w + 1) + n }, rnd) }));
+      const sm = (t) => t * t * (3 - 2 * t);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        let val = 0, amp = 0.55, tot = 0;
+        for (const o of octaves) {
+          const fx = x / w * o.n, fy = y / w * o.n, ix = Math.floor(fx), iy = Math.floor(fy), ax = sm(fx - ix), ay = sm(fy - iy);
+          const at = (i, j) => o.v[((j * o.n) + ((i % o.n) + o.n) % o.n) % o.v.length];
+          const top = at(ix, iy) * (1 - ax) + at(ix + 1, iy) * ax, bot = at(ix, iy + 1) * (1 - ax) + at(ix + 1, iy + 1) * ax;
+          val += (top * (1 - ay) + bot * ay) * amp; tot += amp; amp *= 0.5;
+        }
+        val /= tot;
+        const edge = Math.sin(Math.PI * y / h);                     // fade out at the top and bottom of the band
+        const a = Math.max(0, (val - 0.48) / 0.52) ** 1.4 * edge;
+        const k = (y * w + x) * 4; im.data[k] = 255; im.data[k + 1] = 226; im.data[k + 2] = 212; im.data[k + 3] = a * 255;
+      }
+      g.putImageData(im, 0, 0); return c;
+    };
+    cloudA = make(512, 96, 7, 6); cloudB = make(512, 80, 99, 4);
+  }
+  const W = () => cvs.width, H = () => cvs.height;
+  function place(name, t) {   // the transform for one depth layer
+    const [px, py] = PAR[name];
+    let ox = (-mx * px) * life, oy = (-my * py) * life;
+    if (name === 'moon') { ox += Math.sin(t * 0.00011) * 5 * life; oy += Math.sin(t * 0.00008 + 1) * 4 * life; }
+    ctx.setTransform(S, 0, 0, S, W() * (1 - S) / 2 + ox, H() * (1 - S) / 2 + oy);
+  }
+  function drawLayer(name, t) { place(name, t); const o = data.layers[name]; ctx.drawImage(layer[name], o[0], o[1]); }
+  function drift(img, y, h, speed, alpha, t) {   // a band of cloud scrolling slowly to the right
+    const w = W() * 1.25, off = ((t * speed) % w + w) % w;
+    ctx.globalAlpha = alpha * life;
+    for (let x = off - w; x < W() + w; x += w) ctx.drawImage(img, x - W() * 0.1, y, w, h);
+    ctx.globalAlpha = 1;
+  }
+  const flick = (t, seed) => 0.55 + 0.25 * Math.sin(t * 0.0021 + seed * 7.1) + 0.2 * Math.sin(t * 0.0137 + seed * 3.3) * Math.sin(t * 0.0049 + seed);
+  function glow(x, y, r, a, col) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(0.35, `rgba(${col},${a * 0.35})`); g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  function draw(t) {
     if ((state === 'cut' || (state === 'end' && !noCut)) && cut.readyState >= 2) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(cut, 0, 0, cvs.width, cvs.height);
       return;
     }
-    ctx.drawImage(bg, 0, 0, cvs.width, cvs.height);
-    drawGirl();
+    // she settles the world as she nears him; at the hand-off it is exactly the film's first frame
+    life = state === 'play' || state === 'ready' || state === 'loading' ? Math.max(0, Math.min(1, (data.trigger_s - s) / 2.5)) : 0;
+    const ease = 0.035;
+    const amb = Math.sin(t * 0.00007) * 0.25, ambY = Math.cos(t * 0.00005) * 0.15;
+    mx += (tx + amb - mx) * ease; my += (ty + ambY - my) * ease;
+    drawLayer('sky', t);
+    // the lights in the fog: the tower lamp breathes, the town's windows flicker
+    ctx.globalCompositeOperation = 'lighter';
+    const [lx, ly] = data.lamp;
+    glow(lx, ly, 26, 0.55 * (0.75 + 0.25 * Math.sin(t * 0.0016)) * (0.4 + 0.6 * life) , '255,190,120');
+    data.town.forEach(([x, y], i) => glow(x, y, 5 + (i * 7 % 4), 0.32 * flick(t, i) * (0.4 + 0.6 * life), '255,196,120'));
+    ctx.globalCompositeOperation = 'source-over';
+    drift(cloudA, H() * 0.10, H() * 0.26, 0.006, 0.10, t);          // high wisps, behind the moon
+    drawLayer('moon', t);
+    drift(cloudB, H() * 0.30, H() * 0.16, 0.011, 0.07, t);          // thinner ones across its face
+    drift(cloudB, H() * 0.52, H() * 0.12, 0.016, 0.06, t);          // mist drifting over the far plain
+    drawLayer('land', t);
+    place('land', t); drawGirl();
+    drawLayer('fore', t);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   function tick(t) {
@@ -172,7 +247,7 @@
       if (Math.abs(v) > 0.2 && !moved) { moved = true; setTimeout(() => hint.classList.add('hidden'), 1800); }
       if (s >= data.trigger_s) startCut();
     }
-    draw();
+    draw(t);
     requestAnimationFrame(tick);
   }
 
