@@ -155,7 +155,7 @@
   // band of mist pass through; the town's windows and the tower lamp flicker; the moon floats. All of
   // it settles to stillness as she reaches him, so the hand-off to the film is seamless.
   const PAR = { sky: [10, 5], moon: [16, 8], land: [28, 10], fore: [46, 14] };   // px at full tilt (x, y)
-  const S = 1.04;                       // everything drawn a touch larger so a drift never shows an edge
+  const S = 1.10;                       // drawn a little larger: a drift never shows an edge, and less of the flat near band shows
   let mx = 0, my = 0, tx = 0, ty = 0, life = 1;
   addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') { tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1; } });
   let cloudA, cloudB;
@@ -188,7 +188,7 @@
     const [px, py] = PAR[name];
     let ox = (-mx * px) * life, oy = (-my * py) * life;
     if (name === 'moon') { ox += Math.sin(t * 0.00011) * 5 * life; oy += Math.sin(t * 0.00008 + 1) * 4 * life; }
-    ctx.setTransform(S, 0, 0, S, W() * (1 - S) / 2 + ox, H() * (1 - S) / 2 + oy);
+    ctx.setTransform(S, 0, 0, S, W() * (1 - S) / 2 + ox, H() * (1 - S) * 0.35 + oy);      // anchored high: the crop falls on the near band
   }
   function drawLayer(name, t) { place(name, t); const o = data.layers[name]; ctx.drawImage(layer[name], o[0], o[1]); }
   function drift(img, y, h, speed, alpha, t) {   // a band of cloud scrolling slowly to the right
@@ -206,8 +206,9 @@
 
   function draw(t) {
     if ((state === 'cut' || (state === 'end' && !noCut)) && cut.readyState >= 2) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.setTransform(S, 0, 0, S, W() * (1 - S) / 2, H() * (1 - S) * 0.35);     // the same framing as the play
       ctx.drawImage(cut, 0, 0, cvs.width, cvs.height);
+      ctx.setTransform(1, 0, 0, 1, 0, 0); shade();
       return;
     }
     // she settles the world as she nears him; at the hand-off it is exactly the film's first frame
@@ -230,6 +231,12 @@
     place('land', t); drawGirl();
     drawLayer('fore', t);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    shade();
+  }
+  function shade() {   // the near band sinks into deep shadow instead of reading as a flat brown lump
+    const g = ctx.createLinearGradient(0, H() * 0.66, 0, H());
+    g.addColorStop(0, 'rgba(8,6,9,0)'); g.addColorStop(0.35, 'rgba(8,6,9,0.55)'); g.addColorStop(1, 'rgba(6,5,8,0.92)');
+    ctx.fillStyle = g; ctx.fillRect(0, H() * 0.66, W(), H() * 0.34);
   }
 
   function tick(t) {
