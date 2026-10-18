@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/far-light",
+      "destination": "/far-light/index.html"
+    },
+    {
+      "source": "/far-light/",
+      "destination": "/far-light/index.html"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api"
     },
@@ -17,7 +25,7 @@
       "destination": "/design.html"
     },
     {
-      "source": "/((?!api).*)",
+      "source": "/((?!api|far-light).*)",
       "destination": "/index.html"
     }
   ],

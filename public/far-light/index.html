@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/far-light/">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Far Light</title>
+<meta name="description" content="Far Light, level one: Before. A wordless side-on story game.">
+<meta name="theme-color" content="#0a090b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0a090b;
+    --ink: #efe6dc;
+    --ink-dim: rgba(239, 230, 220, 0.55);
+    --ember: #ffcf7a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--night); color: var(--ink); overflow: hidden;
+    font-family: Inter, system-ui, sans-serif; -webkit-user-select: none; user-select: none; touch-action: none; }
+  /* the scene fills the window: rendered 16:9 with sky and foreground to spare, cropped to fit */
+  #stage, #frame { position: fixed; inset: 0; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .layer { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; pointer-events: none;
+    transition: opacity 1.6s ease; }
+  .hidden { opacity: 0; }
+  #veil { background: var(--night); transition: opacity 2.2s ease; }
+  .title { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 300; letter-spacing: .32em;
+    font-size: clamp(26px, min(5.4vw, 9vh), 84px); text-indent: .32em; margin: 0; text-wrap: balance; }
+  .chapter { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 400; font-style: italic;
+    font-size: clamp(14px, min(2vw, 3.4vh), 28px); letter-spacing: .08em; color: var(--ink-dim); margin: .6em 0 0; }
+  .prompt { font-size: clamp(10px, min(1vw, 1.8vh), 13px); letter-spacing: .24em; text-transform: uppercase; color: var(--ink-dim);
+    margin-top: 2.6em; animation: breathe 3.2s ease-in-out infinite; }
+  @keyframes breathe { 50% { opacity: .35; } }
+  #hint { align-items: end; padding-bottom: 6%; }
+  #hint p { margin: 0; font-size: clamp(10px, min(1vw, 1.8vh), 13px); letter-spacing: .22em; text-transform: uppercase; color: var(--ink-dim); }
+  kbd { font-family: inherit; display: inline-block; min-width: 1.9em; padding: .25em .5em; margin: 0 .25em;
+    border: 1px solid rgba(239,230,220,.3); border-radius: 4px; color: var(--ink); letter-spacing: 0; }
+  #loading { position: absolute; left: 50%; bottom: 18%; width: min(220px, 40%); height: 1px; transform: translateX(-50%);
+    background: rgba(239,230,220,.12); overflow: hidden; }
+  #loading i { display: block; height: 100%; width: 0; background: var(--ember); transition: width .3s ease; }
+  #again { pointer-events: auto; margin-top: 2.4em; background: none; border: 1px solid rgba(239,230,220,.35); color: var(--ink);
+    font: 500 12px/1 Inter, system-ui, sans-serif; letter-spacing: .24em; text-transform: uppercase; padding: 1em 1.6em;
+    border-radius: 999px; cursor: pointer; }
+  #again:hover, #again:focus-visible { border-color: var(--ember); color: var(--ember); outline: none; }
+  #end { background: radial-gradient(ellipse at center, rgba(10,9,11,.62), rgba(10,9,11,.2) 70%); }
+  .end-line { font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; color: var(--ink-dim);
+    font-size: clamp(13px, min(1.6vw, 2.8vh), 20px); margin: 1em 0 0; }
+  #fs { position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 5;
+    width: 40px; height: 40px; display: grid; place-items: center; border-radius: 999px; cursor: pointer;
+    background: rgba(10,9,11,.28); border: 1px solid rgba(239,230,220,.22); color: var(--ink-dim); transition: color .3s, border-color .3s, opacity .6s; }
+  #fs:hover, #fs:focus-visible { color: var(--ink); border-color: rgba(239,230,220,.5); outline: none; }
+  #fs svg { width: 16px; height: 16px; }
+  body.playing #fs { opacity: .35; } body.playing #fs:hover { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .prompt { animation: none; } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="frame">
+    <canvas id="c" width="2560" height="1440" aria-label="Far Light: a girl runs up a hill at sunset to her father"></canvas>
+    <div class="grain"></div>
+    <div class="layer" id="hint" hidden><p id="hint-text">Hold <kbd>→</kbd> to run</p></div>
+    <div class="layer" id="veil"></div>
+    <div class="layer" id="title">
+      <div>
+        <h1 class="title">Far Light</h1>
+        <p class="chapter">Before</p>
+        <p class="prompt" id="prompt">Loading</p>
+        <div id="loading"><i id="bar"></i></div>
+      </div>
+    </div>
+    <div class="layer hidden" id="end">
+      <div>
+        <h2 class="title">Far Light</h2>
+        <p class="end-line" id="end-line">Level one continues soon.</p>
+        <button id="again" type="button">Play again</button>
+      </div>
+    </div>
+  </div>
+</div>
+<button id="fs" type="button" aria-label="Full screen" title="Full screen (F)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4"/></svg></button>
+<video id="cut" src="assets/cutscene.mp4" preload="auto" playsinline muted hidden></video>
+<script>
+(() => {
+  const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+  const veil = document.getElementById('veil'), title = document.getElementById('title'), end = document.getElementById('end');
+  const hint = document.getElementById('hint'), hintText = document.getElementById('hint-text');
+  const prompt = document.getElementById('prompt'), bar = document.getElementById('bar'), loading = document.getElementById('loading');
+  const cut = document.getElementById('cut');
+  const touch = matchMedia('(pointer: coarse)').matches;
+  if (touch) hintText.innerHTML = 'Hold the right side to run';
+
+  // ---------------------------------------------------------------- assets
+  let data, bg, idle, run = [], ready = 0, total = 0;
+  const bump = () => { ready++; bar.style.width = (100 * ready / total) + '%'; };
+  const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => { bump(); ok(i); }; i.onerror = no; i.src = src; });
+  let noCut = false;
+  const videoReady = new Promise((ok) => {
+    let fired = false;
+    const done = () => { if (!fired) { fired = true; ok(); } };
+    if (cut.readyState >= 4) done(); else cut.addEventListener('canplaythrough', done, { once: true });
+    cut.addEventListener('error', () => { noCut = true; done(); }, { once: true });   // the cut-scene isn't published yet
+    setTimeout(done, 15000);   // play anyway if the network is slow; the browser keeps buffering
+  });
+
+  async function load() {
+    data = await (await fetch('assets/path.json')).json();
+    total = 2 + data.run_frames;
+    const jobs = [img('assets/bg.webp').then(i => bg = i), img('assets/idle.png').then(i => idle = i)];
+    for (let k = 0; k < data.run_frames; k++) jobs.push(img(`assets/run_${String(k).padStart(2, '0')}.png`).then(i => run[k] = i));
+    await Promise.all(jobs);
+    cvs.width = data.size[0]; cvs.height = data.size[1];           // full render size, never upscaled in the canvas
+    draw();
+    prompt.textContent = touch ? 'Touch to begin' : 'Press any key';
+    loading.style.display = 'none';
+    videoReady.then(() => {});
+  }
+
+  // ---------------------------------------------------------------- the road
+  const road = () => data.road;
+  function at(s) {   // screen point and scale on the road, s metres along it
+    const R = road(); if (s <= R[0][0]) return R[0];
+    for (let i = 1; i < R.length; i++) if (R[i][0] >= s) {
+      const a = R[i - 1], b = R[i], t = (s - a[0]) / (b[0] - a[0] || 1);
+      return [s, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t];
+    }
+    return R[R.length - 1];
+  }
+
+  // ---------------------------------------------------------------- state
+  const RUN_SPEED = 3.6, ACCEL = 9, DECEL = 12;    // m/s, m/s²
+  let state = 'loading', s = 0, v = 0, face = 1, phase = 0, keys = { r: false, l: false }, last = 0, moved = false;
+
+  function drawGirl() {
+    const p = at(s), running = Math.abs(v) > 0.35;
+    const im = running ? run[Math.floor(phase) % data.run_frames] : idle;
+    const meta = data.sprites[running ? `run_${String(Math.floor(phase) % data.run_frames).padStart(2, '0')}.png` : 'idle.png'];
+    const k = p[3] / meta.ppm;                     // her size at this point of the road
+    const x = p[1], y = p[2];
+    ctx.save(); ctx.translate(x, y); ctx.scale(face * k, k);
+    ctx.drawImage(im, -meta.anchor[0], -meta.anchor[1]);
+    ctx.restore();
+  }
+
+  function draw() {
+    if (state === 'cut' || (state === 'end' && !noCut)) {
+      if (cut.readyState >= 2) ctx.drawImage(cut, 0, 0, cvs.width, cvs.height);
+      return;
+    }
+    ctx.drawImage(bg, 0, 0, cvs.width, cvs.height);
+    drawGirl();
+  }
+
+  function tick(t) {
+    const dt = Math.min(0.05, (t - (last || t)) / 1000); last = t;
+    if (state === 'play') {
+      const want = (keys.r ? 1 : 0) - (keys.l ? 1 : 0);
+      const target = want * RUN_SPEED;
+      const a = Math.abs(target) > Math.abs(v) ? ACCEL : DECEL;
+      v += Math.sign(target - v) * Math.min(Math.abs(target - v), a * dt);
+      s = Math.max(0, s + v * dt);
+      if (s === 0 && v < 0) v = 0;
+      if (want) face = want;
+      // the legs keep pace with the ground: one loop of frames per stride at full speed
+      phase += Math.abs(v) / RUN_SPEED * data.fps * dt;
+      if (Math.abs(v) > 0.2 && !moved) { moved = true; setTimeout(() => hint.classList.add('hidden'), 1800); }
+      if (s >= data.trigger_s) startCut();
+    }
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  function startCut() {
+    state = 'wait';
+    videoReady.then(() => {
+      if (noCut) {   // until the cut-scene is rendered: she stops, and a card says the scene goes on
+        v = 0; state = 'end'; hint.classList.add('hidden');
+        document.getElementById('end-line').textContent = 'The rest of this scene is on its way.';
+        setTimeout(() => end.classList.remove('hidden'), 600);
+        return;
+      }
+      state = 'cut'; hint.classList.add('hidden');
+      cut.currentTime = 0;
+      cut.play().catch(() => {});
+    });
+  }
+  cut.addEventListener('ended', () => { state = 'end'; setTimeout(() => end.classList.remove('hidden'), 1200); });
+
+  function begin() {
+    if (state !== 'ready') return;
+    state = 'play'; title.classList.add('hidden'); document.body.classList.add('playing');
+    veil.style.opacity = 0;
+    hint.hidden = false; hint.classList.remove('hidden');
+  }
+  function reset() {
+    end.classList.add('hidden'); cut.pause(); cut.currentTime = 0;
+    s = 0; v = 0; face = 1; phase = 0; moved = false; state = 'play';
+    hint.hidden = false; hint.classList.remove('hidden');
+  }
+  document.getElementById('again').addEventListener('click', reset);
+  const fs = document.getElementById('fs');
+  const toggleFs = () => { const d = document; if (d.fullscreenElement) d.exitFullscreen?.(); else d.documentElement.requestFullscreen?.().catch(() => {}); };
+  fs.addEventListener('click', (e) => { e.stopPropagation(); toggleFs(); });
+  fs.addEventListener('pointerdown', (e) => e.stopPropagation());
+  if (!document.documentElement.requestFullscreen) fs.hidden = true;
+
+  // ---------------------------------------------------------------- input
+  const setKey = (code, on) => {
+    if (code === 'ArrowRight' || code === 'KeyD') keys.r = on;
+    if (code === 'ArrowLeft' || code === 'KeyA') keys.l = on;
+  };
+  addEventListener('keydown', (e) => { if (e.code === 'KeyF') { toggleFs(); return; } if (state === 'ready') begin(); setKey(e.code, true); if (e.code.startsWith('Arrow')) e.preventDefault(); });
+  addEventListener('keyup', (e) => setKey(e.code, false));
+  addEventListener('blur', () => { keys.r = keys.l = false; });
+  const pointers = new Map();
+  const updatePointers = () => {
+    keys.r = keys.l = false;
+    const w = innerWidth;
+    for (const x of pointers.values()) { if (x > w * 0.5) keys.r = true; else keys.l = true; }
+  };
+  addEventListener('pointerdown', (e) => {
+    if (e.target.id === 'again') return;
+    if (state === 'ready') { begin(); return; }
+    pointers.set(e.pointerId, e.clientX); updatePointers();
+  });
+  addEventListener('pointermove', (e) => { if (pointers.has(e.pointerId)) { pointers.set(e.pointerId, e.clientX); updatePointers(); } });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) addEventListener(ev, (e) => { pointers.delete(e.pointerId); updatePointers(); });
+
+  window.farLight = { get state() { return state; }, get s() { return s; }, get trigger() { return data && data.trigger_s; } };   // for testing
+  load().then(() => { state = 'ready'; veil.style.opacity = 0.35; requestAnimationFrame(tick); })
+        .catch((err) => { prompt.textContent = 'Could not load the scene'; console.error(err); });
+})();
+</script>
+</body>
+</html>
