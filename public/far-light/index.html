@@ -149,8 +149,8 @@
   }
 
   function draw() {
-    if (state === 'cut' || (state === 'end' && !noCut)) {
-      if (cut.readyState >= 2) ctx.drawImage(cut, 0, 0, cvs.width, cvs.height);
+    if ((state === 'cut' || (state === 'end' && !noCut)) && cut.readyState >= 2) {
+      ctx.drawImage(cut, 0, 0, cvs.width, cvs.height);
       return;
     }
     ctx.drawImage(bg, 0, 0, cvs.width, cvs.height);
@@ -178,8 +178,10 @@
 
   function startCut() {
     state = 'wait';
-    videoReady.then(() => {
-      if (noCut) {   // until the cut-scene is rendered: she stops, and a card says the scene goes on
+    // the video's own state decides: its 404 can fire before this script was listening for it
+    if (cut.error || cut.networkState === 3) noCut = true;
+    (noCut ? Promise.resolve() : videoReady).then(() => {
+      if (noCut || cut.error) {   // until the cut-scene is rendered: she stops, and a card says the scene goes on
         v = 0; state = 'end'; hint.classList.add('hidden');
         document.getElementById('end-line').textContent = 'The rest of this scene is on its way.';
         setTimeout(() => end.classList.remove('hidden'), 600);
