@@ -574,5 +574,23 @@
     "token": "r-tatacomm-p7if",
     "jobUrl": "https://www.naukri.com/job-listings-product-owner-sms-customer-interaction-suite-tata-communications-bengaluru-3-to-5-years-290926934840",
     "role": "Product Owner, SMS - Customer Interaction Suite"
+  },
+  {
+    "label": "Info Edge (DoSelect)",
+    "token": "r-infoedge-k3p8",
+    "jobUrl": "https://www.naukri.com/job-listings-191026008129",
+    "role": "Product Manager - DoSelect"
+  },
+  {
+    "label": "GoKwik",
+    "token": "r-gokwik-m7x2",
+    "jobUrl": "https://gokwik.keka.com/careers/jobdetails/166740",
+    "role": "Product Manager"
+  },
+  {
+    "label": "Naukri profile",
+    "token": "r-naukri-p4tz",
+    "jobUrl": "https://www.naukri.com/mnjuser/profile",
+    "role": "Portfolio link on the Naukri profile"
   }
 ]
