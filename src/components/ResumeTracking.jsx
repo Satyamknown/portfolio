@@ -18,6 +18,16 @@ const DESIGN_PAGES = [
 ];
 const isDesignPage = (to) => to === '/design' || to.startsWith('/design/');
 const KNOWN = new Set(PAGES.map((p) => p.to));
+// Page views from Greenlight, my OAuth planner, arrive as "planner:/path".
+const isPlannerPage = (to) => to.startsWith('planner:');
+const plannerLabel = (to) => {
+  const path = to.slice('planner:'.length);
+  const guide = path.match(/^\/apps\/([a-z0-9_-]+)/);
+  if (path === '/') return 'Greenlight: home';
+  if (guide) return `Greenlight: ${guide[1]} guide`;
+  if (path.startsWith('/generate/')) return `Greenlight: live research (${path.slice(10)})`;
+  return `Greenlight: ${path.slice(1) || 'home'}`;
+};
 
 const PAGE_LABEL = Object.fromEntries([
   ...PAGES.map((p) => [p.to, p.label]),
@@ -112,7 +122,10 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
         // Opens come from the event log (people only, scanner bursts removed), not the raw counter.
         const s = stats[link._id] || { pages: {}, opens: 0, lastOpenedAt: null, bots: 0, scans: 0, lastBotAt: null };
         const other = Object.entries(s.pages)
-          .filter(([to]) => !KNOWN.has(to) && !isDesignPage(to))
+          .filter(([to]) => !KNOWN.has(to) && !isDesignPage(to) && !isPlannerPage(to))
+          .reduce((sum, [, n]) => sum + n, 0);
+        const planner = Object.entries(s.pages)
+          .filter(([to]) => isPlannerPage(to))
           .reduce((sum, [, n]) => sum + n, 0);
         const design = Object.entries(s.pages)
           .filter(([to]) => isDesignPage(to))
@@ -121,6 +134,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
           link,
           pages: s.pages,
           other,
+          planner,
           design,
           opens: s.opens || 0,
           recent: s.recent || [],
@@ -141,7 +155,8 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
   const pageCols = track === 'design' ? DESIGN_PAGES : PAGES;
   const showDesign = track === 'all' && rows.some((r) => r.design > 0 || trackOf(r.link) === 'design');
   const showOther = track !== 'design' && inTrack.some((r) => r.other > 0);
-  const columns = pageCols.length + 4 + (showOther ? 1 : 0) + (showDesign ? 1 : 0);
+  const showPlanner = track !== 'design' && inTrack.some((r) => r.planner > 0);
+  const columns = pageCols.length + 4 + (showOther ? 1 : 0) + (showDesign ? 1 : 0) + (showPlanner ? 1 : 0);
 
   return (
     <div className="track">
@@ -213,6 +228,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
                 <th key={p.to} scope="col" className="num">{p.label}</th>
               ))}
               {showDesign && <th scope="col" className="num" title="Opens of any /design page">Design</th>}
+              {showPlanner && <th scope="col" className="num">Greenlight</th>}
               {showOther && <th scope="col" className="num">Other</th>}
               <th scope="col" className="num is-bot" title="Link previews, crawlers, mail scanners and systems that fetch every link in a resume at once. Not counted as opens.">
                 Bots
@@ -227,7 +243,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
                 </td>
               </tr>
             ) : (
-              shown.map(({ link, opens, recent, pages, other, design, bots, lastBotAt, last }) => (
+              shown.map(({ link, opens, recent, pages, other, planner, design, bots, lastBotAt, last }) => (
                 <Fragment key={link._id}>
                   <tr className={opens > 0 ? 'is-opened' : ''}>
                     <th scope="row" className="track-company">
@@ -280,6 +296,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
                       <td key={p.to} className="num"><Count value={pages[p.to]} /></td>
                     ))}
                     {showDesign && <td className="num"><Count value={design} /></td>}
+                    {showPlanner && <td className="num"><Count value={planner} /></td>}
                     {showOther && <td className="num"><Count value={other} /></td>}
                     <td className="num" title={lastBotAt ? `Last bot hit ${istFormat.format(lastBotAt)} IST` : undefined}>
                       <Count value={bots} muted />
@@ -295,7 +312,7 @@ export default function ResumeTracking({ links, stats, updatedAt, onRefresh }) {
                           {[...recent].reverse().map((h) => (
                             <li key={h.id} className={`is-${h.kind}`}>
                               <span className="track-hit-when">{istFormat.format(new Date(h.at))}</span>
-                              <span className="track-hit-page">{PAGE_LABEL[h.to] || h.to}</span>
+                              <span className="track-hit-page">{PAGE_LABEL[h.to] || (isPlannerPage(h.to) ? plannerLabel(h.to) : h.to)}</span>
                               <span className="track-hit-device">
                                 {h.device}
                                 {h.country ? `, ${h.country}` : ''}
