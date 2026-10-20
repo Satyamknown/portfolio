@@ -592,5 +592,11 @@
     "token": "r-naukri-p4tz",
     "jobUrl": "https://www.naukri.com/mnjuser/profile",
     "role": "Portfolio link on the Naukri profile"
+  },
+  {
+    "label": "Composio (OAuth Launch Planner)",
+    "token": "r-composio-planner-q8n3",
+    "jobUrl": "https://composio.notion.site/APM-Integrations-Take-home-Assignment-3f9f261a6dfe81489ee5e3643151f9d6",
+    "role": "APM take-home: which planner pages they opened"
   }
 ]

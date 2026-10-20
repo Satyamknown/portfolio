@@ -76,6 +76,35 @@ export async function openAccessLink(req, res, next) {
   }
 }
 
+// Page views from my other sites (the OAuth Launch Planner), logged under a share link so the
+// same dashboard shows which pages a company looked at. Same rules as /go: bots and the owner's
+// browsers are logged but not counted, no IP is stored. Only the first page of a visit counts as an open.
+const EXTERNAL_PATH = /^\/[A-Za-z0-9._~/-]{0,120}$/;
+const EXTERNAL_SITES = new Set(['planner']);
+
+export async function trackExternal(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch { body = {}; }
+  }
+  const { token = '', path = '', site = '', first = false, owner: ownerFlag = false } = body || {};
+  if (!TOKEN_PATTERN.test(token) || !EXTERNAL_PATH.test(path) || !EXTERNAL_SITES.has(site)) return res.status(204).end();
+  try {
+    const visitor = classifyVisitor(req);
+    // The planner is another site, so it can't see the owner cookie; it sends its own owner flag.
+    const owner = isOwner(req) || ownerFlag === true;
+    const now = new Date();
+    const link = visitor.bot || owner || first !== true
+      ? await AccessLink.findOne({ token, active: true }, { _id: 1 })
+      : await AccessLink.findOneAndUpdate({ token, active: true }, { $inc: { opens: 1 }, $set: { lastOpenedAt: now } });
+    if (link) await AccessLinkEvent.create({ link: link._id, at: now, to: `${site}:${path}`, ...visitor, owner });
+  } catch (err) {
+    console.error('Could not record an external page view:', err.message);
+  }
+  res.status(204).end();
+}
+
 router.use(requireAuth);
 
 // "Don't count my own clicks": marks this browser as the owner's. The dashboard calls it
