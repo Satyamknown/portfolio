@@ -617,5 +617,11 @@
     "token": "r-wellfound-zfij",
     "jobUrl": "https://wellfound.com/profile",
     "role": "Portfolio link on the Wellfound profile"
+  },
+  {
+    "label": "Foundit profile",
+    "token": "r-foundit-y0uv",
+    "jobUrl": "https://www.foundit.in/seeker/profile",
+    "role": "Portfolio link on the Foundit profile"
   }
 ]
