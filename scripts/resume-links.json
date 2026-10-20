@@ -594,9 +594,15 @@
     "role": "Portfolio link on the Naukri profile"
   },
   {
-    "label": "Composio (OAuth Launch Planner)",
+    "label": "Composio (site)",
     "token": "r-composio-planner-q8n3",
     "jobUrl": "https://composio.notion.site/APM-Integrations-Take-home-Assignment-3f9f261a6dfe81489ee5e3643151f9d6",
-    "role": "APM take-home: which planner pages they opened"
+    "role": "APM take-home: visits that opened the site directly"
+  },
+  {
+    "label": "Composio (PDF)",
+    "token": "r-composio-pdf-h2m7",
+    "jobUrl": "https://composio.notion.site/APM-Integrations-Take-home-Assignment-3f9f261a6dfe81489ee5e3643151f9d6",
+    "role": "APM take-home: visits that came from the submission PDF"
   }
 ]
