@@ -604,5 +604,18 @@
     "token": "r-composio-pdf-h2m7",
     "jobUrl": "https://composio.notion.site/APM-Integrations-Take-home-Assignment-3f9f261a6dfe81489ee5e3643151f9d6",
     "role": "APM take-home: visits that came from the submission PDF"
+  },
+  {
+    "label": "Incruiter",
+    "token": "r-incruiter-tiua",
+    "jobUrl": "https://www.naukri.com/job-listings-ai-associate-product-manager-incruiter-bengaluru-2-to-7-years-191026502179",
+    "role": "AI Associate Product Manager",
+    "appliedAt": "2026-10-21"
+  },
+  {
+    "label": "Wellfound profile",
+    "token": "r-wellfound-zfij",
+    "jobUrl": "https://wellfound.com/profile",
+    "role": "Portfolio link on the Wellfound profile"
   }
 ]
