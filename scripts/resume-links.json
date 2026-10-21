@@ -630,5 +630,12 @@
     "jobUrl": "https://www.naukri.com/job-listings-191026502660",
     "role": "Corporate Subscriptions Product Owner",
     "appliedAt": "2026-10-21"
+  },
+  {
+    "label": "Experian",
+    "token": "r-experian-snl4",
+    "jobUrl": "https://jobs.smartrecruiters.com/Experian/744000156302354-product-launch-manager",
+    "role": "Product Launch Manager",
+    "appliedAt": "2026-10-21"
   }
 ]
