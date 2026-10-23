@@ -4,14 +4,14 @@ const img = (name) => `/design/pacific-coast-contracting/${name}.webp`;
 
 export default {
   slug: 'pacific-coast-contracting',
-  version: 'v1.4',
+  version: 'v1.5',
   order: 2,
   published: true,
   title: 'Pacific Coast Contracting',
   tagline: 'One contractor, four brands, four websites, each page planned from search data.',
   summary:
     'A Vancouver home-services contractor came in for a rebrand. I recommended splitting it into four trade brands, planned each site\'s structure from search demand, and shipped 88 pages across four websites with the dev team.',
-  role: 'Design Lead, Rsquare Web Studio',
+  role: 'Product Design Lead, Rsquare Web Studio',
   client: 'Pacific Coast Contracting, Vancouver',
   timeline: 'September 2025 to now',
   team: 'Me on brand structure, IA, page plans and the visual design of the pages. The dev team built the sites from my designs; a colleague co-owned the roofing sitemap.',
@@ -54,7 +54,7 @@ In local search, trade-specific brands were winning, because the name, the searc
     {
       type: 'text',
       label: 'My role',
-      heading: 'Design Lead, from brand structure to the live sites',
+      heading: 'Product Design Lead, from brand structure to the live sites',
       body: `- **Owned:** the brand-structure recommendation, competitor research, sitemaps and page plans, the landing-page layouts, the visual design of the pages, and checking each live site against its plan.
 - **Worked with:** the dev team, who built and deployed the sites, and a colleague who co-owned the roofing sitemap.
 - **Also ran** the delivery tracker and QA, so every plan made it to a live page.`

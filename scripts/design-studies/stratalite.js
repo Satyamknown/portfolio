@@ -4,17 +4,17 @@ const img = (name) => `/design/stratalite/${name}.webp`;
 
 export default {
   slug: 'stratalite',
-  version: 'v1.6',
+  version: 'v1.7',
   order: 1,
   published: true,
   title: 'Stratalite',
   tagline: 'One project workflow for five roles that each see a different product.',
   summary:
-    'A Vancouver B2B marketplace where property companies post work to vendors, and vendors complete it under the guidance of the company\'s managers. I owned the UX and UI from the first whiteboard session to the screens now live in beta, and designed the access model the whole product rests on.',
-  role: 'Design Lead, Rsquare Web Studio',
+    'A Vancouver B2B marketplace where property companies post work to vendors, and vendors complete it under the guidance of the company\'s managers. I owned the UX and UI from the first whiteboard session through an 18-month build and a small beta, and designed the access model the whole product rests on.',
+  role: 'Product Design Lead, Rsquare Web Studio',
   client: 'Stratalite, Vancouver',
-  timeline: 'About 8 months, 2026. Live in beta.',
-  team: "Me on UX and UI, with the client's team and the developers who built it",
+  timeline: '18 months, 2025 to 2026. Beta in July 2026, then pulled back to fix money issues first.',
+  team: "A team of three at Rsquare Web Studio: one developer, one designer and me, working with the client's team",
   tools: ['Figma', 'FigJam', 'Google Sheets'],
   heroImage: img('screen-project-detail'),
   heroAlt: 'Manager view of a project: scope of work, location map, site visit booking and photos',
@@ -26,7 +26,7 @@ export default {
     },
     {
       value: '~210',
-      label: 'frames designed across 5 role views, now live in beta',
+      label: 'frames designed across 5 role views',
       note: 'The IA has 13 sections and 118 screens; the frame count adds the dialogs and states drawn as full screens'
     },
     {
@@ -56,7 +56,7 @@ The design problem was not the screens. It was that **five roles** (platform adm
     {
       type: 'text',
       label: 'My role',
-      heading: 'Design Lead, from the whiteboard to the live build',
+      heading: 'Product Design Lead, from the whiteboard to the beta',
       body: `- **Owned:** stakeholder map, personas, journey maps, information architecture, flows, about 210 designed frames, the access model, the design-vs-build review, and the acceptance testing before rollout.
 - **Worked with:** the client's team at Stratalite on priorities and KPIs, and the developers who built the product.
 - **Joined** before any screen existed, and stayed until the live build matched the design.`

@@ -15,7 +15,7 @@ export default function DesignDetail() {
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  useDesignHead(study ? `${study.title} · Design · Abhishek Manjhi` : 'Design work · Abhishek Manjhi, Design Lead');
+  useDesignHead(study ? `${study.title} · Design · Abhishek Manjhi` : 'Design work · Abhishek Manjhi, Product Design Lead');
 
   // Arriving from a folder in the /design crate: its black cover filled the screen, so start
   // under the same black and fade it away once the case study is in.

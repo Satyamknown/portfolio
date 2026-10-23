@@ -48,7 +48,7 @@ export const home = {
     proof: [
       { value: '30 min', label: 'to reply to a lead', was: 'down from 4–8 h' },
       { value: 'CA$43', label: 'per lead', was: 'down from CA$80' },
-      { value: '18 months', label: 'on one B2B SaaS', was: 'sketch to stable' }
+      { value: '18 months', label: 'on one B2B SaaS', was: 'sketch to beta' }
     ],
     contactLine: 'Open to product roles at B2B SaaS companies. I reply within a day.',
     photo: '/portrait.webp',
@@ -220,10 +220,10 @@ export const inProgress = {
   intro: 'What I’m working on now.',
   items: [
     {
-      name: 'Design Lead at Rsquare Web Studio',
+      name: 'Product Design Lead at Rsquare Web Studio',
       status: 'Ongoing',
       detail:
-        'Product work for clients in India, Canada, and the UK since January 2022; right now that’s Stratalite, a construction project and vendor platform, where I build user-flow boards for every role and QA the live product end to end.'
+        'Product work for clients in India, Canada, and the UK since January 2022; right now that’s Stratalite, a B2B SaaS for property managers in Vancouver, where I build user-flow boards for every role and QA the live product end to end.'
     },
     {
       name: 'RoofSpark AI Audit Tool',
@@ -253,9 +253,9 @@ export const bio = {
   short:
     'Design Lead → Product Manager · Shipped growth systems, design systems, and a Figma plugin used worldwide',
   medium:
-    'Abhishek Manjhi is a Design Lead in Mumbai moving into product management. Over four years he’s owned funnels, design systems, and internal tools for clients in Canada, the UK, and India — usually as the only person in the room thinking about the product. He ships his own tools, too.',
+    'Abhishek Manjhi is a Product Design Lead in Thane moving into product management. Over four years he’s owned funnels, design systems, and internal tools for clients in Canada, the UK, and India — usually as the only person in the room thinking about the product. He ships his own tools, too.',
   long: [
-    'I’m a Design Lead based in Mumbai, and for four years I’ve been the de facto product owner on work that never had a PM assigned to it. Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi. In each case the brief arrived as “make this look better,” and the actual job turned out to be figuring out what to build and why.',
+    'I’m a Product Design Lead based in Thane, and for four years I’ve been the de facto product owner on work that never had a PM assigned to it. Contracting clients in Vancouver, a founding-cohort platform in London, a D2C brand in Delhi. In each case the brief arrived as “make this look better,” and the actual job turned out to be figuring out what to build and why.',
     'That gap is what pushed me toward product management. I already do discovery, prioritization, and stakeholder work; I just do it under a design title, without the vocabulary or the frameworks to make it legible to anyone outside the project.',
     'So I’m making it explicit: I’m moving into product management, and writing down what I learn along the way.'
   ]

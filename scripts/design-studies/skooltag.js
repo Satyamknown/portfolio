@@ -4,16 +4,16 @@ const img = (name) => `/design/skooltag/${name}.webp`;
 
 export default {
   slug: 'skooltag',
-  version: 'v1.4',
+  version: 'v1.5',
   order: 3,
   published: true,
   title: 'Skooltag',
   tagline: 'A uniform shop that had sold only in person since 1989, moving online with an app parents can trust.',
   summary:
     'A Delhi NCR school-uniform retailer was going online. I built the brand and the component library from zero, designed the parent app through 5 iterations, and handed off 85 screens with a clickable prototype.',
-  role: 'UI/UX Designer, Student Junction',
+  role: 'Product Designer (Freelance), Student Junction',
   client: 'Skooltag, Delhi NCR',
-  timeline: '2021 to 2022',
+  timeline: '2024',
   team: 'Two designers (me and one other) and three developers. No product manager, so I also coordinated the graphic designer, the motion designer and the developers.',
   tools: ['Figma'],
   heroImage: img('hero'),

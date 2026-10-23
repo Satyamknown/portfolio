@@ -5,7 +5,7 @@
 export default {
   slug: 'pacific-coast-contracting',
   title: 'Pacific Coast Contracting',
-  version: 'v5.3',
+  version: 'v5.4',
   tagline: 'One lead system for four brands, so no enquiry gets lost again.',
   summary:
     'Pacific Coast Contracting has four brands and four websites. Leads were spread across all of them, some quietly vanished, and replies took hours. I led a four-person team to build one lead system: every enquiry in one CRM, answered in about 30 minutes instead of 4 to 8 hours, and paid ads only once the system worked.',
@@ -115,7 +115,7 @@ Back to the four goals:
 
 1. **One place: yes.** All four sites feed one CRM, every lead labelled by brand and page.
 2. **Nothing lost: yes.** All four silent failures found and fixed.
-3. **Fast replies: yes.** Replies went from **4 to 8 hours down to about 25 to 30 minutes.** In a business where the first call-back wins, that's the headline.
+3. **Fast replies: yes.** Replies went from **4 to 8 hours down to about 30 minutes.** In a business where the first call-back wins, that's the headline.
 4. **Known cost: yes, and it fell.** Cost per lead dropped from **CA$80 to CA$43.** A colleague also tuned the campaign in that window, so I'll share the credit.
 
 And the ads themselves: **30 leads across two 24-day sprints** (16 in the first, 14 in the second), all from one landing page for one service.

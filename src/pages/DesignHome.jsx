@@ -29,7 +29,7 @@ const PROJECTS = [
     ],
     rows: [
       ['Years', '2026'],
-      ['Role', 'Design Lead, Rsquare Web Studio'],
+      ['Role', 'Product Design Lead, Rsquare Web Studio'],
       ['Scope', 'Flow mapping, AI agents, tooling'],
     ],
   },
@@ -50,7 +50,7 @@ const PROJECTS = [
     ],
     rows: [
       ['Years', '2025 – now'],
-      ['Role', 'Design Lead, Rsquare Web Studio'],
+      ['Role', 'Product Design Lead, Rsquare Web Studio'],
       ['Scope', 'Brand structure, IA, page plans, visual design'],
     ],
   },
@@ -63,8 +63,8 @@ const PROJECTS = [
       'I built the brand and the component library from zero, designed the parent app over five iterations, and handed off 85 screens with a clickable prototype.',
     ],
     rows: [
-      ['Years', '2021 – 2022'],
-      ['Role', 'UI/UX Designer, Student Junction'],
+      ['Years', '2024'],
+      ['Role', 'Product Designer (Freelance), Student Junction'],
       ['Scope', 'Brand, component library, app UX/UI, prototyping'],
     ],
   },
@@ -81,11 +81,11 @@ const PROJECTS = [
     kicker: 'Product design · B2B SaaS',
     lines: [
       'A Vancouver marketplace where property companies post work and vendors complete it under their managers.',
-      'I owned the UX and UI from the first whiteboard session to the screens now live in beta, and designed the access model behind five roles that each see a different product.',
+      'I owned the UX and UI from the first whiteboard session through an 18-month build and a small beta, and designed the access model behind five roles that each see a different product.',
     ],
     rows: [
-      ['Years', '2026'],
-      ['Role', 'Design Lead, Rsquare Web Studio'],
+      ['Years', '2025 – 2026'],
+      ['Role', 'Product Design Lead, Rsquare Web Studio'],
       ['Scope', 'Product UX, UI, access model, flows'],
     ],
   },

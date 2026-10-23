@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 // visit started on design.html, each tag's data-site attribute holds the index.html value,
 // so a PM page reached from here still gets its own title and viewport back.
 const DESCRIPTION =
-  'Product design for B2B SaaS and web products: permission models, flows and screens for clients in Canada, the UK and India. Case studies by Abhishek Manjhi, Design Lead.';
+  'Product design for B2B SaaS and web products: permission models, flows and screens for clients in Canada, the UK and India. Case studies by Abhishek Manjhi, Product Design Lead.';
 
 const TAGS = [
   ['name', 'description', () => DESCRIPTION],

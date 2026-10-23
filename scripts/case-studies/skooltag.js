@@ -1,16 +1,16 @@
 // Skooltag case study (PM framing). Facts sourced from the Figma file
 // 3tbYHEmj1wddRierSmyBfl and /Users/abhishek/Downloads/apm-resume/projects/skooltag.md.
-// Done at Student Junction, 2021–22 (confirmed by Abhishek on 2026-09-28), not as a Rsquare client.
+// Done at Student Junction as a freelance project in 2024 (corrected by Abhishek on 2026-10-13), not as a Rsquare client.
 
 export default {
   slug: 'skooltag',
   title: 'Skooltag',
-  version: 'v2.5',
+  version: 'v2.6',
   summary:
     'A school-uniform retailer that had sold offline in Delhi NCR since 1989 was moving online, and the team had no product manager. Alongside design, I wrote the backend requirements, split the build into phases, mapped the back office for three operational roles and organised the developer handoff.',
-  role: 'UI/UX designer · brand, app & back office',
+  role: 'Product designer (freelance) · brand, app & back office',
   client: 'Skooltag · Delhi NCR',
-  year: '2021-22',
+  year: '2024',
   tags: ['Requirements (SRS)', 'Phasing & roadmap', 'Stakeholder management', 'Developer handoff', 'E-commerce'],
   metrics: [
     { value: '15-page', label: 'SRS' },

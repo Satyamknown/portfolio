@@ -7,14 +7,14 @@ const img = (name) => `/design/ai-design-workflow/${name}.webp`;
 
 export default {
   slug: 'ai-design-workflow',
-  version: 'v1.1',
+  version: 'v1.2',
   order: 5,
   published: true,
   title: 'AI in my design workflow',
   tagline: 'AI agents did the clicking on a live five-role product. I kept the design calls, and the flow boards became what the team reviewed.',
   summary:
     'On Stratalite, AI browser agents mapped every screen of the live product, one role at a time. I decided how the boards read, what counted as a problem and which gaps went to the client as questions, and I approved every action that changed data. The boards then became the place the team reviewed flows, instead of screenshots pasted into documents. I also built flowmap, the tool that turns captured screens into FigJam flow boards.',
-  role: 'Design Lead, Rsquare Web Studio',
+  role: 'Product Design Lead, Rsquare Web Studio',
   client: 'Stratalite, Vancouver',
   timeline: 'August to September 2026, alongside the Stratalite beta',
   team: 'Me, directing AI browser agents (Claude, and Codex for one August test pass). The client\'s product owner answered the open questions.',
@@ -43,7 +43,7 @@ export default {
       type: 'text',
       label: 'The problem',
       heading: 'Five products in one, and a build that had moved on',
-      body: `Stratalite is live in beta, and each of its five roles sees a different product: platform admins, company admins, company managers, independent managers and vendors each get their own sidebar, rules and view of the same project.
+      body: `Stratalite went to a small beta in July 2026, and each of its five roles sees a different product: platform admins, company admins, company managers, independent managers and vendors each get their own sidebar, rules and view of the same project.
 
 I designed the screens, and the developers built them sprint by sprint. My design-vs-build review flagged 3 flows that were built differently from the design, and the documents written one role at a time did not always agree with each other. A flow board that does not match the product is worse than no board, because the team designs and builds against it.
 
@@ -54,7 +54,7 @@ The old way to fix that was slow: screenshot every screen by hand, copy the fiel
     {
       type: 'text',
       label: 'My role',
-      heading: 'Design Lead, setting the rules the agents worked to',
+      heading: 'Product Design Lead, setting the rules the agents worked to',
       body: `- **I owned:** the scope, the shape and voice of every board, what counted as a problem, the product rules, every risky action, and the review of what the agents produced.
 - **The agents did:** the clicking, a log of every click, field and system response, and first drafts of the boards from content files I could audit.
 - **I built:** flowmap, the capture tool, including its canvas and its Figma plugin.

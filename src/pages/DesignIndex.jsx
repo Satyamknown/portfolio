@@ -15,7 +15,7 @@ export default function DesignIndex() {
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
-  useDesignHead('Design work · Abhishek Manjhi, Design Lead');
+  useDesignHead('Design work · Abhishek Manjhi, Product Design Lead');
 
   useEffect(() => {
     designApi
@@ -32,7 +32,7 @@ export default function DesignIndex() {
     <div className="dz dz-index">
       <header className="dz-head dz-index-head">
         <div className="dz-in">
-          <div className="dz-kicker">Design work · Design Lead, Rsquare Web Studio</div>
+          <div className="dz-kicker">Design work · Product Design Lead, Rsquare Web Studio</div>
           <h1 className="dz-title">
             Abhishek Manjhi.
             <br />
